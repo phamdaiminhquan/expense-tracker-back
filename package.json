@@ -89,6 +89,11 @@
     "typescript-eslint": "^8.38.0",
     "vite": "^7.2.6"
   },
+  "overrides": {
+    "@github/spark": {
+      "vite": "^7.0.0"
+    }
+  },
   "workspaces": {
     "packages": [
       "packages/*"
