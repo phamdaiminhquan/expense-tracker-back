@@ -139,3 +139,26 @@ Return ONLY the JSON object, no other text.`
     throw new APISystemError('Hệ thống tạm thời gặp lỗi, vui lòng thử lại sau')
   }
 }
+
+export async function parseExpenseWithAI(
+  text: string,
+  userName: string
+): Promise<{ success: boolean; data?: ParsedExpense; error?: 'system' | 'invalid' }> {
+  const validation = validatePrompt(text)
+  if (!validation.valid) {
+    return { success: false, error: 'invalid' }
+  }
+
+  try {
+    const parsed = await parseExpenseText(text)
+    return { success: true, data: parsed }
+  } catch (error) {
+    if (error instanceof APISystemError) {
+      return { success: false, error: 'system' }
+    }
+    if (error instanceof InvalidPromptError) {
+      return { success: false, error: 'invalid' }
+    }
+    return { success: false, error: 'system' }
+  }
+}

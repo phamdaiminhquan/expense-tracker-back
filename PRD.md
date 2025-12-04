@@ -1,14 +1,14 @@
 # Planning Guide
 
-An AI-powered expense tracker with fund management that parses natural language entries into structured transaction data, supporting both personal and shared fund tracking for effortless collaborative finance management.
+An AI-powered expense tracker with fund management that parses natural language entries into structured transaction data, featuring a chat-like interface for intuitive expense logging and supporting both personal and shared fund tracking.
 
 **Experience Qualities**:
-1. **Intelligent** - The app understands natural language expense entries and extracts structured data automatically
-2. **Collaborative** - Shared funds enable multiple users to track expenses together with per-user analytics
-3. **Organized** - Multiple fund support allows users to separate personal, shared, and project-specific finances
+1. **Conversational** - Chat-style interface makes expense tracking feel natural and effortless, like messaging a friend
+2. **Intelligent** - The app understands natural language expense entries and extracts structured data automatically
+3. **Organized** - Clear navigation between fund list and transaction views with persistent, sticky UI elements
 
 **Complexity Level**: Light Application (multiple features with basic state)
-  - Combines AI text parsing with CRUD operations, multi-fund management, and local persistence for a comprehensive expense management experience
+  - Combines AI text parsing with CRUD operations, multi-fund management, chat-style UI, and local persistence for a comprehensive expense management experience
 
 ## Essential Features
 
@@ -20,11 +20,11 @@ An AI-powered expense tracker with fund management that parses natural language 
 - **Success criteria**: Only two demo users available, persists user context during session, logout clears session, automatically creates default personal fund on first login
 
 ### Fund Management
-- **Functionality**: Users can create and manage multiple funds - each fund is either personal (single user) or shared (multiple users). Default "Cá nhân" fund created automatically for each user. Funds have foreign key relationships with both users and transactions.
-- **Purpose**: Organize finances by context (personal, shared projects, group events) and enable collaborative expense tracking
-- **Trigger**: Fund selector dropdown in main interface, "Tạo quỹ" button
-- **Progression**: Click create fund → Enter fund name → Select type (personal/shared) → If shared, select member users → Save → Auto-select new fund
-- **Success criteria**: Users can switch between funds, create unlimited funds, shared funds show all members' transactions, personal funds show only owner's expenses, fund data persists between sessions
+- **Functionality**: Users can create and manage multiple funds. After login, users see a fund list screen with all accessible funds. Each fund is either personal (single user) or shared (multiple users). Default "Cá nhân" fund created automatically. Tapping a fund navigates to its transaction view. Header contains app title, tagline, create fund button, and logout button.
+- **Purpose**: Organize finances by context (personal, shared projects, group events) and enable collaborative expense tracking with clear navigation
+- **Trigger**: Fund list shown after login, "Tạo quỹ mới" button in header, back arrow from transaction view
+- **Progression**: Login → Fund list screen → Click fund card → Transaction view OR Click create fund → Enter details → Save → Return to list
+- **Success criteria**: Users can switch between funds, create unlimited funds, clear visual hierarchy, easy navigation back to list, header elements properly positioned
 
 ### AI-Powered Expense Parsing
 - **Functionality**: Accepts free-form text like "bánh tráng trộn 35" (no longer requires user name since it's from logged-in user) and extracts amount (in thousands) and description, associating with current fund. Validates prompt before API call. Distinguishes between system errors (API down) and invalid prompts (unclear input).
@@ -34,11 +34,11 @@ An AI-powered expense tracker with fund management that parses natural language 
 - **Success criteria**: Correctly extracts amount in thousands (without zeros) and content description from Vietnamese/English text, automatically tags with current user's name, ID, and selected fund ID. For system errors, saves as pending prompt. For invalid prompts, requests user to revise without saving.
 
 ### Transaction Management
-- **Functionality**: Display all transactions for current fund with amount, type (spend/earn), content, user name, and timestamp. Pending prompts are shown as notes with special styling and excluded from statistics. Transactions are filtered by fundId.
-- **Purpose**: Provides clear overview of fund's financial activity, with distinction between valid transactions and pending prompts. In shared funds, shows who made each transaction.
-- **Trigger**: Automatic on page load, fund selection change, and after adding transactions
-- **Progression**: Load from KV storage → Filter by fundId → Render list showing userName for each transaction → Allow edit/delete actions → Highlight pending prompts
-- **Success criteria**: All transactions persist between sessions with userId and fundId foreign keys, support inline editing, isolated per fund. User name displayed for each transaction. Pending prompts are visually distinct and can be reprocessed later
+- **Functionality**: Chat-style interface with sticky header (fund name, members, back button, statistics button) and sticky bottom input. Transactions displayed as chat bubbles, newest at bottom. Current user's transactions align right with primary color, others align left. Scroll up to load more (10 per page). Input has send icon that shows spinner during processing.
+- **Purpose**: Provides familiar chat-like experience for natural expense logging with clear visual ownership and smooth pagination
+- **Trigger**: Select fund from list, scroll to top for pagination, type and send message
+- **Progression**: Enter transaction view → See chat history → Scroll up for older → Type expense → Send → See spinner → Transaction appears as bubble → Auto-scroll to bottom
+- **Success criteria**: Sticky header and input, smooth scrolling, pagination loads seamlessly, bubbles styled by user, timestamps formatted contextually (time/yesterday/date), auto-scroll on new messages
 
 ### Pending Prompt Management
 - **Functionality**: When API fails due to system errors, saves the prompt text with timestamp for later processing. User can edit and reprocess prompts when ready. Saved with current fundId.
@@ -54,32 +54,34 @@ An AI-powered expense tracker with fund management that parses natural language 
 - **Progression**: Click edit → Show editable fields → Save changes → Update storage → Refresh display
 - **Success criteria**: All fields editable without data loss
 ### Statistics Overview & Fund Analytics
-- **Functionality**: Show total spend, total earn, and net balance for valid transactions only (excluding pending prompts). Time-based filtering (day/week/month/year/all). For shared funds, show per-user breakdown of spending with individual totals.
-- **Purpose**: Provides accurate financial snapshot of fund activity. In shared funds, enables tracking of who spent how much during different time periods for fair expense splitting.
-- **Trigger**: Automatic calculation when transactions change, fund selection changes, or time filter changes
-- **Progression**: Filter transactions by fundId → Apply time filter → Filter out pending prompts → Calculate total spend/earn → Calculate net balance → If shared fund, group by userId and calculate per-user totals → Display metrics and optional per-user breakdown
-- **Success criteria**: Real-time updates as transactions are added/edited/deleted, only includes successfully parsed transactions, time filtering works accurately, shared fund per-user statistics show correct totals, statistics isolate by fund
+- **Functionality**: Dialog popup showing total spend, total earn, net balance for valid transactions only. For shared funds, show per-user breakdown with individual totals. Accessed via chart icon in transaction view header.
+- **Purpose**: Provides accurate financial snapshot in non-intrusive popup, enabling per-user expense tracking in shared funds
+- **Trigger**: Click statistics button (chart icon) in transaction view header
+- **Progression**: Click chart icon → Dialog opens → View totals and per-user breakdown → Close to return
+- **Success criteria**: Dialog overlay, clear metrics display, per-user stats for shared funds, excludes pending prompts, clean responsive layout
 
 ## Edge Case Handling
 
-- **API System Failures**: Retry logic for transient errors, save as pending prompt after failures, show system error toast with explanation, allow later reprocessing
-- **Invalid Prompts**: Validate prompt length and format before API call, distinguish from system errors, request user to revise prompt without saving
-- **Malformed AI Response**: JSON validation with retry mechanism for system issues, save as pending prompt if parsing fails
-- **Empty Input**: Disable submit button and show placeholder guidance, disable when no fund selected
-- **Unauthorized Access**: Login screen on app load, redirect to login on logout, persist session state
-- **User Data Isolation**: Transactions filtered by fundId, users only see funds they have access to
-- **Fund Data Isolation**: Transactions belong to specific funds via fundId foreign key, switching funds filters transactions
-- **No Fund Selected**: Disable transaction input until user selects a fund
-- **First-Time User**: Automatically create default "Cá nhân" personal fund on first login
-- **Shared Fund Access**: Users can only see and add transactions to funds where they are members
-- **Pending Prompt Statistics**: Exclude pending prompts from financial calculations, show only as notes in list
-- **Timestamp Preservation**: When processing pending prompts, use original creation time (promptCreatedAt) not processing time
-- **Ambiguous Amounts**: AI should default to "spend" type unless keywords like "nhận", "thu", "earn" are present
-- **Missing Fields**: AI should return null for optional fields (earn/spend), validation ensures required fields exist
+- **API System Failures**: Retry logic for transient errors, save as pending prompt after failures, show system error toast, allow later reprocessing
+- **Invalid Prompts**: Validate prompt length/format, distinguish from system errors, request user to revise without saving
+- **Malformed AI Response**: JSON validation with retry for system issues, save as pending if parsing fails
+- **Empty Input**: Disable submit button, show placeholder guidance
+- **Unauthorized Access**: Login screen on app load, redirect to login on logout
+- **User Data Isolation**: Transactions filtered by fundId, users only see accessible funds
+- **Fund Data Isolation**: Transactions belong to specific funds, switching funds changes view
+- **No Fund Selected**: Navigation prevents accessing transaction view without fund selection
+- **First-Time User**: Auto-create default "Cá nhân" personal fund on first login
+- **Shared Fund Access**: Users only see/add to funds where they're members
+- **Pending Prompt Statistics**: Excluded from calculations, shown as special bubbles in chat
+- **Timestamp Preservation**: Pending prompts use original creation time when processed
+- **Scroll Pagination**: Loading more transactions maintains scroll position, smooth experience
+- **Concurrent Messages**: Spinner prevents sending multiple messages simultaneously
+- **Long Transaction Lists**: Pagination (10 items) prevents performance issues
+- **Mobile Responsiveness**: Chat bubbles adapt width, header/input remain accessible
 
 ## Design Direction
 
-The design should feel modern, efficient, and intelligent - like a smart assistant handling your finances. Vietnamese-first with clean typography, clear data hierarchy, and subtle AI-powered interactions that feel magical but trustworthy.
+The design should feel modern, conversational, and effortless - like a messaging app for your finances. Clean chat-style bubbles, smooth scrolling, and intuitive navigation create a familiar, friendly experience that makes expense tracking feel natural rather than tedious.
 
 ## Color Selection
 
@@ -110,71 +112,63 @@ Typography should convey modernity and precision, balancing Vietnamese character
 
 ## Animations
 
-Subtle, purposeful animations that reinforce the AI's intelligence: smooth transitions when parsing text, gentle pulse on API calls, satisfying checkmarks on successful additions, and fluid list updates. All animations under 300ms to maintain snappy responsiveness.
+Purposeful, chat-style animations: smooth message appearance, gentle scroll behavior, satisfying send button transformation to spinner, and fluid navigation transitions. All under 300ms to maintain messaging app responsiveness.
 
 ## Component Selection
 
 - **Components**: 
-  - Input with Button for text entry (shadcn Input + Button)
-  - Card components for statistics display (shadcn Card)
-  - Table or custom list for transactions (shadcn Table)
-  - Dialog for editing transactions and creating funds (shadcn Dialog)
-  - Select dropdown for fund selection (shadcn Select)
-  - Radio group for fund type selection (shadcn RadioGroup)
-  - Checkbox for shared fund member selection (shadcn Checkbox)
+  - Card for fund list items and statistics (shadcn Card)
+  - Dialog for creating funds and viewing statistics (shadcn Dialog)
+  - Input with Button for chat-style message entry (shadcn Input + Button)
   - Toast for notifications (sonner)
-  - Badge for transaction types (shadcn Badge)
-  - Skeleton loaders during API calls (shadcn Skeleton)
+  - Badge for transaction amounts and pending status (shadcn Badge)
+  - Spinner icon for loading states (Phosphor Icons)
 
 - **Customizations**: 
-  - Custom transaction list item with inline edit capability
-  - AI parsing status indicator with animated states
-  - Vietnamese currency formatter (thousands with 'k' suffix)
-  - Fund selector with type indicators (personal/shared)
-  - Per-user statistics breakdown for shared funds
-  - Time-based filtering UI (day/week/month/year/all)
+  - Chat bubble layout with right/left alignment based on user
+  - Sticky header with back navigation and statistics access
+  - Sticky bottom input bar with send icon
+  - Pagination with "load more" at top of scroll
+  - Fund list cards with icons and member info
+  - Transaction bubbles with hover actions (edit/delete)
+  - Contextual timestamp formatting (time/yesterday/date)
 
 - **States**: 
-  - Input: default, focused (teal ring), disabled during API call or no fund selected, error (red ring)
-  - Buttons: primary (teal), secondary (slate), destructive (red), all with hover lift and active press
-  - Transaction rows: default, hover (subtle background), editing (highlighted border)
-  - Fund selector: shows fund type icon, member count for shared funds
+  - Input: default, focused (primary ring), disabled during API call with spinner
+  - Send button: default (paper plane icon), loading (spinner), disabled (no input)
+  - Fund cards: default, hover (accent background), active tap
+  - Transaction bubbles: default, hover (show actions)
+  - Back/Statistics buttons: default, hover, active
 
 - **Icon Selection**: 
-  - Plus (add transaction, create fund)
-  - PencilSimple (edit)
-  - Trash (delete)
-  - SpinnerGap (loading)
-  - CheckCircle (success)
-  - Warning (error/retry)
-  - TrendUp/TrendDown (earnings/spending)
-  - SignIn/SignOut (authentication)
-  - Sparkle (branding, AI magic)
-  - ArrowClockwise (reprocess pending prompt)
-  - NotePencil (pending prompt indicator)
-  - Users (shared fund icon)
-  - User (personal fund icon)
-  - Wallet (balance)
-  - ChartBar (view per-user statistics)
+  - PaperPlaneRight (send message/fill variant)
+  - CircleNotch (loading spinner)
+  - ArrowLeft (back navigation)
+  - ChartBar (view statistics)
+  - Plus (create fund)
+  - SignOut (logout)
+  - Users/User (fund type indicators/fill variants)
+  - CaretRight (fund list navigation hint)
+  - PencilSimple (edit transaction)
+  - Trash (delete transaction)
+  - ArrowClockwise (reprocess pending)
+  - NotePencil (pending indicator)
+  - TrendUp/TrendDown (statistics earnings/spending)
+  - Wallet (balance in statistics)
 
 - **Spacing**: 
-  - Container padding: p-6
+  - Chat bubble gaps: gap-4 (between messages)
+  - Container padding: px-4 py-6
+  - Header/Footer padding: px-4 py-4
   - Card padding: p-4
-  - Section gaps: gap-6
-  - List item gaps: gap-3
-  - Inline element gaps: gap-2
+  - Inline element gaps: gap-2 to gap-3
+  - Max message width: 85% mobile, 70% desktop
 
 - **Mobile**: 
-  - Stack statistics cards vertically on mobile
-  - Full-width input on small screens
-  - Simplified transaction list (hide timestamps, show on tap)
-  - Bottom-fixed input bar for easy thumb access
-  - Responsive table → card layout transformation below 640px
-  - Fund selector adapts to full width on mobile
-
-- **Mobile**: 
-  - Stack statistics cards vertically on mobile
-  - Full-width input on small screens
-  - Simplified transaction list (hide timestamps, show on tap)
-  - Bottom-fixed input bar for easy thumb access
-  - Responsive table → card layout transformation below 640px
+  - Full-screen chat view (100vh)
+  - Sticky header and input work on all devices
+  - Chat bubbles stack naturally with responsive widths
+  - Fund list cards full-width on mobile
+  - Bottom input optimized for thumb access
+  - Statistics dialog scrollable on small screens
+  - Touch-friendly tap targets (min 44px)
