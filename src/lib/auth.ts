@@ -6,9 +6,7 @@ export interface User {
 
 export const MOCK_USERS: User[] = [
   { id: 'user_1', name: 'Minh Quân', email: 'minhquan@example.com' },
-  { id: 'user_2', name: 'Hồng Anh', email: 'honganh@example.com' },
-  { id: 'user_3', name: 'Tuấn Kiệt', email: 'tuankiet@example.com' },
-  { id: 'user_4', name: 'Thu Hà', email: 'thuha@example.com' },
+  { id: 'user_2', name: 'Tuệ Minh', email: 'tueminh@example.com' },
 ]
 
 export function authenticateUser(email: string): User | null {

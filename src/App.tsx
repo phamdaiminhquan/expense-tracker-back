@@ -1,18 +1,40 @@
 import { useKV } from '@github/spark/hooks'
-import { Transaction } from '@/lib/types'
+import { Transaction, Fund } from '@/lib/types'
 import { TransactionInput } from '@/components/TransactionInput'
-import { StatisticsCards } from '@/components/StatisticsCards'
 import { TransactionList } from '@/components/TransactionList'
 import { LoginForm } from '@/components/LoginForm'
+import { FundSelector } from '@/components/FundSelector'
+import { CreateFundDialog } from '@/components/CreateFundDialog'
+import { FundStatistics } from '@/components/FundStatistics'
 import { Toaster } from '@/components/ui/sonner'
 import { Sparkle, SignOut } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createDefaultPersonalFund, createFund, canAccessFund } from '@/lib/funds'
+import { MOCK_USERS } from '@/lib/auth'
+import { toast } from 'sonner'
 
 function App() {
   const [transactions, setTransactions] = useKV<Transaction[]>('transactions', [])
+  const [funds, setFunds] = useKV<Fund[]>('funds', [])
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [currentUserName, setCurrentUserName] = useState<string | null>(null)
+  const [selectedFundId, setSelectedFundId] = useState<string | null>(null)
+  const [isCreateFundDialogOpen, setIsCreateFundDialogOpen] = useState(false)
+
+  useEffect(() => {
+    if (currentUserId && funds) {
+      const userFunds = funds.filter((f) => canAccessFund(f, currentUserId))
+      
+      if (userFunds.length === 0) {
+        const defaultFund = createDefaultPersonalFund(currentUserId, currentUserName || '')
+        setFunds((current) => [...(current || []), defaultFund])
+        setSelectedFundId(defaultFund.id)
+      } else if (!selectedFundId || !userFunds.find((f) => f.id === selectedFundId)) {
+        setSelectedFundId(userFunds[0].id)
+      }
+    }
+  }, [currentUserId, currentUserName, funds, selectedFundId, setFunds])
 
   const handleLogin = (userId: string, userName: string) => {
     setCurrentUserId(userId)
@@ -22,6 +44,19 @@ function App() {
   const handleLogout = () => {
     setCurrentUserId(null)
     setCurrentUserName(null)
+    setSelectedFundId(null)
+  }
+
+  const handleCreateFund = (name: string, type: 'personal' | 'shared', memberIds: string[]) => {
+    if (!currentUserId) return
+
+    const newFund = createFund(name, type, currentUserId, memberIds)
+    setFunds((current) => [...(current || []), newFund])
+    setSelectedFundId(newFund.id)
+    
+    toast.success('Đã tạo quỹ thành công!', {
+      description: name,
+    })
   }
 
   const handleAddTransaction = (newTransaction: Omit<Transaction, 'id' | 'timestamp'>) => {
@@ -51,7 +86,9 @@ function App() {
     setTransactions((current) => (current || []).filter((t) => t.id !== id))
   }
 
-  const userTransactions = (transactions || []).filter((t) => t.userId === currentUserId)
+  const userFunds = (funds || []).filter((f) => currentUserId && canAccessFund(f, currentUserId))
+  const selectedFund = userFunds.find((f) => f.id === selectedFundId) || null
+  const fundTransactions = (transactions || []).filter((t) => t.fundId === selectedFundId)
 
   if (!currentUserId || !currentUserName) {
     return <LoginForm onLogin={handleLogin} />
@@ -83,15 +120,38 @@ function App() {
         </header>
 
         <div className="space-y-6">
-          <TransactionInput onAdd={handleAddTransaction} currentUserName={currentUserName} />
-          <StatisticsCards transactions={userTransactions} />
+          <FundSelector
+            funds={userFunds}
+            selectedFundId={selectedFundId}
+            onSelectFund={setSelectedFundId}
+            onCreateFund={() => setIsCreateFundDialogOpen(true)}
+            currentUserId={currentUserId}
+          />
+
+          <TransactionInput
+            onAdd={handleAddTransaction}
+            currentUserName={currentUserName}
+            currentFundId={selectedFundId}
+          />
+
+          <FundStatistics transactions={fundTransactions} fund={selectedFund} />
+
           <TransactionList
-            transactions={userTransactions}
+            transactions={fundTransactions}
             onUpdate={handleUpdateTransaction}
             onDelete={handleDeleteTransaction}
           />
         </div>
       </div>
+
+      <CreateFundDialog
+        open={isCreateFundDialogOpen}
+        onOpenChange={setIsCreateFundDialogOpen}
+        onCreateFund={handleCreateFund}
+        currentUserId={currentUserId}
+        allUsers={MOCK_USERS}
+      />
+
       <Toaster position="top-right" />
     </div>
   )

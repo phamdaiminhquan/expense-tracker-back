@@ -9,16 +9,17 @@ import { Transaction } from '@/lib/types'
 interface TransactionInputProps {
   onAdd: (transaction: Omit<Transaction, 'id' | 'timestamp'>) => void
   currentUserName: string
+  currentFundId: string | null
 }
 
-export function TransactionInput({ onAdd, currentUserName }: TransactionInputProps) {
+export function TransactionInput({ onAdd, currentUserName, currentFundId }: TransactionInputProps) {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!input.trim()) return
+    if (!input.trim() || !currentFundId) return
 
     const validation = validatePrompt(input.trim())
     if (!validation.valid) {
@@ -38,6 +39,7 @@ export function TransactionInput({ onAdd, currentUserName }: TransactionInputPro
       onAdd({
         userId: '',
         userName: currentUserName,
+        fundId: currentFundId,
         spend: parsed.spend,
         earn: parsed.earn,
         content: parsed.content,
@@ -55,6 +57,7 @@ export function TransactionInput({ onAdd, currentUserName }: TransactionInputPro
         onAdd({
           userId: '',
           userName: currentUserName,
+          fundId: currentFundId,
           spend: null,
           earn: null,
           content: promptText,
@@ -90,13 +93,13 @@ export function TransactionInput({ onAdd, currentUserName }: TransactionInputPro
         value={input}
         onChange={(e) => setInput(e.target.value)}
         placeholder="Nhập giao dịch (VD: bánh tráng trộn 35)"
-        disabled={isLoading}
+        disabled={isLoading || !currentFundId}
         className="flex-1 text-base"
         id="transaction-input"
       />
       <Button
         type="submit"
-        disabled={!input.trim() || isLoading}
+        disabled={!input.trim() || isLoading || !currentFundId}
         className="gap-2 px-6"
       >
         {isLoading ? (
