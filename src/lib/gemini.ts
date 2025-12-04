@@ -3,8 +3,40 @@ import { GeminiResponse, ParsedExpense } from './types'
 const GEMINI_API_KEY = 'AIzaSyDCY7f-Iaswz3FMidS565AHwotyvnXrSX4'
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
 
+export class APISystemError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'APISystemError'
+  }
+}
+
+export class InvalidPromptError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'InvalidPromptError'
+  }
+}
+
+export function validatePrompt(text: string): { valid: boolean; error?: string } {
+  const trimmed = text.trim()
+  
+  if (trimmed.length === 0) {
+    return { valid: false, error: 'Prompt không được để trống' }
+  }
+  
+  if (trimmed.length < 3) {
+    return { valid: false, error: 'Prompt quá ngắn, vui lòng mô tả chi tiết hơn' }
+  }
+  
+  if (trimmed.length > 500) {
+    return { valid: false, error: 'Prompt quá dài, vui lòng rút ngắn lại' }
+  }
+  
+  return { valid: true }
+}
+
 export async function parseExpenseText(text: string, retryCount = 0): Promise<ParsedExpense> {
-  const maxRetries = 3
+  const maxRetries = 2
 
   const prompt = `Parse this Vietnamese/English expense entry into JSON format. Extract:
 - spend: amount spent in thousands VND (number without zeros, null if not spending)
@@ -48,31 +80,62 @@ Return ONLY the JSON object, no other text.`
     })
 
     if (!response.ok) {
-      throw new Error(`API request failed: ${response.status}`)
+      if (response.status >= 500) {
+        throw new APISystemError('Hệ thống API đang gặp sự cố, vui lòng thử lại sau')
+      }
+      if (response.status === 429) {
+        throw new APISystemError('Quá nhiều yêu cầu, vui lòng thử lại sau')
+      }
+      throw new APISystemError(`Lỗi kết nối API (${response.status})`)
     }
 
     const data: GeminiResponse = await response.json()
     const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text
 
     if (!textResponse) {
-      throw new Error('No text response from API')
+      throw new APISystemError('API không trả về kết quả')
     }
 
     const jsonMatch = textResponse.match(/\{[\s\S]*\}/)
     const jsonStr = jsonMatch ? jsonMatch[0] : textResponse
 
-    const parsed: ParsedExpense = JSON.parse(jsonStr)
+    let parsed: ParsedExpense
+    try {
+      parsed = JSON.parse(jsonStr)
+    } catch {
+      throw new InvalidPromptError('Không thể phân tích prompt, vui lòng mô tả rõ hơn (VD: "mua cơm 35" hoặc "nhận lương 5000")')
+    }
 
-    if (!parsed.content || (parsed.spend === null && parsed.earn === null)) {
-      throw new Error('Invalid parsed data structure')
+    if (!parsed.content || typeof parsed.content !== 'string' || parsed.content.trim().length === 0) {
+      throw new InvalidPromptError('Không tìm thấy mô tả giao dịch, vui lòng nhập lại')
+    }
+
+    if (parsed.spend === null && parsed.earn === null) {
+      throw new InvalidPromptError('Không tìm thấy số tiền, vui lòng thêm số tiền vào prompt')
+    }
+
+    if ((parsed.spend !== null && (typeof parsed.spend !== 'number' || parsed.spend < 0)) ||
+        (parsed.earn !== null && (typeof parsed.earn !== 'number' || parsed.earn < 0))) {
+      throw new InvalidPromptError('Số tiền không hợp lệ, vui lòng kiểm tra lại')
     }
 
     return parsed
   } catch (error) {
+    if (error instanceof APISystemError || error instanceof InvalidPromptError) {
+      throw error
+    }
+
     if (retryCount < maxRetries) {
-      await new Promise(resolve => setTimeout(resolve, 500 * (retryCount + 1)))
+      await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)))
       return parseExpenseText(text, retryCount + 1)
     }
-    throw new Error(`Failed to parse after ${maxRetries} attempts: ${error instanceof Error ? error.message : 'Unknown error'}`)
+
+    if (error instanceof Error) {
+      if (error.message.includes('fetch') || error.message.includes('network')) {
+        throw new APISystemError('Lỗi kết nối mạng, vui lòng kiểm tra internet và thử lại')
+      }
+    }
+
+    throw new APISystemError('Hệ thống tạm thời gặp lỗi, vui lòng thử lại sau')
   }
 }

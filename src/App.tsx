@@ -27,6 +27,8 @@ function App() {
   const handleAddTransaction = (newTransaction: Omit<Transaction, 'id' | 'timestamp'>) => {
     if (!currentUserId || !currentUserName) return
 
+    const timestamp = newTransaction.promptCreatedAt || Date.now()
+
     setTransactions((current) => [
       ...(current || []),
       {
@@ -34,7 +36,7 @@ function App() {
         userId: currentUserId,
         userName: currentUserName,
         id: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        timestamp: Date.now(),
+        timestamp,
       },
     ])
   }

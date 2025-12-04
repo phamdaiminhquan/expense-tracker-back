@@ -8,8 +8,10 @@ interface StatisticsCardsProps {
 }
 
 export function StatisticsCards({ transactions }: StatisticsCardsProps) {
-  const totalSpend = transactions.reduce((sum, t) => sum + (t.spend || 0), 0)
-  const totalEarn = transactions.reduce((sum, t) => sum + (t.earn || 0), 0)
+  const validTransactions = transactions.filter(t => !t.isPendingPrompt)
+  
+  const totalSpend = validTransactions.reduce((sum, t) => sum + (t.spend || 0), 0)
+  const totalEarn = validTransactions.reduce((sum, t) => sum + (t.earn || 0), 0)
   const netBalance = totalEarn - totalSpend
 
   return (

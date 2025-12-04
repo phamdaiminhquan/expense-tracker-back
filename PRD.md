@@ -13,11 +13,11 @@ An AI-powered expense tracker that parses natural language entries into structur
 ## Essential Features
 
 ### AI-Powered Expense Parsing
-- **Functionality**: Accepts free-form text like "bánh tráng trộn 35" and extracts amount (in thousands) and description, automatically associating with logged-in user
-- **Purpose**: Eliminates tedious form-filling by understanding natural language and using session context
+- **Functionality**: Accepts free-form text like "bánh tráng trộn 35" and extracts amount (in thousands) and description, automatically associating with logged-in user. Validates prompt before API call. Distinguishes between system errors (API down) and invalid prompts (unclear input).
+- **Purpose**: Eliminates tedious form-filling by understanding natural language and using session context, with intelligent error handling
 - **Trigger**: User types text and presses enter or clicks add button
-- **Progression**: Input text → Send to Gemini API → Parse JSON response → Retry up to 3 times if malformed → Associate with current user → Display success/error → Store transaction
-- **Success criteria**: Correctly extracts amount in thousands (without zeros) and content description from Vietnamese/English text, automatically tags with current user's name and ID
+- **Progression**: Input text → Validate prompt format → Send to Gemini API → Parse JSON response → Retry up to 2 times if system error → Associate with current user → Display success/error → Store transaction OR save as pending prompt
+- **Success criteria**: Correctly extracts amount in thousands (without zeros) and content description from Vietnamese/English text, automatically tags with current user's name and ID. For system errors, saves as pending prompt. For invalid prompts, requests user to revise without saving.
 
 ### User Authentication
 - **Functionality**: Mock login system with predefined users, session management
@@ -27,11 +27,18 @@ An AI-powered expense tracker that parses natural language entries into structur
 - **Success criteria**: Only shows transactions for logged-in user, persists user context during session, logout clears session
 
 ### Transaction Management
-- **Functionality**: Display all transactions for current user with amount, type (spend/earn), content, and timestamp
-- **Purpose**: Provides clear overview of user's financial activity
+- **Functionality**: Display all transactions for current user with amount, type (spend/earn), content, and timestamp. Pending prompts are shown as notes with special styling and excluded from statistics
+- **Purpose**: Provides clear overview of user's financial activity, with distinction between valid transactions and pending prompts
 - **Trigger**: Automatic on page load and after adding transactions
-- **Progression**: Load from KV storage → Filter by userId → Render list → Allow edit/delete actions
-- **Success criteria**: All transactions persist between sessions with userId foreign key, support inline editing, isolated per user
+- **Progression**: Load from KV storage → Filter by userId → Render list → Allow edit/delete actions → Highlight pending prompts
+- **Success criteria**: All transactions persist between sessions with userId foreign key, support inline editing, isolated per user. Pending prompts are visually distinct and can be reprocessed later
+
+### Pending Prompt Management
+- **Functionality**: When API fails due to system errors, saves the prompt text with timestamp for later processing. User can edit and reprocess prompts when ready
+- **Purpose**: Prevents data loss during system outages and allows users to quickly note expenses even when busy
+- **Trigger**: API system error (not invalid prompt), or user manually retries pending prompt
+- **Progression**: API fails → Save prompt with isPendingPrompt flag and original timestamp → Display in list as note → User clicks reprocess → Edit prompt if needed → Process with API → Update to valid transaction with original timestamp
+- **Success criteria**: Pending prompts preserve the original expense time (promptCreatedAt), are excluded from statistics, appear distinctly in list, and can be converted to valid transactions
 
 ### Manual Transaction Editing
 - **Functionality**: Click any transaction to edit fields directly
@@ -41,19 +48,22 @@ An AI-powered expense tracker that parses natural language entries into structur
 - **Success criteria**: All fields editable without data loss
 
 ### Statistics Overview
-- **Functionality**: Show total spend, total earn, and net balance
-- **Purpose**: Provides quick financial snapshot
+- **Functionality**: Show total spend, total earn, and net balance for valid transactions only (excluding pending prompts)
+- **Purpose**: Provides accurate financial snapshot
 - **Trigger**: Automatic calculation when transactions change
-- **Progression**: Sum all spend amounts → Sum all earn amounts → Calculate difference → Display metrics
-- **Success criteria**: Real-time updates as transactions are added/edited/deleted
+- **Progression**: Filter out pending prompts → Sum all spend amounts → Sum all earn amounts → Calculate difference → Display metrics
+- **Success criteria**: Real-time updates as transactions are added/edited/deleted, only includes successfully parsed transactions
 
 ## Edge Case Handling
 
-- **API Failures**: Retry logic with exponential backoff, show error toast after 3 failed attempts, allow manual entry
-- **Malformed AI Response**: JSON validation with retry mechanism, fallback to manual input form
+- **API System Failures**: Retry logic for transient errors, save as pending prompt after failures, show system error toast with explanation, allow later reprocessing
+- **Invalid Prompts**: Validate prompt length and format before API call, distinguish from system errors, request user to revise prompt without saving
+- **Malformed AI Response**: JSON validation with retry mechanism for system issues, save as pending prompt if parsing fails
 - **Empty Input**: Disable submit button and show placeholder guidance
 - **Unauthorized Access**: Login screen on app load, redirect to login on logout, persist session state
 - **User Data Isolation**: Transactions filtered by userId, no cross-user data access
+- **Pending Prompt Statistics**: Exclude pending prompts from financial calculations, show only as notes in list
+- **Timestamp Preservation**: When processing pending prompts, use original creation time (promptCreatedAt) not processing time
 - **Ambiguous Amounts**: AI should default to "spend" type unless keywords like "nhận", "thu", "earn" are present
 - **Missing Fields**: AI should return null for optional fields (earn/spend), validation ensures required fields exist
 
@@ -123,6 +133,8 @@ Subtle, purposeful animations that reinforce the AI's intelligence: smooth trans
   - TrendUp/TrendDown (earnings/spending)
   - SignIn/SignOut (authentication)
   - Sparkle (branding, AI magic)
+  - ArrowClockwise (reprocess pending prompt)
+  - NotePencil (pending prompt indicator)
 
 - **Spacing**: 
   - Container padding: p-6

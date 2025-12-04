@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Plus, SpinnerGap } from '@phosphor-icons/react'
-import { parseExpenseText } from '@/lib/gemini'
+import { parseExpenseText, validatePrompt, APISystemError, InvalidPromptError } from '@/lib/gemini'
 import { toast } from 'sonner'
 import { Transaction } from '@/lib/types'
 
@@ -20,10 +20,20 @@ export function TransactionInput({ onAdd, currentUserName }: TransactionInputPro
     
     if (!input.trim()) return
 
+    const validation = validatePrompt(input.trim())
+    if (!validation.valid) {
+      toast.error('Prompt không hợp lệ', {
+        description: validation.error,
+      })
+      return
+    }
+
     setIsLoading(true)
+    const promptText = input.trim()
+    const promptTimestamp = Date.now()
 
     try {
-      const parsed = await parseExpenseText(input.trim())
+      const parsed = await parseExpenseText(promptText)
       
       onAdd({
         userId: '',
@@ -31,6 +41,8 @@ export function TransactionInput({ onAdd, currentUserName }: TransactionInputPro
         spend: parsed.spend,
         earn: parsed.earn,
         content: parsed.content,
+        isPendingPrompt: false,
+        promptCreatedAt: promptTimestamp,
       })
 
       toast.success('Đã thêm giao dịch thành công!', {
@@ -39,9 +51,34 @@ export function TransactionInput({ onAdd, currentUserName }: TransactionInputPro
 
       setInput('')
     } catch (error) {
-      toast.error('Không thể phân tích giao dịch', {
-        description: error instanceof Error ? error.message : 'Vui lòng thử lại hoặc nhập lại',
-      })
+      if (error instanceof APISystemError) {
+        onAdd({
+          userId: '',
+          userName: currentUserName,
+          spend: null,
+          earn: null,
+          content: promptText,
+          isPendingPrompt: true,
+          originalPrompt: promptText,
+          promptCreatedAt: promptTimestamp,
+        })
+
+        toast.error('Lỗi hệ thống', {
+          description: `${error.message}. Prompt đã được lưu để xử lý sau.`,
+          duration: 5000,
+        })
+
+        setInput('')
+      } else if (error instanceof InvalidPromptError) {
+        toast.error('Không thể phân tích prompt', {
+          description: error.message,
+          duration: 5000,
+        })
+      } else {
+        toast.error('Có lỗi xảy ra', {
+          description: 'Vui lòng thử lại',
+        })
+      }
     } finally {
       setIsLoading(false)
     }

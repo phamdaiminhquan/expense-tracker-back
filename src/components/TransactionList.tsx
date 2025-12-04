@@ -9,10 +9,11 @@ import {
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { PencilSimple, Trash } from '@phosphor-icons/react'
+import { PencilSimple, Trash, ArrowClockwise, NotePencil } from '@phosphor-icons/react'
 import { Transaction } from '@/lib/types'
 import { formatCurrency } from '@/lib/currency'
 import { EditTransactionDialog } from './EditTransactionDialog'
+import { EditPendingPromptDialog } from './EditPendingPromptDialog'
 
 interface TransactionListProps {
   transactions: Transaction[]
@@ -22,6 +23,7 @@ interface TransactionListProps {
 
 export function TransactionList({ transactions, onUpdate, onDelete }: TransactionListProps) {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
+  const [editingPendingPrompt, setEditingPendingPrompt] = useState<Transaction | null>(null)
 
   const sortedTransactions = [...transactions].sort((a, b) => b.timestamp - a.timestamp)
 
@@ -60,53 +62,81 @@ export function TransactionList({ transactions, onUpdate, onDelete }: Transactio
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedTransactions.map((transaction) => (
-              <TableRow key={transaction.id}>
-                <TableCell className="font-medium">{transaction.userName}</TableCell>
-                <TableCell>{transaction.content}</TableCell>
-                <TableCell className="text-right">
-                  {transaction.spend !== null ? (
-                    <Badge variant="destructive" className="font-mono">
-                      {formatCurrency(transaction.spend)}
-                    </Badge>
-                  ) : (
-                    <span className="text-muted-foreground">—</span>
-                  )}
-                </TableCell>
-                <TableCell className="text-right">
-                  {transaction.earn !== null ? (
-                    <Badge className="font-mono bg-accent text-accent-foreground hover:bg-accent/90">
-                      {formatCurrency(transaction.earn)}
-                    </Badge>
-                  ) : (
-                    <span className="text-muted-foreground">—</span>
-                  )}
-                </TableCell>
-                <TableCell className="text-muted-foreground text-sm hidden sm:table-cell">
-                  {formatDate(transaction.timestamp)}
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex gap-1 justify-end">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setEditingTransaction(transaction)}
-                      className="h-8 w-8"
-                    >
-                      <PencilSimple />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onDelete(transaction.id)}
-                      className="h-8 w-8 text-destructive hover:text-destructive"
-                    >
-                      <Trash />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+            {sortedTransactions.map((transaction) => {
+              const isPending = transaction.isPendingPrompt === true
+
+              return (
+                <TableRow key={transaction.id} className={isPending ? 'bg-muted/30' : ''}>
+                  <TableCell className="font-medium">{transaction.userName}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {isPending && (
+                        <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-300">
+                          <NotePencil className="mr-1" size={12} />
+                          Ghi chú
+                        </Badge>
+                      )}
+                      <span className={isPending ? 'text-muted-foreground italic' : ''}>
+                        {transaction.content}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {!isPending && transaction.spend !== null ? (
+                      <Badge variant="destructive" className="font-mono">
+                        {formatCurrency(transaction.spend)}
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {!isPending && transaction.earn !== null ? (
+                      <Badge className="font-mono bg-accent text-accent-foreground hover:bg-accent/90">
+                        {formatCurrency(transaction.earn)}
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-sm hidden sm:table-cell">
+                    {formatDate(transaction.promptCreatedAt || transaction.timestamp)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex gap-1 justify-end">
+                      {isPending ? (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setEditingPendingPrompt(transaction)}
+                          className="h-8 w-8 text-primary hover:text-primary"
+                          title="Chỉnh sửa và xử lý"
+                        >
+                          <ArrowClockwise />
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setEditingTransaction(transaction)}
+                          className="h-8 w-8"
+                        >
+                          <PencilSimple />
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onDelete(transaction.id)}
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                      >
+                        <Trash />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       </div>
@@ -115,6 +145,13 @@ export function TransactionList({ transactions, onUpdate, onDelete }: Transactio
         transaction={editingTransaction}
         open={editingTransaction !== null}
         onOpenChange={(open) => !open && setEditingTransaction(null)}
+        onSave={onUpdate}
+      />
+
+      <EditPendingPromptDialog
+        transaction={editingPendingPrompt}
+        open={editingPendingPrompt !== null}
+        onOpenChange={(open) => !open && setEditingPendingPrompt(null)}
         onSave={onUpdate}
       />
     </>

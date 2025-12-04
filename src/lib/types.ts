@@ -6,6 +6,9 @@ export interface Transaction {
   earn: number | null
   content: string
   timestamp: number
+  isPendingPrompt?: boolean
+  originalPrompt?: string
+  promptCreatedAt?: number
 }
 
 export interface ParsedExpense {
