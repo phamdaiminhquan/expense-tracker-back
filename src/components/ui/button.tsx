@@ -50,10 +50,19 @@ function Button({
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(
+        buttonVariants({ variant, size, className }),
+        "text-xs",
+        "text-base",
+        "text-xs",
+        "font-normal",
+        "font-sans",
+        "font-serif",
+        "font-mono"
+      )}
       {...props}
     />
-  )
+  );
 }
 
 export { Button, buttonVariants }

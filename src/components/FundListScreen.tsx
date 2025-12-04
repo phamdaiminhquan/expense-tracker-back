@@ -28,17 +28,13 @@ export function FundListScreen({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-primary/5">
+    <div className="min-h-screen from-background via-muted/30 to-primary/5 border-gray-950 bg-gray-100">
       <div className="container max-w-2xl mx-auto px-4 py-8 space-y-8">
         <header className="space-y-4">
           <div className="flex items-start justify-between">
             <div className="space-y-2">
-              <h1 className="text-4xl font-bold flex items-center gap-3">
-                Chi Tiêu Thông Minh
-              </h1>
-              <p className="text-muted-foreground text-lg">
-                Quản lý chi tiêu với trí tuệ nhân tạo - chỉ cần nhập, AI sẽ lo
-              </p>
+              <h1 className="flex items-center gap-3 font-sans font-semibold text-3xl text-orange-400">FinCap</h1>
+              <p className="text-muted-foreground text-sm">Tự do tài chính từ chi tiêu</p>
             </div>
             <Button variant="outline" onClick={onLogout} className="gap-2 shrink-0">
               <SignOut />
@@ -49,7 +45,7 @@ export function FundListScreen({
           <div className="flex items-center justify-between pt-2">
             <div>
               <p className="text-sm text-muted-foreground">Xin chào,</p>
-              <p className="text-lg font-semibold">{currentUserName}</p>
+              <p className="font-semibold text-base">{currentUserName}</p>
             </div>
             <Button onClick={onCreateFund} className="gap-2">
               <Plus weight="bold" />
@@ -59,7 +55,7 @@ export function FundListScreen({
         </header>
 
         <div className="space-y-3">
-          <h2 className="text-xl font-semibold">Quỹ của bạn</h2>
+          <h2 className="text-base font-semibold text-slate-500">Quỹ của bạn</h2>
           
           {funds.length === 0 ? (
             <Card className="p-8 text-center">
@@ -87,7 +83,7 @@ export function FundListScreen({
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-lg">{fund.name}</h3>
+                        <h3 className="text-sm font-medium">{fund.name}</h3>
                         <p className="text-sm text-muted-foreground truncate">
                           {fund.type === 'shared'
                             ? `${fund.memberIds.length} thành viên: ${getMemberNames(fund.memberIds)}`
@@ -107,5 +103,5 @@ export function FundListScreen({
         </div>
       </div>
     </div>
-  )
+  );
 }
