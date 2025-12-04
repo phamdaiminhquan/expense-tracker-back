@@ -25,14 +25,14 @@ export function EditTransactionDialog({
   onOpenChange,
   onSave,
 }: EditTransactionDialogProps) {
-  const [user, setUser] = useState('')
+  const [userName, setUserName] = useState('')
   const [amount, setAmount] = useState('')
   const [content, setContent] = useState('')
   const [type, setType] = useState<'spend' | 'earn'>('spend')
 
   useEffect(() => {
     if (transaction) {
-      setUser(transaction.user)
+      setUserName(transaction.userName)
       setAmount(String(transaction.spend || transaction.earn || ''))
       setContent(transaction.content)
       setType(transaction.spend !== null ? 'spend' : 'earn')
@@ -40,14 +40,14 @@ export function EditTransactionDialog({
   }, [transaction])
 
   const handleSave = () => {
-    if (!transaction || !user.trim() || !amount.trim() || !content.trim()) return
+    if (!transaction || !userName.trim() || !amount.trim() || !content.trim()) return
 
     const numAmount = parseFloat(amount)
     if (isNaN(numAmount)) return
 
     onSave({
       ...transaction,
-      user: user.trim(),
+      userName: userName.trim(),
       spend: type === 'spend' ? numAmount : null,
       earn: type === 'earn' ? numAmount : null,
       content: content.trim(),
@@ -67,8 +67,8 @@ export function EditTransactionDialog({
             <Label htmlFor="edit-user">Người</Label>
             <Input
               id="edit-user"
-              value={user}
-              onChange={(e) => setUser(e.target.value)}
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
               placeholder="Tên người"
             />
           </div>

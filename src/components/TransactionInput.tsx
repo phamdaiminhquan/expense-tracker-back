@@ -8,9 +8,10 @@ import { Transaction } from '@/lib/types'
 
 interface TransactionInputProps {
   onAdd: (transaction: Omit<Transaction, 'id' | 'timestamp'>) => void
+  currentUserName: string
 }
 
-export function TransactionInput({ onAdd }: TransactionInputProps) {
+export function TransactionInput({ onAdd, currentUserName }: TransactionInputProps) {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
@@ -25,14 +26,15 @@ export function TransactionInput({ onAdd }: TransactionInputProps) {
       const parsed = await parseExpenseText(input.trim())
       
       onAdd({
-        user: parsed.user,
+        userId: '',
+        userName: currentUserName,
         spend: parsed.spend,
         earn: parsed.earn,
         content: parsed.content,
       })
 
       toast.success('Đã thêm giao dịch thành công!', {
-        description: `${parsed.user} - ${parsed.content}`,
+        description: parsed.content,
       })
 
       setInput('')
@@ -50,7 +52,7 @@ export function TransactionInput({ onAdd }: TransactionInputProps) {
       <Input
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="Nhập giao dịch (VD: Minh Quân bánh tráng trộn 35)"
+        placeholder="Nhập giao dịch (VD: bánh tráng trộn 35)"
         disabled={isLoading}
         className="flex-1 text-base"
         id="transaction-input"

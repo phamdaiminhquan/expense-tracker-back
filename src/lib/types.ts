@@ -1,6 +1,7 @@
 export interface Transaction {
   id: string
-  user: string
+  userId: string
+  userName: string
   spend: number | null
   earn: number | null
   content: string
@@ -8,7 +9,6 @@ export interface Transaction {
 }
 
 export interface ParsedExpense {
-  user: string
   spend: number | null
   earn: number | null
   content: string

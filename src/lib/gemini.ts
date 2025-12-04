@@ -7,7 +7,6 @@ export async function parseExpenseText(text: string, retryCount = 0): Promise<Pa
   const maxRetries = 3
 
   const prompt = `Parse this Vietnamese/English expense entry into JSON format. Extract:
-- user: person's name (string)
 - spend: amount spent in thousands VND (number without zeros, null if not spending)
 - earn: amount earned in thousands VND (number without zeros, null if not earning)
 - content: description of what was bought/earned (string)
@@ -18,8 +17,11 @@ Rules:
 - Amount is in thousands (35 means 35,000 VND)
 - Return ONLY valid JSON, no markdown formatting
 
-Example input: "Minh Quân bánh tráng trộn 35"
-Example output: {"user": "Minh Quân", "spend": 35, "earn": null, "content": "bánh tráng trộn"}
+Example input: "bánh tráng trộn 35"
+Example output: {"spend": 35, "earn": null, "content": "bánh tráng trộn"}
+
+Example input: "nhận lương tháng 15000"
+Example output: {"spend": null, "earn": 15000, "content": "nhận lương tháng"}
 
 Now parse this: "${text}"
 
@@ -61,7 +63,7 @@ Return ONLY the JSON object, no other text.`
 
     const parsed: ParsedExpense = JSON.parse(jsonStr)
 
-    if (!parsed.user || !parsed.content || (parsed.spend === null && parsed.earn === null)) {
+    if (!parsed.content || (parsed.spend === null && parsed.earn === null)) {
       throw new Error('Invalid parsed data structure')
     }
 

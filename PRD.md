@@ -13,18 +13,25 @@ An AI-powered expense tracker that parses natural language entries into structur
 ## Essential Features
 
 ### AI-Powered Expense Parsing
-- **Functionality**: Accepts free-form text like "Minh Quân bánh tráng trộn 35" and extracts user, amount (in thousands), and description
-- **Purpose**: Eliminates tedious form-filling by understanding natural language
+- **Functionality**: Accepts free-form text like "bánh tráng trộn 35" and extracts amount (in thousands) and description, automatically associating with logged-in user
+- **Purpose**: Eliminates tedious form-filling by understanding natural language and using session context
 - **Trigger**: User types text and presses enter or clicks add button
-- **Progression**: Input text → Send to Gemini API → Parse JSON response → Retry up to 3 times if malformed → Display success/error → Store transaction
-- **Success criteria**: Correctly extracts user name, amount in thousands (without zeros), and content description from Vietnamese/English text
+- **Progression**: Input text → Send to Gemini API → Parse JSON response → Retry up to 3 times if malformed → Associate with current user → Display success/error → Store transaction
+- **Success criteria**: Correctly extracts amount in thousands (without zeros) and content description from Vietnamese/English text, automatically tags with current user's name and ID
+
+### User Authentication
+- **Functionality**: Mock login system with predefined users, session management
+- **Purpose**: Associates transactions with specific users and filters views per user
+- **Trigger**: App load shows login screen, user enters email or clicks demo account
+- **Progression**: Enter email → Validate against mock users → Set session → Redirect to main app
+- **Success criteria**: Only shows transactions for logged-in user, persists user context during session, logout clears session
 
 ### Transaction Management
-- **Functionality**: Display all transactions with user, amount, type (spend/earn), content, and timestamp
-- **Purpose**: Provides clear overview of financial activity
+- **Functionality**: Display all transactions for current user with amount, type (spend/earn), content, and timestamp
+- **Purpose**: Provides clear overview of user's financial activity
 - **Trigger**: Automatic on page load and after adding transactions
-- **Progression**: Load from KV storage → Render list → Allow edit/delete actions
-- **Success criteria**: All transactions persist between sessions and support inline editing
+- **Progression**: Load from KV storage → Filter by userId → Render list → Allow edit/delete actions
+- **Success criteria**: All transactions persist between sessions with userId foreign key, support inline editing, isolated per user
 
 ### Manual Transaction Editing
 - **Functionality**: Click any transaction to edit fields directly
@@ -45,6 +52,8 @@ An AI-powered expense tracker that parses natural language entries into structur
 - **API Failures**: Retry logic with exponential backoff, show error toast after 3 failed attempts, allow manual entry
 - **Malformed AI Response**: JSON validation with retry mechanism, fallback to manual input form
 - **Empty Input**: Disable submit button and show placeholder guidance
+- **Unauthorized Access**: Login screen on app load, redirect to login on logout, persist session state
+- **User Data Isolation**: Transactions filtered by userId, no cross-user data access
 - **Ambiguous Amounts**: AI should default to "spend" type unless keywords like "nhận", "thu", "earn" are present
 - **Missing Fields**: AI should return null for optional fields (earn/spend), validation ensures required fields exist
 
@@ -112,6 +121,8 @@ Subtle, purposeful animations that reinforce the AI's intelligence: smooth trans
   - CheckCircle (success)
   - Warning (error/retry)
   - TrendUp/TrendDown (earnings/spending)
+  - SignIn/SignOut (authentication)
+  - Sparkle (branding, AI magic)
 
 - **Spacing**: 
   - Container padding: p-6

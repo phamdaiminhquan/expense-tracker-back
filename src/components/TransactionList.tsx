@@ -62,7 +62,7 @@ export function TransactionList({ transactions, onUpdate, onDelete }: Transactio
           <TableBody>
             {sortedTransactions.map((transaction) => (
               <TableRow key={transaction.id}>
-                <TableCell className="font-medium">{transaction.user}</TableCell>
+                <TableCell className="font-medium">{transaction.userName}</TableCell>
                 <TableCell>{transaction.content}</TableCell>
                 <TableCell className="text-right">
                   {transaction.spend !== null ? (
