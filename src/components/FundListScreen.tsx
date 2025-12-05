@@ -1,8 +1,11 @@
 import { Fund } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Plus, Users, User, CaretRight, SignOut } from '@phosphor-icons/react'
+import { Input } from '@/components/ui/input'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Plus, Wallet, Users, CaretRight, SignOut } from '@phosphor-icons/react'
 import { MOCK_USERS } from '@/lib/auth'
+import { useState } from 'react'
 
 interface FundListScreenProps {
   funds: Fund[]
@@ -21,79 +24,111 @@ export function FundListScreen({
   onCreateFund,
   onLogout,
 }: FundListScreenProps) {
-  const getMemberNames = (memberIds: string[]) => {
-    return memberIds
-      .map((id) => MOCK_USERS.find((u) => u.id === id)?.name || 'Unknown')
-      .join(', ')
+  const [fundNameInput, setFundNameInput] = useState('')
+
+  const getInitials = (name: string) => {
+    return name.charAt(0).toUpperCase()
+  }
+
+  const handleCreateFund = () => {
+    onCreateFund()
+    setFundNameInput('')
   }
 
   return (
-    <div className="min-h-screen from-background via-muted/30 to-primary/5 border-gray-950 bg-gray-100">
-      <div className="container max-w-2xl mx-auto px-4 py-8 space-y-8">
-        <header className="space-y-4">
+    <div className="min-h-screen bg-background">
+      <div className="container max-w-md mx-auto px-5 py-6 space-y-6">
+        <header className="space-y-6">
           <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <h1 className="flex items-center gap-3 font-sans font-semibold text-3xl text-orange-400">FinCap</h1>
-              <p className="text-muted-foreground text-sm">Tự do tài chính từ chi tiêu</p>
+            <div className="flex items-center gap-3">
+              <Avatar className="h-11 w-11 bg-primary/10">
+                <AvatarFallback className="bg-primary/10 text-primary font-medium text-base">
+                  {getInitials(currentUserName)}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">XIN CHÀO</p>
+                <p className="font-semibold text-base text-foreground">{currentUserName}</p>
+              </div>
             </div>
-            <Button variant="outline" onClick={onLogout} className="gap-2 shrink-0">
-              <SignOut />
-              Đăng xuất
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onLogout}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <SignOut size={20} />
             </Button>
           </div>
 
-          <div className="flex items-center justify-between pt-2">
-            <div>
-              <p className="text-sm text-muted-foreground">Xin chào,</p>
-              <p className="font-semibold text-base">{currentUserName}</p>
-            </div>
-            <Button onClick={onCreateFund} className="gap-2">
-              <Plus weight="bold" />
-              Tạo quỹ mới
+          <div className="space-y-3">
+            <h1 className="text-4xl font-bold leading-tight" style={{ color: 'oklch(0.52 0.19 264)' }}>
+              Chi Tiêu<br />Thông Minh
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Chi cần nhập, AI sẽ lo phần còn lại.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Input
+              placeholder="Tên quỹ mới..."
+              value={fundNameInput}
+              onChange={(e) => setFundNameInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && fundNameInput.trim()) {
+                  handleCreateFund()
+                }
+              }}
+              className="flex-1 bg-muted/50 border-muted"
+            />
+            <Button
+              onClick={handleCreateFund}
+              size="icon"
+              className="shrink-0 h-10 w-10"
+            >
+              <Plus size={20} weight="bold" />
             </Button>
           </div>
         </header>
 
         <div className="space-y-3">
-          <h2 className="text-base font-semibold text-slate-500">Quỹ của bạn</h2>
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            DANH SÁCH QUỸ
+          </h2>
           
           {funds.length === 0 ? (
-            <Card className="p-8 text-center">
-              <p className="text-muted-foreground">Chưa có quỹ nào</p>
-              <Button onClick={onCreateFund} className="mt-4 gap-2">
-                <Plus weight="bold" />
-                Tạo quỹ đầu tiên
-              </Button>
+            <Card className="p-8 text-center border-dashed">
+              <p className="text-sm text-muted-foreground">Chưa có quỹ nào. Tạo quỹ đầu tiên để bắt đầu!</p>
             </Card>
           ) : (
             <div className="space-y-2">
               {funds.map((fund) => (
                 <Card
                   key={fund.id}
-                  className="p-4 cursor-pointer hover:bg-accent/50 transition-colors group"
+                  className="p-4 cursor-pointer hover:bg-accent/50 transition-all group border-border/50"
                   onClick={() => onSelectFund(fund.id)}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 flex-1">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                         {fund.type === 'shared' ? (
-                          <Users size={20} className="text-primary" weight="fill" />
+                          <Users size={22} className="text-primary" weight="duotone" />
                         ) : (
-                          <User size={20} className="text-primary" weight="fill" />
+                          <Wallet size={22} className="text-primary" weight="duotone" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-medium">{fund.name}</h3>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {fund.type === 'shared'
-                            ? `${fund.memberIds.length} thành viên: ${getMemberNames(fund.memberIds)}`
-                            : 'Quỹ cá nhân'}
+                        <h3 className="text-sm font-semibold text-foreground">{fund.name}</h3>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Users size={12} weight="fill" />
+                          {fund.memberIds.length} thành viên
                         </p>
                       </div>
                     </div>
                     <CaretRight
                       size={20}
-                      className="text-muted-foreground group-hover:text-foreground transition-colors shrink-0"
+                      className="text-muted-foreground/40 group-hover:text-muted-foreground group-hover:translate-x-0.5 transition-all shrink-0"
                     />
                   </div>
                 </Card>
