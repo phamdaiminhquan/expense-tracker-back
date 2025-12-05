@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { SignIn, Sparkle } from '@phosphor-icons/react'
 import { authenticateUser, MOCK_USERS } from '@/lib/auth'
@@ -59,14 +59,11 @@ export function LoginForm({ onLogin }: LoginFormProps) {
         <Card>
           <CardHeader>
             <CardTitle>Đăng nhập</CardTitle>
-            <CardDescription>
-              Nhập email của bạn để tiếp tục
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+              <div className="space-y-2 flex just">
+                <Label htmlFor="email">Email: </Label>
                 <Input
                   id="email"
                   type="email"

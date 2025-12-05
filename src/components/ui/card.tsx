@@ -32,20 +32,16 @@ function CardTitle({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       data-slot="card-title"
-      className={cn("leading-none font-semibold", className)}
+      className={cn(
+        "leading-none font-semibold text-center",
+        className,
+        "text-sm",
+        "text-2xl",
+        "text-xl"
+      )}
       {...props}
     />
-  )
-}
-
-function CardDescription({ className, ...props }: ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="card-description"
-      className={cn("text-muted-foreground text-sm", className)}
-      {...props}
-    />
-  )
+  );
 }
 
 function CardAction({ className, ...props }: ComponentProps<"div">) {
@@ -87,6 +83,5 @@ export {
   CardFooter,
   CardTitle,
   CardAction,
-  CardDescription,
   CardContent,
 }
