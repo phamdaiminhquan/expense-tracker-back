@@ -65,10 +65,12 @@ export function ChatTransactionView({
     const container = scrollContainerRef.current
     if (!container) return
 
+    // Logic to load previous pages when scrolling to the top
     if (container.scrollTop === 0 && visibleCount < sortedTransactions.length) {
       const oldScrollHeight = container.scrollHeight
       setVisibleCount((prev) => Math.min(prev + ITEMS_PER_PAGE, sortedTransactions.length))
       
+      // Maintain scroll position after loading more items
       setTimeout(() => {
         const newScrollHeight = container.scrollHeight
         container.scrollTop = newScrollHeight - oldScrollHeight
@@ -96,6 +98,7 @@ export function ChatTransactionView({
   }
 
   useEffect(() => {
+    // Scroll to the bottom only on the initial load and when a new prompt is sent (if not processing the previous one)
     if (bottomRef.current && !isProcessing) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth' })
     }
@@ -192,6 +195,7 @@ export function ChatTransactionView({
               <p className="text-xs mt-1">Nhập giao dịch đầu tiên bên dưới</p>
             </div>
           ) : (
+            // Reverse the list for chat view (newest at the bottom)
             [...visibleTransactions].reverse().map((transaction) => {
               const isPending = transaction.isPendingPrompt === true
               const isCurrentUser = transaction.userId === currentUserId
@@ -242,7 +246,7 @@ export function ChatTransactionView({
                                     >
                                       +{formatCurrency(transaction.earn)}
                                     </span>
-                              )}
+                                  )}
                                 </div>
                               )}
                               {transaction.categoryId && (
@@ -258,28 +262,38 @@ export function ChatTransactionView({
                                     {categories.find((c) => c.id === transaction.categoryId)?.name || 'Không rõ'}
                                   </span>
                                 </div>
-                          )}
+                              )}
                             </>
                           )}
                         </div>
                       </div>
-                          <Button
-                        <div className="absolute -right-1 bottom-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            size="icon"
-                            className="h-6 w-6 bg-white border border-gray-200 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50"
-                          >
-                          >
-                          </Button>
-                          </Button>
+                      
+                      {/* FIXED: Deleting/Editing button logic (Visible on hover) */}
+                      {/* Delete button only appears for non-pending messages */}
+                      {!isPending && (
+                        <div 
+                          className={`absolute bottom-0 transition-opacity ${isCurrentUser ? '-left-8' : '-right-8'} opacity-0 group-hover:opacity-100`}
+                        >
+                            <Button
+                                size="icon"
+                                onClick={() => onDeleteTransaction(transaction.id)}
+                                className="h-6 w-6 bg-white border border-gray-200 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50 shadow-md"
+                            >
+                                <Trash size={12} weight="bold" />
+                            </Button>
                         </div>
                       )}
                     </div>
+
+                    {/* Footer: Timestamp, Reprocess/Edit/Pending status */}
                     <div className="flex items-center gap-1.5 px-3">
                       <p className="text-[10px] text-gray-400">
-                      </p>tCreatedAt || transaction.timestamp)}
+                        {/* FIXED: Correctly display timestamp */}
+                        {formatDate(transaction.promptCreatedAt || transaction.timestamp)}
                       </p>
-                        <Button
+                      
+                      {isPending && isCurrentUser && (
+                        // Reprocess/Edit pending prompt button
                         <Button
                           variant="ghost"
                           className="h-4 w-4 text-yellow-600 hover:text-yellow-700 hover:bg-transparent p-0"
@@ -288,7 +302,9 @@ export function ChatTransactionView({
                           <ArrowClockwise size={10} weight="bold" />
                         </Button>
                       )}
-                      {!isPending && !isCurrentUser && (
+                      
+                      {/* Edit button for confirmed transactions (if not pending) */}
+                      {!isPending && isCurrentUser && (
                         <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button
                             variant="ghost"
@@ -342,6 +358,7 @@ export function ChatTransactionView({
         open={editingTransaction !== null}
         onOpenChange={(open) => !open && setEditingTransaction(null)}
         onSave={onUpdateTransaction}
+        onDelete={onDeleteTransaction}
       />
 
       <EditPendingPromptDialog

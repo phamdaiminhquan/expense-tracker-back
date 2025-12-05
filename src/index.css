@@ -35,7 +35,7 @@
   --border: oklch(0.88 0.005 264);
   --input: oklch(0.88 0.005 264);
   --ring: oklch(0.52 0.19 264);
-  --radius: 1rem;
+  --radius: 0.25rem;
   --spacing: 0.25rem;
   --font-mono: Fira Code;
 }
