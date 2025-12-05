@@ -1,5 +1,13 @@
 export type FundType = 'personal' | 'shared'
 
+export interface Category {
+  id: string
+  fundId: string
+  name: string
+  description: string
+  createdAt: number
+}
+
 export interface Fund {
   id: string
   name: string
@@ -17,6 +25,7 @@ export interface Transaction {
   spend: number | null
   earn: number | null
   content: string
+  categoryId?: string | null
   timestamp: number
   isPendingPrompt?: boolean
   originalPrompt?: string
@@ -27,6 +36,7 @@ export interface ParsedExpense {
   spend: number | null
   earn: number | null
   content: string
+  categoryId?: string | null
 }
 
 export interface GeminiResponse {

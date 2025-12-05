@@ -10,13 +10,14 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Transaction } from '@/lib/types'
+import { Transaction, Category } from '@/lib/types'
 import { parseExpenseText, validatePrompt, APISystemError, InvalidPromptError } from '@/lib/gemini'
 import { toast } from 'sonner'
 import { SpinnerGap } from '@phosphor-icons/react'
 
 interface EditPendingPromptDialogProps {
   transaction: Transaction | null
+  categories: Category[]
   open: boolean
   onOpenChange: (open: boolean) => void
   onSave: (transaction: Transaction) => void
@@ -24,6 +25,7 @@ interface EditPendingPromptDialogProps {
 
 export function EditPendingPromptDialog({
   transaction,
+  categories,
   open,
   onOpenChange,
   onSave,
@@ -51,13 +53,14 @@ export function EditPendingPromptDialog({
     setIsLoading(true)
 
     try {
-      const parsed = await parseExpenseText(promptText.trim())
+      const parsed = await parseExpenseText(promptText.trim(), categories)
 
       onSave({
         ...transaction,
         spend: parsed.spend,
         earn: parsed.earn,
         content: parsed.content,
+        categoryId: parsed.categoryId,
         isPendingPrompt: false,
         originalPrompt: undefined,
       })

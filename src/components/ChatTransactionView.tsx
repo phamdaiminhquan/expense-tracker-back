@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Transaction, Fund } from '@/lib/types'
+import { Transaction, Fund, Category } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -13,6 +13,7 @@ import {
   NotePencil,
   Users,
   CircleNotch,
+  Tag,
 } from '@phosphor-icons/react'
 import { formatCurrency } from '@/lib/currency'
 import { EditTransactionDialog } from './EditTransactionDialog'
@@ -22,10 +23,12 @@ import { MOCK_USERS } from '@/lib/auth'
 interface ChatTransactionViewProps {
   fund: Fund
   transactions: Transaction[]
+  categories: Category[]
   currentUserId: string
   currentUserName: string
   onBack: () => void
   onShowStatistics: () => void
+  onManageCategories: () => void
   onAddTransaction: (transaction: Omit<Transaction, 'id' | 'timestamp'>) => void
   onUpdateTransaction: (transaction: Transaction) => void
   onDeleteTransaction: (id: string) => void
@@ -37,10 +40,12 @@ const ITEMS_PER_PAGE = 10
 export function ChatTransactionView({
   fund,
   transactions,
+  categories,
   currentUserId,
   currentUserName,
   onBack,
   onShowStatistics,
+  onManageCategories,
   onAddTransaction,
   onUpdateTransaction,
   onDeleteTransaction,
@@ -133,9 +138,14 @@ export function ChatTransactionView({
                 </p>
               </div>
             </div>
-            <Button variant="outline" size="icon" onClick={onShowStatistics}>
-              <ChartBar size={20} />
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="icon" onClick={onManageCategories}>
+                <Tag size={20} />
+              </Button>
+              <Button variant="outline" size="icon" onClick={onShowStatistics}>
+                <ChartBar size={20} />
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -200,23 +210,36 @@ export function ChatTransactionView({
                           {transaction.content}
                         </p>
                         {!isPending && (
-                          <div className="flex items-center gap-2 flex-wrap">
-                            {transaction.spend !== null && (
-                              <Badge
-                                variant="destructive"
-                                className="font-mono text-sm"
-                              >
-                                -{formatCurrency(transaction.spend)}
-                              </Badge>
+                          <>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {transaction.spend !== null && (
+                                <Badge
+                                  variant="destructive"
+                                  className="font-mono text-sm"
+                                >
+                                  -{formatCurrency(transaction.spend)}
+                                </Badge>
+                              )}
+                              {transaction.earn !== null && (
+                                <Badge
+                                  className="font-mono text-sm bg-accent text-accent-foreground hover:bg-accent/90"
+                                >
+                                  +{formatCurrency(transaction.earn)}
+                                </Badge>
+                              )}
+                            </div>
+                            {transaction.categoryId && (
+                              <div className="pt-1">
+                                <Badge
+                                  variant="secondary"
+                                  className="text-xs"
+                                >
+                                  <Tag size={12} className="mr-1" />
+                                  {categories.find((c) => c.id === transaction.categoryId)?.name || 'Không rõ'}
+                                </Badge>
+                              </div>
                             )}
-                            {transaction.earn !== null && (
-                              <Badge
-                                className="font-mono text-sm bg-accent text-accent-foreground hover:bg-accent/90"
-                              >
-                                +{formatCurrency(transaction.earn)}
-                              </Badge>
-                            )}
-                          </div>
+                          </>
                         )}
                       </div>
                     </div>
@@ -293,6 +316,7 @@ export function ChatTransactionView({
 
       <EditPendingPromptDialog
         transaction={editingPendingPrompt}
+        categories={categories}
         open={editingPendingPrompt !== null}
         onOpenChange={(open) => !open && setEditingPendingPrompt(null)}
         onSave={onUpdateTransaction}

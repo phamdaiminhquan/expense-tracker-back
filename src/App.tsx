@@ -1,13 +1,15 @@
 import { useKV } from '@github/spark/hooks'
-import { Transaction, Fund } from '@/lib/types'
+import { Transaction, Fund, Category } from '@/lib/types'
 import { LoginForm } from '@/components/LoginForm'
 import { FundListScreen } from '@/components/FundListScreen'
 import { ChatTransactionView } from '@/components/ChatTransactionView'
 import { CreateFundDialog } from '@/components/CreateFundDialog'
 import { FundStatisticsDialog } from '@/components/FundStatisticsDialog'
+import { CategoryManagementDialog } from '@/components/CategoryManagementDialog'
 import { Toaster } from '@/components/ui/sonner'
 import { useState, useEffect } from 'react'
 import { createDefaultPersonalFund, createFund, canAccessFund } from '@/lib/funds'
+import { createCategory } from '@/lib/categories'
 import { MOCK_USERS } from '@/lib/auth'
 import { toast } from 'sonner'
 import { parseExpenseWithAI } from '@/lib/gemini'
@@ -17,12 +19,14 @@ type Screen = 'fund-list' | 'transaction-view'
 function App() {
   const [transactions, setTransactions] = useKV<Transaction[]>('transactions', [])
   const [funds, setFunds] = useKV<Fund[]>('funds', [])
+  const [categories, setCategories] = useKV<Category[]>('categories', [])
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [currentUserName, setCurrentUserName] = useState<string | null>(null)
   const [selectedFundId, setSelectedFundId] = useState<string | null>(null)
   const [currentScreen, setCurrentScreen] = useState<Screen>('fund-list')
   const [isCreateFundDialogOpen, setIsCreateFundDialogOpen] = useState(false)
   const [isStatisticsDialogOpen, setIsStatisticsDialogOpen] = useState(false)
+  const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
 
   useEffect(() => {
@@ -75,7 +79,8 @@ function App() {
     setIsProcessing(true)
 
     try {
-      const result = await parseExpenseWithAI(newTransaction.content, currentUserName)
+      const fundCategories = (categories || []).filter((c) => c.fundId === newTransaction.fundId)
+      const result = await parseExpenseWithAI(newTransaction.content, currentUserName, fundCategories)
 
       if (result.success && result.data) {
         const timestamp = newTransaction.promptCreatedAt || Date.now()
@@ -139,9 +144,29 @@ function App() {
     setTransactions((current) => (current || []).filter((t) => t.id !== id))
   }
 
+  const handleCreateCategory = (name: string, description: string) => {
+    if (!selectedFundId) return
+
+    const newCategory = createCategory(selectedFundId, name, description)
+    setCategories((current) => [...(current || []), newCategory])
+  }
+
+  const handleUpdateCategory = (categoryId: string, name: string, description: string) => {
+    setCategories((current) =>
+      (current || []).map((c) =>
+        c.id === categoryId ? { ...c, name, description } : c
+      )
+    )
+  }
+
+  const handleDeleteCategory = (categoryId: string) => {
+    setCategories((current) => (current || []).filter((c) => c.id !== categoryId))
+  }
+
   const userFunds = (funds || []).filter((f) => currentUserId && canAccessFund(f, currentUserId))
   const selectedFund = userFunds.find((f) => f.id === selectedFundId) || null
   const fundTransactions = (transactions || []).filter((t) => t.fundId === selectedFundId)
+  const fundCategories = (categories || []).filter((c) => c.fundId === selectedFundId)
 
   if (!currentUserId || !currentUserName) {
     return <LoginForm onLogin={handleLogin} />
@@ -178,10 +203,12 @@ function App() {
         <ChatTransactionView
           fund={selectedFund}
           transactions={fundTransactions}
+          categories={fundCategories}
           currentUserId={currentUserId}
           currentUserName={currentUserName}
           onBack={handleBackToFundList}
           onShowStatistics={() => setIsStatisticsDialogOpen(true)}
+          onManageCategories={() => setIsCategoryDialogOpen(true)}
           onAddTransaction={handleAddTransaction}
           onUpdateTransaction={handleUpdateTransaction}
           onDeleteTransaction={handleDeleteTransaction}
@@ -192,7 +219,18 @@ function App() {
           open={isStatisticsDialogOpen}
           onOpenChange={setIsStatisticsDialogOpen}
           transactions={fundTransactions}
+          categories={fundCategories}
           fund={selectedFund}
+        />
+
+        <CategoryManagementDialog
+          open={isCategoryDialogOpen}
+          onOpenChange={setIsCategoryDialogOpen}
+          categories={fundCategories}
+          transactions={fundTransactions}
+          onCreateCategory={handleCreateCategory}
+          onUpdateCategory={handleUpdateCategory}
+          onDeleteCategory={handleDeleteCategory}
         />
 
         <Toaster position="top-right" />

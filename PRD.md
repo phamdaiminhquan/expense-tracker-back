@@ -27,18 +27,18 @@ An AI-powered expense tracker with fund management that parses natural language 
 - **Success criteria**: Users can switch between funds, create unlimited funds, clear visual hierarchy, easy navigation back to list, header elements properly positioned
 
 ### AI-Powered Expense Parsing
-- **Functionality**: Accepts free-form text like "bánh tráng trộn 35" (no longer requires user name since it's from logged-in user) and extracts amount (in thousands) and description, associating with current fund. Validates prompt before API call. Distinguishes between system errors (API down) and invalid prompts (unclear input).
-- **Purpose**: Eliminates tedious form-filling by understanding natural language and using session context, with intelligent error handling
+- **Functionality**: Accepts free-form text like "bánh tráng trộn 35" (no longer requires user name since it's from logged-in user) and extracts amount (in thousands), description, and matching category (if available) associating with current fund. Categories are matched based on their descriptions. Validates prompt before API call. Distinguishes between system errors (API down) and invalid prompts (unclear input).
+- **Purpose**: Eliminates tedious form-filling by understanding natural language, automatically categorizing expenses, and using session context with intelligent error handling
 - **Trigger**: User types text and presses enter or clicks add button
-- **Progression**: Input text → Validate prompt format → Send to Gemini API → Parse JSON response → Retry up to 2 times if system error → Associate with current user and selected fund → Display success/error → Store transaction with fundId foreign key OR save as pending prompt
-- **Success criteria**: Correctly extracts amount in thousands (without zeros) and content description from Vietnamese/English text, automatically tags with current user's name, ID, and selected fund ID. For system errors, saves as pending prompt. For invalid prompts, requests user to revise without saving.
+- **Progression**: Input text → Validate prompt format → Send to Gemini API with fund categories → Parse JSON response including categoryId → Retry up to 2 times if system error → Associate with current user, selected fund, and matched category → Display success/error → Store transaction with fundId and categoryId foreign keys OR save as pending prompt
+- **Success criteria**: Correctly extracts amount in thousands (without zeros), content description, and matching category from Vietnamese/English text, automatically tags with current user's name, ID, selected fund ID, and categoryId if match found. For system errors, saves as pending prompt. For invalid prompts, requests user to revise without saving. Can handle transactions without matching categories.
 
 ### Transaction Management
-- **Functionality**: Chat-style interface with sticky header (fund name, members, back button, statistics button) and sticky bottom input. Transactions displayed as chat bubbles, newest at bottom. Current user's transactions align right with primary color, others align left. Scroll up to load more (10 per page). Input has send icon that shows spinner during processing.
-- **Purpose**: Provides familiar chat-like experience for natural expense logging with clear visual ownership and smooth pagination
+- **Functionality**: Chat-style interface with sticky header (fund name, members, back button, category management button, statistics button) and sticky bottom input. Transactions displayed as chat bubbles, newest at bottom. Current user's transactions align right with primary color, others align left. Scroll up to load more (10 per page). Input has send icon that shows spinner during processing. Transactions with categories display a category badge.
+- **Purpose**: Provides familiar chat-like experience for natural expense logging with clear visual ownership, smooth pagination, and category organization
 - **Trigger**: Select fund from list, scroll to top for pagination, type and send message
-- **Progression**: Enter transaction view → See chat history → Scroll up for older → Type expense → Send → See spinner → Transaction appears as bubble → Auto-scroll to bottom
-- **Success criteria**: Sticky header and input, smooth scrolling, pagination loads seamlessly, bubbles styled by user, timestamps formatted contextually (time/yesterday/date), auto-scroll on new messages
+- **Progression**: Enter transaction view → See chat history → Scroll up for older → Type expense → Send → See spinner → Transaction appears as bubble with category badge if applicable → Auto-scroll to bottom
+- **Success criteria**: Sticky header and input, smooth scrolling, pagination loads seamlessly, bubbles styled by user, timestamps formatted contextually (time/yesterday/date), auto-scroll on new messages, category badges visible when present
 
 ### Pending Prompt Management
 - **Functionality**: When API fails due to system errors, saves the prompt text with timestamp for later processing. User can edit and reprocess prompts when ready. Saved with current fundId.
@@ -54,11 +54,18 @@ An AI-powered expense tracker with fund management that parses natural language 
 - **Progression**: Click edit → Show editable fields → Save changes → Update storage → Refresh display
 - **Success criteria**: All fields editable without data loss
 ### Statistics Overview & Fund Analytics
-- **Functionality**: Dialog popup showing total spend, total earn, net balance for valid transactions only. For shared funds, show per-user breakdown with individual totals. Accessed via chart icon in transaction view header.
-- **Purpose**: Provides accurate financial snapshot in non-intrusive popup, enabling per-user expense tracking in shared funds
+- **Functionality**: Dialog popup showing total spend, total earn, net balance for valid transactions only. For shared funds, show per-user breakdown with individual totals. Displays category-based breakdown showing spend/earn per category with transaction counts. Shows uncategorized transactions separately. Accessed via chart icon in transaction view header.
+- **Purpose**: Provides accurate financial snapshot in non-intrusive popup, enabling per-user expense tracking in shared funds and category-based spending analysis
 - **Trigger**: Click statistics button (chart icon) in transaction view header
-- **Progression**: Click chart icon → Dialog opens → View totals and per-user breakdown → Close to return
-- **Success criteria**: Dialog overlay, clear metrics display, per-user stats for shared funds, excludes pending prompts, clean responsive layout
+- **Progression**: Click chart icon → Dialog opens → View totals, per-user breakdown, and category breakdown → Close to return
+- **Success criteria**: Dialog overlay, clear metrics display, per-user stats for shared funds, category-based breakdown with counts, uncategorized section, excludes pending prompts, clean responsive layout
+
+### Category Management
+- **Functionality**: Fund-scoped categories with name and description. Users can create, edit, and delete categories via management dialog. AI uses category descriptions to automatically classify transactions. Categories can only be deleted if not used in any transactions. Each category belongs to a specific fund.
+- **Purpose**: Enables organized expense tracking by type (groceries, dining, transport, etc.) with AI-assisted categorization and detailed reporting
+- **Trigger**: Click category management button (tag icon) in transaction view header, create/edit/delete actions in dialog
+- **Progression**: Click tag icon → Dialog opens → Create category (name + description) → AI uses description to match future transactions → View/edit existing categories → Delete unused categories → Close dialog
+- **Success criteria**: Create categories with name and description, AI automatically assigns categories based on descriptions during expense parsing, categories appear in statistics breakdown, categories displayed as badges on transactions, cannot delete categories in use, edit updates category details, categories scoped to specific fund
 
 ## Edge Case Handling
 
@@ -78,6 +85,9 @@ An AI-powered expense tracker with fund management that parses natural language 
 - **Concurrent Messages**: Spinner prevents sending multiple messages simultaneously
 - **Long Transaction Lists**: Pagination (10 items) prevents performance issues
 - **Mobile Responsiveness**: Chat bubbles adapt width, header/input remain accessible
+- **Category Deletion**: Categories with existing transactions cannot be deleted, show error message
+- **No Matching Category**: AI assigns null categoryId if no category matches, transaction still created successfully
+- **Category Reprocessing**: Pending prompts processed with current fund categories at time of reprocessing
 
 ## Design Direction
 
@@ -117,44 +127,58 @@ Purposeful, chat-style animations: smooth message appearance, gentle scroll beha
 ## Component Selection
 
 - **Components**: 
-  - Card for fund list items and statistics (shadcn Card)
-  - Dialog for creating funds and viewing statistics (shadcn Dialog)
+  - Card for fund list items, statistics, and category items (shadcn Card)
+  - Dialog for creating funds, viewing statistics, and managing categories (shadcn Dialog)
   - Input with Button for chat-style message entry (shadcn Input + Button)
+  - Textarea for category descriptions (shadcn Textarea)
   - Toast for notifications (sonner)
-  - Badge for transaction amounts and pending status (shadcn Badge)
+  - Badge for transaction amounts, pending status, and category tags (shadcn Badge)
   - Spinner icon for loading states (Phosphor Icons)
+  - ScrollArea for category list in management dialog (shadcn ScrollArea)
+  - Label for form fields (shadcn Label)
 
 - **Customizations**: 
   - Chat bubble layout with right/left alignment based on user
-  - Sticky header with back navigation and statistics access
+  - Category badges on transaction bubbles (secondary variant, small size)
+  - Sticky header with back, category management, and statistics buttons
   - Sticky bottom input bar with send icon
   - Pagination with "load more" at top of scroll
   - Fund list cards with icons and member info
   - Transaction bubbles with hover actions (edit/delete)
   - Contextual timestamp formatting (time/yesterday/date)
+  - Category management dialog with create/edit inline forms
+  - Category cards showing usage count
+  - Statistics breakdown by category with uncategorized section
+  - Disabled delete button for categories in use
 
 - **States**: 
   - Input: default, focused (primary ring), disabled during API call with spinner
   - Send button: default (paper plane icon), loading (spinner), disabled (no input)
   - Fund cards: default, hover (accent background), active tap
   - Transaction bubbles: default, hover (show actions)
-  - Back/Statistics buttons: default, hover, active
+  - Category badges: secondary variant, small text
+  - Back/Statistics/Category buttons: default, hover, active
+  - Category management: create mode (inline form), edit mode (inline form), view mode (cards)
+  - Delete category button: enabled (red), disabled (gray, when in use)
+  - Category cards: default, editing (opacity reduced)
 
 - **Icon Selection**: 
   - PaperPlaneRight (send message/fill variant)
   - CircleNotch (loading spinner)
   - ArrowLeft (back navigation)
   - ChartBar (view statistics)
-  - Plus (create fund)
+  - Tag (category management and badges/fill variant)
+  - Plus (create fund and category)
   - SignOut (logout)
   - Users/User (fund type indicators/fill variants)
   - CaretRight (fund list navigation hint)
-  - PencilSimple (edit transaction)
-  - Trash (delete transaction)
+  - PencilSimple (edit transaction and category)
+  - Trash (delete transaction and category)
   - ArrowClockwise (reprocess pending)
   - NotePencil (pending indicator)
   - TrendUp/TrendDown (statistics earnings/spending)
   - Wallet (balance in statistics)
+  - Check/X (save/cancel in forms)
 
 - **Spacing**: 
   - Chat bubble gaps: gap-4 (between messages)

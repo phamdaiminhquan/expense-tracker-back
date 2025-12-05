@@ -10,18 +10,19 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { PencilSimple, Trash, ArrowClockwise, NotePencil } from '@phosphor-icons/react'
-import { Transaction } from '@/lib/types'
+import { Transaction, Category } from '@/lib/types'
 import { formatCurrency } from '@/lib/currency'
 import { EditTransactionDialog } from './EditTransactionDialog'
 import { EditPendingPromptDialog } from './EditPendingPromptDialog'
 
 interface TransactionListProps {
   transactions: Transaction[]
+  categories?: Category[]
   onUpdate: (transaction: Transaction) => void
   onDelete: (id: string) => void
 }
 
-export function TransactionList({ transactions, onUpdate, onDelete }: TransactionListProps) {
+export function TransactionList({ transactions, categories = [], onUpdate, onDelete }: TransactionListProps) {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
   const [editingPendingPrompt, setEditingPendingPrompt] = useState<Transaction | null>(null)
 
@@ -150,6 +151,7 @@ export function TransactionList({ transactions, onUpdate, onDelete }: Transactio
 
       <EditPendingPromptDialog
         transaction={editingPendingPrompt}
+        categories={categories}
         open={editingPendingPrompt !== null}
         onOpenChange={(open) => !open && setEditingPendingPrompt(null)}
         onSave={onUpdate}

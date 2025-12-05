@@ -1,4 +1,4 @@
-import { Transaction, Fund } from '@/lib/types'
+import { Transaction, Fund, Category } from '@/lib/types'
 import {
   Dialog,
   DialogContent,
@@ -8,12 +8,13 @@ import {
 import { formatCurrency } from '@/lib/currency'
 import { MOCK_USERS } from '@/lib/auth'
 import { Card } from '@/components/ui/card'
-import { TrendUp, TrendDown, Wallet, User } from '@phosphor-icons/react'
+import { TrendUp, TrendDown, Wallet, User, Tag } from '@phosphor-icons/react'
 
 interface FundStatisticsDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   transactions: Transaction[]
+  categories: Category[]
   fund: Fund | null
 }
 
@@ -21,6 +22,7 @@ export function FundStatisticsDialog({
   open,
   onOpenChange,
   transactions,
+  categories,
   fund,
 }: FundStatisticsDialogProps) {
   const validTransactions = transactions.filter((t) => !t.isPendingPrompt)
@@ -40,6 +42,23 @@ export function FundStatisticsDialog({
           return { userId, userName, spend, earn, count: userTransactions.length }
         })
       : []
+
+  const categoryStats = categories.map((category) => {
+    const categoryTransactions = validTransactions.filter((t) => t.categoryId === category.id)
+    const spend = categoryTransactions.reduce((sum, t) => sum + (t.spend || 0), 0)
+    const earn = categoryTransactions.reduce((sum, t) => sum + (t.earn || 0), 0)
+    return {
+      categoryId: category.id,
+      categoryName: category.name,
+      spend,
+      earn,
+      count: categoryTransactions.length,
+    }
+  }).filter((stat) => stat.count > 0)
+
+  const uncategorizedTransactions = validTransactions.filter((t) => !t.categoryId)
+  const uncategorizedSpend = uncategorizedTransactions.reduce((sum, t) => sum + (t.spend || 0), 0)
+  const uncategorizedEarn = uncategorizedTransactions.reduce((sum, t) => sum + (t.earn || 0), 0)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -118,6 +137,81 @@ export function FundStatisticsDialog({
                     </div>
                   </Card>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {categoryStats.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="font-semibold text-lg">Chi tiết theo danh mục</h3>
+              <div className="space-y-2">
+                {categoryStats.map((stat) => (
+                  <Card key={stat.categoryId} className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-secondary/50 flex items-center justify-center shrink-0">
+                          <Tag size={20} className="text-secondary-foreground" weight="fill" />
+                        </div>
+                        <div>
+                          <p className="font-semibold">{stat.categoryName}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {stat.count} giao dịch
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right space-y-1">
+                        {stat.spend > 0 && (
+                          <p className="text-sm">
+                            Chi: <span className="font-mono font-semibold text-destructive">
+                              {formatCurrency(stat.spend)}
+                            </span>
+                          </p>
+                        )}
+                        {stat.earn > 0 && (
+                          <p className="text-sm">
+                            Thu: <span className="font-mono font-semibold text-accent">
+                              {formatCurrency(stat.earn)}
+                            </span>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+                
+                {uncategorizedTransactions.length > 0 && (
+                  <Card className="p-4 border-dashed">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+                          <Tag size={20} className="text-muted-foreground" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-muted-foreground">Chưa phân loại</p>
+                          <p className="text-sm text-muted-foreground">
+                            {uncategorizedTransactions.length} giao dịch
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right space-y-1">
+                        {uncategorizedSpend > 0 && (
+                          <p className="text-sm">
+                            Chi: <span className="font-mono font-semibold text-destructive">
+                              {formatCurrency(uncategorizedSpend)}
+                            </span>
+                          </p>
+                        )}
+                        {uncategorizedEarn > 0 && (
+                          <p className="text-sm">
+                            Thu: <span className="font-mono font-semibold text-accent">
+                              {formatCurrency(uncategorizedEarn)}
+                            </span>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                )}
               </div>
             </div>
           )}

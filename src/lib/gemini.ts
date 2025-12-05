@@ -1,4 +1,4 @@
-import { GeminiResponse, ParsedExpense } from './types'
+import { GeminiResponse, ParsedExpense, Category } from './types'
 
 const GEMINI_API_KEY = 'AIzaSyDCY7f-Iaswz3FMidS565AHwotyvnXrSX4'
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
@@ -35,25 +35,35 @@ export function validatePrompt(text: string): { valid: boolean; error?: string }
   return { valid: true }
 }
 
-export async function parseExpenseText(text: string, retryCount = 0): Promise<ParsedExpense> {
+export async function parseExpenseText(
+  text: string, 
+  categories: Category[] = [],
+  retryCount = 0
+): Promise<ParsedExpense> {
   const maxRetries = 2
+
+  const categoriesInfo = categories.length > 0 
+    ? `\n\nAvailable categories:\n${categories.map(c => `- ID: "${c.id}", Name: "${c.name}", Description: "${c.description}"`).join('\n')}\n\nIf the expense matches one of the categories above, include "categoryId" with the category's ID. If no category matches, set "categoryId" to null.`
+    : '\n\nNo categories available, set "categoryId" to null.'
 
   const prompt = `Parse this Vietnamese/English expense entry into JSON format. Extract:
 - spend: amount spent in thousands VND (number without zeros, null if not spending)
 - earn: amount earned in thousands VND (number without zeros, null if not earning)
 - content: description of what was bought/earned (string)
+- categoryId: the ID of the matching category if applicable, or null${categoriesInfo}
 
 Rules:
 - If text contains "nhận", "thu", "earn", "kiếm", it's earning (set earn, spend=null)
 - Otherwise it's spending (set spend, earn=null)
 - Amount is in thousands (35 means 35,000 VND)
+- Match category based on description if available
 - Return ONLY valid JSON, no markdown formatting
 
 Example input: "bánh tráng trộn 35"
-Example output: {"spend": 35, "earn": null, "content": "bánh tráng trộn"}
+Example output: {"spend": 35, "earn": null, "content": "bánh tráng trộn", "categoryId": null}
 
 Example input: "nhận lương tháng 15000"
-Example output: {"spend": null, "earn": 15000, "content": "nhận lương tháng"}
+Example output: {"spend": null, "earn": 15000, "content": "nhận lương tháng", "categoryId": null}
 
 Now parse this: "${text}"
 
@@ -127,7 +137,7 @@ Return ONLY the JSON object, no other text.`
 
     if (retryCount < maxRetries) {
       await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)))
-      return parseExpenseText(text, retryCount + 1)
+      return parseExpenseText(text, categories, retryCount + 1)
     }
 
     if (error instanceof Error) {
@@ -142,7 +152,8 @@ Return ONLY the JSON object, no other text.`
 
 export async function parseExpenseWithAI(
   text: string,
-  userName: string
+  userName: string,
+  categories: Category[] = []
 ): Promise<{ success: boolean; data?: ParsedExpense; error?: 'system' | 'invalid' }> {
   const validation = validatePrompt(text)
   if (!validation.valid) {
@@ -150,7 +161,7 @@ export async function parseExpenseWithAI(
   }
 
   try {
-    const parsed = await parseExpenseText(text)
+    const parsed = await parseExpenseText(text, categories)
     return { success: true, data: parsed }
   } catch (error) {
     if (error instanceof APISystemError) {
