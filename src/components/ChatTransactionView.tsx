@@ -110,9 +110,11 @@ export function ChatTransactionView({
     if (date.toDateString() === today.toDateString()) {
       return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
     } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Hôm qua ' + date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+      return 'Hôm qua'
     } else {
-      return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })
+      const day = date.getDate()
+      const month = date.getMonth() + 1
+      return `${day}/${month}`
     }
   }
 
@@ -123,27 +125,42 @@ export function ChatTransactionView({
   }
 
   return (
-    <div className="h-screen flex flex-col bg-background">
-      <header className="sticky top-0 z-10 bg-card border-b shadow-sm">
-        <div className="container max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between gap-4">
+    <div className="h-screen flex flex-col bg-[#f0f0f5]">
+      <header className="sticky top-0 z-10 bg-white border-b border-gray-200">
+        <div className="max-w-2xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <Button variant="ghost" size="icon" onClick={onBack}>
-                <ArrowLeft size={20} />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={onBack}
+                className="h-9 w-9 hover:bg-gray-100"
+              >
+                <ArrowLeft size={20} weight="regular" />
               </Button>
               <div className="flex-1 min-w-0">
-                <h1 className="font-bold text-xl truncate">{fund.name}</h1>
-                <p className="text-sm text-muted-foreground truncate">
-                  {fund.type === 'shared' ? getMemberNames() : 'Quỹ cá nhân'}
+                <h1 className="font-semibold text-base truncate text-gray-900">{fund.name}</h1>
+                <p className="text-xs text-gray-500 truncate">
+                  {fund.type === 'shared' ? getMemberNames() : 'AI Bot'}
                 </p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="icon" onClick={onManageCategories}>
-                <Tag size={20} />
+            <div className="flex gap-1">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={onManageCategories}
+                className="h-9 w-9 hover:bg-gray-100 text-gray-600"
+              >
+                <Tag size={20} weight="regular" />
               </Button>
-              <Button variant="outline" size="icon" onClick={onShowStatistics}>
-                <ChartBar size={20} />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={onShowStatistics}
+                className="h-9 w-9 hover:bg-gray-100 text-gray-600"
+              >
+                <ChartBar size={20} weight="regular" />
               </Button>
             </div>
           </div>
@@ -155,23 +172,24 @@ export function ChatTransactionView({
         onScroll={handleScroll}
         className="flex-1 overflow-y-auto"
       >
-        <div className="container max-w-4xl mx-auto px-4 py-6 space-y-4">
+        <div className="max-w-2xl mx-auto px-4 py-4 space-y-1">
           {visibleCount < sortedTransactions.length && (
-            <div className="text-center">
+            <div className="text-center pb-2">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setVisibleCount((prev) => Math.min(prev + ITEMS_PER_PAGE, sortedTransactions.length))}
+                className="text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100"
               >
-                Tải thêm giao dịch cũ hơn
+                Tải thêm
               </Button>
             </div>
           )}
 
           {visibleTransactions.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <p className="text-lg">Chưa có giao dịch nào</p>
-              <p className="text-sm mt-2">Nhập giao dịch đầu tiên bên dưới</p>
+            <div className="text-center py-16 text-gray-400">
+              <p className="text-sm">Chưa có giao dịch nào</p>
+              <p className="text-xs mt-1">Nhập giao dịch đầu tiên bên dưới</p>
             </div>
           ) : (
             [...visibleTransactions].reverse().map((transaction) => {
@@ -181,101 +199,109 @@ export function ChatTransactionView({
               return (
                 <div
                   key={transaction.id}
-                  className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} group`}
+                  className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-3 group`}
                 >
-                  <div className={`max-w-[85%] sm:max-w-[70%] space-y-1`}>
+                  <div className={`max-w-[75%] space-y-0.5`}>
                     {!isCurrentUser && (
-                      <p className="text-xs text-muted-foreground px-3">{transaction.userName}</p>
+                      <p className="text-[10px] text-gray-400 px-3 lowercase">{transaction.userName}</p>
                     )}
-                    <div
-                      className={`rounded-2xl px-4 py-3 shadow-sm ${
-                        isCurrentUser
-                          ? isPending
-                            ? 'bg-yellow-50 border border-yellow-200'
-                            : 'bg-primary text-primary-foreground'
-                          : 'bg-card border'
-                      }`}
-                    >
-                      <div className="space-y-2">
-                        {isPending && (
-                          <Badge
-                            variant="outline"
-                            className="text-xs bg-yellow-100 text-yellow-700 border-yellow-300"
-                          >
-                            <NotePencil className="mr-1" size={12} />
-                            Ghi chú tạm
-                          </Badge>
-                        )}
-                        <p className={isPending ? 'text-muted-foreground italic' : ''}>
-                          {transaction.content}
-                        </p>
-                        {!isPending && (
-                          <>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              {transaction.spend !== null && (
-                                <Badge
-                                  variant="destructive"
-                                  className="font-mono text-sm"
-                                >
-                                  -{formatCurrency(transaction.spend)}
-                                </Badge>
+                    <div className="relative">
+                      <div
+                        className={`rounded-2xl px-3.5 py-2.5 ${
+                          isCurrentUser
+                            ? isPending
+                              ? 'bg-white border border-gray-200'
+                              : 'bg-[#4169E1] text-white'
+                            : 'bg-white border border-gray-200'
+                        }`}
+                      >
+                        <div className="space-y-1.5">
+                          <p className={`text-sm leading-snug ${
+                            isPending ? 'text-gray-500' : isCurrentUser ? 'text-white' : 'text-gray-900'
+                          }`}>
+                            {transaction.content}
+                          </p>
+                          {!isPending && (
+                            <>
+                              {(transaction.spend !== null || transaction.earn !== null) && (
+                                <div className="flex items-center gap-1.5 pt-0.5">
+                                  {transaction.spend !== null && (
+                                    <span
+                                      className={`font-medium text-sm ${
+                                        isCurrentUser ? 'text-white' : 'text-red-500'
+                                      }`}
+                                    >
+                                      -{formatCurrency(transaction.spend)}
+                                    </span>
+                                  )}
+                                  {transaction.earn !== null && (
+                                    <span
+                                      className={`font-medium text-sm ${
+                                        isCurrentUser ? 'text-white' : 'text-green-500'
+                                      }`}
+                                    >
+                                      +{formatCurrency(transaction.earn)}
+                                    </span>
+                                  )}
+                                </div>
                               )}
-                              {transaction.earn !== null && (
-                                <Badge
-                                  className="font-mono text-sm bg-accent text-accent-foreground hover:bg-accent/90"
-                                >
-                                  +{formatCurrency(transaction.earn)}
-                                </Badge>
+                              {transaction.categoryId && (
+                                <div className="flex items-center gap-1 pt-0.5">
+                                  <Tag 
+                                    size={10} 
+                                    weight="fill" 
+                                    className={isCurrentUser ? 'text-white/70' : 'text-gray-400'}
+                                  />
+                                  <span className={`text-[10px] uppercase tracking-wide ${
+                                    isCurrentUser ? 'text-white/80' : 'text-gray-500'
+                                  }`}>
+                                    {categories.find((c) => c.id === transaction.categoryId)?.name || 'Không rõ'}
+                                  </span>
+                                </div>
                               )}
-                            </div>
-                            {transaction.categoryId && (
-                              <div className="pt-1">
-                                <Badge
-                                  variant="secondary"
-                                  className="text-xs"
-                                >
-                                  <Tag size={12} className="mr-1" />
-                                  {categories.find((c) => c.id === transaction.categoryId)?.name || 'Không rõ'}
-                                </Badge>
-                              </div>
-                            )}
-                          </>
-                        )}
+                            </>
+                          )}
+                        </div>
                       </div>
+                      {isCurrentUser && !isPending && (
+                        <div className="absolute -right-1 bottom-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 bg-white border border-gray-200 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50"
+                            onClick={() => onDeleteTransaction(transaction.id)}
+                          >
+                            <Trash size={12} weight="fill" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center justify-between px-3">
-                      <p className="text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1.5 px-3">
+                      <p className="text-[10px] text-gray-400">
                         {formatDate(transaction.promptCreatedAt || transaction.timestamp)}
                       </p>
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {isPending ? (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-primary"
-                            onClick={() => setEditingPendingPrompt(transaction)}
-                          >
-                            <ArrowClockwise size={14} />
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => setEditingTransaction(transaction)}
-                          >
-                            <PencilSimple size={14} />
-                          </Button>
-                        )}
+                      {isPending && (
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6 text-destructive"
-                          onClick={() => onDeleteTransaction(transaction.id)}
+                          className="h-4 w-4 text-yellow-600 hover:text-yellow-700 hover:bg-transparent p-0"
+                          onClick={() => setEditingPendingPrompt(transaction)}
                         >
-                          <Trash size={14} />
+                          <ArrowClockwise size={10} weight="bold" />
                         </Button>
-                      </div>
+                      )}
+                      {!isPending && !isCurrentUser && (
+                        <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 text-gray-400 hover:text-gray-600 hover:bg-transparent p-0"
+                            onClick={() => setEditingTransaction(transaction)}
+                          >
+                            <PencilSimple size={10} weight="bold" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -286,21 +312,27 @@ export function ChatTransactionView({
         </div>
       </div>
 
-      <div className="sticky bottom-0 bg-background border-t shadow-lg">
-        <div className="container max-w-4xl mx-auto px-4 py-4">
-          <form onSubmit={handleSubmit} className="flex gap-2">
+      <div className="sticky bottom-0 bg-white border-t border-gray-200">
+        <div className="max-w-2xl mx-auto px-4 py-3">
+          <form onSubmit={handleSubmit} className="flex gap-2 items-center">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Nhập chi tiêu của bạn..."
+              placeholder="Nhập chi tiêu..."
               disabled={isProcessing}
-              className="flex-1"
+              className="flex-1 border-0 bg-[#f0f0f5] rounded-full px-4 py-2.5 text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-400"
             />
-            <Button type="submit" size="icon" disabled={!input.trim() || isProcessing}>
+            <Button 
+              type="submit" 
+              size="icon" 
+              disabled={!input.trim() || isProcessing}
+              className="h-10 w-10 rounded-full bg-[#f0f0f5] hover:bg-gray-200 text-gray-600 disabled:opacity-50 disabled:bg-[#f0f0f5]"
+              variant="ghost"
+            >
               {isProcessing ? (
-                <CircleNotch size={20} className="animate-spin" />
+                <CircleNotch size={20} weight="bold" className="animate-spin" />
               ) : (
-                <PaperPlaneRight size={20} weight="fill" />
+                <PaperPlaneRight size={20} weight="fill" className={input.trim() ? 'text-[#4169E1]' : 'text-gray-400'} />
               )}
             </Button>
           </form>
