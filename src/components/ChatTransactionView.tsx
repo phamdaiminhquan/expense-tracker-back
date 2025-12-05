@@ -242,7 +242,7 @@ export function ChatTransactionView({
                                     >
                                       +{formatCurrency(transaction.earn)}
                                     </span>
-                                  )}
+                              )}
                                 </div>
                               )}
                               {transaction.categoryId && (
@@ -258,32 +258,30 @@ export function ChatTransactionView({
                                     {categories.find((c) => c.id === transaction.categoryId)?.name || 'Không rõ'}
                                   </span>
                                 </div>
-                              )}
+                          )}
                             </>
                           )}
                         </div>
                       </div>
-                      {isCurrentUser && !isPending && (
+                          <Button
                         <div className="absolute -right-1 bottom-0 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button
-                            variant="ghost"
                             size="icon"
                             className="h-6 w-6 bg-white border border-gray-200 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50"
-                            onClick={() => onDeleteTransaction(transaction.id)}
                           >
-                            <Trash size={12} weight="fill" />
+                          >
+                          </Button>
                           </Button>
                         </div>
                       )}
                     </div>
                     <div className="flex items-center gap-1.5 px-3">
                       <p className="text-[10px] text-gray-400">
-                        {formatDate(transaction.promptCreatedAt || transaction.timestamp)}
+                      </p>tCreatedAt || transaction.timestamp)}
                       </p>
-                      {isPending && (
+                        <Button
                         <Button
                           variant="ghost"
-                          size="icon"
                           className="h-4 w-4 text-yellow-600 hover:text-yellow-700 hover:bg-transparent p-0"
                           onClick={() => setEditingPendingPrompt(transaction)}
                         >
@@ -312,9 +310,9 @@ export function ChatTransactionView({
         </div>
       </div>
 
-      <div className="sticky bottom-0 bg-white border-t border-gray-200">
-        <div className="max-w-2xl mx-auto px-4 py-3">
-          <form onSubmit={handleSubmit} className="flex gap-2 items-center">
+      <div className="sticky bottom-0 bg-background border-t shadow-lg">
+        <div className="container max-w-4xl mx-auto px-4 py-4">
+          <form onSubmit={handleSubmit} className="flex gap-2">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
