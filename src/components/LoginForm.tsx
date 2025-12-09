@@ -1,46 +1,61 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { SignIn, Sparkle } from '@phosphor-icons/react'
-import { authenticateUser, MOCK_USERS } from '@/lib/auth'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Lock, SignIn, Sparkle, UserPlus } from '@phosphor-icons/react'
+import { AuthSession, login, register } from '@/lib/auth'
 import { toast } from 'sonner'
 
 interface LoginFormProps {
-  onLogin: (userId: string, userName: string) => void
+  onLogin: (session: AuthSession) => void
 }
 
 export function LoginForm({ onLogin }: LoginFormProps) {
+  const [mode, setMode] = useState<'login' | 'register'>('login')
   const [email, setEmail] = useState('')
+  const [name, setName] = useState('')
+  const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
+  const isRegister = mode === 'register'
+
+  const isDisabled = useMemo(() => {
+    if (!email.trim() || !password.trim()) return true
+    if (isRegister && !name.trim()) return true
+    return isLoading
+  }, [email, password, isRegister, name, isLoading])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    if (!email.trim()) {
-      toast.error('Vui lòng nhập email')
-      return
-    }
 
-    setIsLoading(true)
+    try {
+      setIsLoading(true)
 
-    setTimeout(() => {
-      const user = authenticateUser(email.trim())
-      
-      if (user) {
-        toast.success('Đăng nhập thành công!', {
-          description: `Chào mừng ${user.name}`,
-        })
-        onLogin(user.id, user.name)
-      } else {
-        toast.error('Email không tồn tại', {
-          description: 'Vui lòng kiểm tra lại email',
-        })
-      }
-      
+      const payload = { email: email.trim(), password: password.trim(), name: name.trim() }
+      const session = isRegister
+        ? await register(payload)
+        : await login({ email: payload.email, password: payload.password })
+
+      toast.success(isRegister ? 'Đăng ký thành công!' : 'Đăng nhập thành công!', {
+        description: `Chào mừng ${session.user.name}`,
+      })
+
+      onLogin(session)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Có lỗi xảy ra'
+      toast.error(isRegister ? 'Đăng ký thất bại' : 'Đăng nhập thất bại', {
+        description: message,
+      })
+    } finally {
       setIsLoading(false)
-    }, 800)
+    }
+  }
+
+  const handleSwitchMode = (value: 'login' | 'register') => {
+    setMode(value)
+    setPassword('')
   }
 
   return (
@@ -52,54 +67,115 @@ export function LoginForm({ onLogin }: LoginFormProps) {
           </div>
           <h1 className="text-3xl font-bold">Chi Tiêu Thông Minh</h1>
           <p className="text-muted-foreground">
-            Quản lý chi tiêu với trí tuệ nhân tạo
+            Đăng nhập hoặc đăng ký để bắt đầu
           </p>
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Đăng nhập</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle>Tài khoản</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2 flex just">
-                <Label htmlFor="email">Email: </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="example@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoading}
-                  className="text-base"
-                />
-              </div>
-              <Button
-                type="submit"
-                disabled={!email.trim() || isLoading}
-                className="w-full gap-2"
-              >
-                <SignIn />
-                {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
-              </Button>
-            </form>
+            <Tabs value={mode} onValueChange={(value) => handleSwitchMode(value as 'login' | 'register')}>
+              <TabsList className="grid grid-cols-2 w-full">
+                <TabsTrigger value="login" className="gap-2">
+                  <Lock size={16} />
+                  Đăng nhập
+                </TabsTrigger>
+                <TabsTrigger value="register" className="gap-2">
+                  <UserPlus size={16} />
+                  Đăng ký
+                </TabsTrigger>
+              </TabsList>
 
-            <div className="mt-6 space-y-2">
-              <p className="text-sm text-muted-foreground font-medium">Tài khoản demo:</p>
-              <div className="grid gap-2 text-sm">
-                {MOCK_USERS.map((user) => (
-                  <button
-                    key={user.id}
-                    type="button"
-                    onClick={() => setEmail(user.email)}
-                    className="text-left p-2 rounded-md hover:bg-muted transition-colors"
-                  >
-                    <div className="font-medium">{user.name}</div>
-                    <div className="text-muted-foreground text-xs">{user.email}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
+              <TabsContent value="login" className="space-y-4 pt-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="login-email">Email</Label>
+                    <Input
+                      id="login-email"
+                      type="email"
+                      placeholder="user@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={isLoading}
+                      className="text-base"
+                      autoComplete="email"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="login-password">Mật khẩu</Label>
+                    <Input
+                      id="login-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={isLoading}
+                      className="text-base"
+                      autoComplete="current-password"
+                    />
+                  </div>
+
+                  <Button type="submit" disabled={isDisabled} className="w-full gap-2">
+                    <SignIn />
+                    {isLoading ? 'Đang xử lý...' : 'Đăng nhập'}
+                  </Button>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="register" className="space-y-4 pt-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="register-name">Họ tên</Label>
+                    <Input
+                      id="register-name"
+                      type="text"
+                      placeholder="Nguyen Van A"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      disabled={isLoading}
+                      className="text-base"
+                      autoComplete="name"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="register-email">Email</Label>
+                    <Input
+                      id="register-email"
+                      type="email"
+                      placeholder="user@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={isLoading}
+                      className="text-base"
+                      autoComplete="email"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="register-password">Mật khẩu</Label>
+                    <Input
+                      id="register-password"
+                      type="password"
+                      placeholder="strongpassword"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={isLoading}
+                      className="text-base"
+                      autoComplete="new-password"
+                    />
+                  </div>
+
+                  <Button type="submit" disabled={isDisabled} className="w-full gap-2">
+                    <UserPlus />
+                    {isLoading ? 'Đang xử lý...' : 'Tạo tài khoản'}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>

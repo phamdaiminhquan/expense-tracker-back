@@ -4,7 +4,6 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Plus, Wallet, Users, CaretRight, SignOut } from '@phosphor-icons/react'
-import { MOCK_USERS } from '@/lib/auth'
 import { useState } from 'react'
 
 interface FundListScreenProps {
@@ -13,6 +12,8 @@ interface FundListScreenProps {
   currentUserName: string
   onSelectFund: (fundId: string) => void
   onCreateFund: () => void
+  isLoading?: boolean
+  onRefresh?: () => void
   onLogout: () => void
 }
 
@@ -22,6 +23,8 @@ export function FundListScreen({
   currentUserName,
   onSelectFund,
   onCreateFund,
+  isLoading = false,
+  onRefresh,
   onLogout,
 }: FundListScreenProps) {
   const [fundNameInput, setFundNameInput] = useState('')
@@ -97,9 +100,18 @@ export function FundListScreen({
             DANH SÁCH QUỸ
           </h2>
           
-          {funds.length === 0 ? (
+          {isLoading ? (
             <Card className="p-8 text-center border-dashed">
+              <p className="text-sm text-muted-foreground">Đang tải danh sách quỹ...</p>
+            </Card>
+          ) : funds.length === 0 ? (
+            <Card className="p-8 text-center border-dashed space-y-3">
               <p className="text-sm text-muted-foreground">Chưa có quỹ nào. Tạo quỹ đầu tiên để bắt đầu!</p>
+              {onRefresh && (
+                <Button variant="ghost" size="sm" onClick={onRefresh}>
+                  Tải lại
+                </Button>
+              )}
             </Card>
           ) : (
             <div className="space-y-2">

@@ -6,7 +6,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { formatCurrency } from '@/lib/currency'
-import { MOCK_USERS } from '@/lib/auth'
 import { Card } from '@/components/ui/card'
 import { TrendUp, TrendDown, Wallet, User, Tag } from '@phosphor-icons/react'
 
@@ -16,6 +15,7 @@ interface FundStatisticsDialogProps {
   transactions: Transaction[]
   categories: Category[]
   fund: Fund | null
+  resolveUserName: (userId: string) => string
 }
 
 export function FundStatisticsDialog({
@@ -24,6 +24,7 @@ export function FundStatisticsDialog({
   transactions,
   categories,
   fund,
+  resolveUserName,
 }: FundStatisticsDialogProps) {
   const validTransactions = transactions.filter((t) => !t.isPendingPrompt)
 
@@ -35,8 +36,7 @@ export function FundStatisticsDialog({
     fund?.type === 'shared'
       ? fund.memberIds.map((userId) => {
           const userTransactions = validTransactions.filter((t) => t.userId === userId)
-          const userName =
-            MOCK_USERS.find((u) => u.id === userId)?.name || 'Unknown'
+          const userName = resolveUserName(userId)
           const spend = userTransactions.reduce((sum, t) => sum + (t.spend || 0), 0)
           const earn = userTransactions.reduce((sum, t) => sum + (t.earn || 0), 0)
           return { userId, userName, spend, earn, count: userTransactions.length }

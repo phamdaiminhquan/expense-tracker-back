@@ -12,11 +12,12 @@ import { Label } from '@/components/ui/label'
 import { Transaction } from '@/lib/types'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
-interface EditTransactionDialogProps {
+export interface EditTransactionDialogProps {
   transaction: Transaction | null
   open: boolean
   onOpenChange: (open: boolean) => void
   onSave: (transaction: Transaction) => void
+  onDelete?: (id: string) => void
 }
 
 export function EditTransactionDialog({
@@ -24,6 +25,7 @@ export function EditTransactionDialog({
   open,
   onOpenChange,
   onSave,
+  onDelete,
 }: EditTransactionDialogProps) {
   const [userName, setUserName] = useState('')
   const [amount, setAmount] = useState('')
@@ -113,10 +115,28 @@ export function EditTransactionDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Hủy
-          </Button>
-          <Button onClick={handleSave}>Lưu</Button>
+          <div className="flex w-full items-center justify-between gap-2">
+            <div>
+              {onDelete && transaction && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => {
+                    onDelete(transaction.id)
+                    onOpenChange(false)
+                  }}
+                >
+                  Xóa
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                Hủy
+              </Button>
+              <Button onClick={handleSave}>Lưu</Button>
+            </div>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

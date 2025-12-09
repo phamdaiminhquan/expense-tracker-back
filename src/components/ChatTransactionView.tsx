@@ -18,7 +18,6 @@ import {
 import { formatCurrency } from '@/lib/currency'
 import { EditTransactionDialog } from './EditTransactionDialog'
 import { EditPendingPromptDialog } from './EditPendingPromptDialog'
-import { MOCK_USERS } from '@/lib/auth'
 
 interface ChatTransactionViewProps {
   fund: Fund
@@ -26,6 +25,7 @@ interface ChatTransactionViewProps {
   categories: Category[]
   currentUserId: string
   currentUserName: string
+  resolveUserName: (userId: string) => string
   onBack: () => void
   onShowStatistics: () => void
   onManageCategories: () => void
@@ -43,6 +43,7 @@ export function ChatTransactionView({
   categories,
   currentUserId,
   currentUserName,
+  resolveUserName,
   onBack,
   onShowStatistics,
   onManageCategories,
@@ -122,9 +123,7 @@ export function ChatTransactionView({
   }
 
   const getMemberNames = () => {
-    return fund.memberIds
-      .map((id) => MOCK_USERS.find((u) => u.id === id)?.name || 'Unknown')
-      .join(', ')
+    return fund.memberIds.map((id) => resolveUserName(id)).join(', ')
   }
 
   return (
