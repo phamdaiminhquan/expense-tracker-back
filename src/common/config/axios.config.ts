@@ -1,8 +1,9 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
+import { appConfig } from '@/global-config'
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
+const API_BASE_URL = appConfig.apiBaseUrl
 const AUTH_STORAGE_KEY = 'expense-tracker-auth-session'
 
 type StoredSession = {

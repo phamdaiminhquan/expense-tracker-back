@@ -1,7 +1,8 @@
 import { GeminiResponse, ParsedExpense, Category } from './types'
+import { appConfig, buildGeminiUrl } from '@/global-config'
 
-const GEMINI_API_KEY = 'AIzaSyDCY7f-Iaswz3FMidS565AHwotyvnXrSX4'
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash-lite:generateContent'
+const GEMINI_API_KEY = appConfig.gemini.apiKey
+const GEMINI_API_URL = buildGeminiUrl(appConfig.gemini)
 
 export class APISystemError extends Error {
   constructor(message: string) {

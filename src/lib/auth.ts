@@ -36,7 +36,9 @@ export interface AuthFetchOptions<TResponse> {
   parse?: (response: Response) => Promise<TResponse>
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
+import { appConfig } from '@/global-config'
+
+const API_BASE_URL = appConfig.apiBaseUrl
 const AUTH_STORAGE_KEY = 'expense-tracker-auth-session'
 
 async function postJson<TResponse>(path: string, body: unknown): Promise<TResponse> {
