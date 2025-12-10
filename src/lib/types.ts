@@ -1,5 +1,7 @@
 export type FundType = 'personal' | 'shared'
 
+export type TransactionStatus = 'pending' | 'processed' | 'failed'
+
 export interface Category {
   id: string
   fundId: string
@@ -27,9 +29,12 @@ export interface Transaction {
   content: string
   categoryId?: string | null
   timestamp: number
+  status?: TransactionStatus
   isPendingPrompt?: boolean
   originalPrompt?: string
   promptCreatedAt?: number
+  clientStatus?: 'sending' | 'sent' | 'failed'
+  clientTempId?: string
 }
 
 export interface ParsedExpense {

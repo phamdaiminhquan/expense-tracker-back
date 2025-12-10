@@ -16,8 +16,8 @@ export interface EditTransactionDialogProps {
   transaction: Transaction | null
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSave: (transaction: Transaction) => void
-  onDelete?: (id: string) => void
+  onSave: (transaction: Transaction) => Promise<void>
+  onDelete?: (id: string) => Promise<void>
 }
 
 export function EditTransactionDialog({
@@ -41,21 +41,25 @@ export function EditTransactionDialog({
     }
   }, [transaction])
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!transaction || !userName.trim() || !amount.trim() || !content.trim()) return
 
     const numAmount = parseFloat(amount)
     if (isNaN(numAmount)) return
 
-    onSave({
-      ...transaction,
-      userName: userName.trim(),
-      spend: type === 'spend' ? numAmount : null,
-      earn: type === 'earn' ? numAmount : null,
-      content: content.trim(),
-    })
+    try {
+      await onSave({
+        ...transaction,
+        userName: userName.trim(),
+        spend: type === 'spend' ? numAmount : null,
+        earn: type === 'earn' ? numAmount : null,
+        content: content.trim(),
+      })
 
-    onOpenChange(false)
+      onOpenChange(false)
+    } catch (error) {
+      // Thông báo lỗi đã được xử lý ở provider
+    }
   }
 
   return (
@@ -121,9 +125,12 @@ export function EditTransactionDialog({
                 <Button
                   type="button"
                   variant="destructive"
-                  onClick={() => {
-                    onDelete(transaction.id)
-                    onOpenChange(false)
+                  onClick={async () => {
+                    try {
+                      await onDelete(transaction.id)
+                    } finally {
+                      onOpenChange(false)
+                    }
                   }}
                 >
                   Xóa

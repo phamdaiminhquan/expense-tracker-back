@@ -1,6 +1,5 @@
 import { createContext, useContext, useState } from 'react'
 import { Category, ParsedExpense } from '@/lib/types'
-import { parseExpenseWithAI } from '@/lib/gemini'
 
 interface AIParserContextValue {
   isParsing: boolean
@@ -21,12 +20,8 @@ function useAIParserState(): AIParserContextValue {
     userName: string,
     categories: Category[] = []
   ): Promise<{ success: boolean; data?: ParsedExpense; error?: 'system' | 'invalid' }> => {
-    setIsParsing(true)
-    try {
-      return await parseExpenseWithAI(text, userName, categories)
-    } finally {
-      setIsParsing(false)
-    }
+    // Gemini client bị tắt; backend xử lý parsing nếu cần.
+    return { success: false, error: 'system' }
   }
 
   return { isParsing, parseExpense }

@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Transaction, Category } from '@/lib/types'
-import { parseExpenseText, validatePrompt, APISystemError, InvalidPromptError } from '@/lib/gemini'
 import { toast } from 'sonner'
 import { SpinnerGap } from '@phosphor-icons/react'
 
@@ -20,7 +19,7 @@ interface EditPendingPromptDialogProps {
   categories: Category[]
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSave: (transaction: Transaction) => void
+  onSave: (transaction: Transaction) => Promise<void>
 }
 
 export function EditPendingPromptDialog({
@@ -42,50 +41,29 @@ export function EditPendingPromptDialog({
   const handleProcess = async () => {
     if (!transaction || !promptText.trim()) return
 
-    const validation = validatePrompt(promptText.trim())
-    if (!validation.valid) {
-      toast.error('Prompt không hợp lệ', {
-        description: validation.error,
-      })
-      return
-    }
-
     setIsLoading(true)
 
     try {
-      const parsed = await parseExpenseText(promptText.trim(), categories)
-
-      onSave({
+      await onSave({
         ...transaction,
-        spend: parsed.spend,
-        earn: parsed.earn,
-        content: parsed.content,
-        categoryId: parsed.categoryId,
-        isPendingPrompt: false,
-        originalPrompt: undefined,
+        content: promptText.trim(),
+        originalPrompt: promptText.trim(),
+        isPendingPrompt: true,
+        status: 'pending',
+        spend: null,
+        earn: null,
+        categoryId: null,
       })
 
-      toast.success('Xử lý giao dịch thành công!', {
-        description: parsed.content,
+      toast.success('Đã lưu ghi chú, backend sẽ xử lý.', {
+        description: promptText.trim(),
       })
 
       onOpenChange(false)
     } catch (error) {
-      if (error instanceof APISystemError) {
-        toast.error('Lỗi hệ thống', {
-          description: error.message,
-          duration: 5000,
-        })
-      } else if (error instanceof InvalidPromptError) {
-        toast.error('Không thể phân tích prompt', {
-          description: error.message,
-          duration: 5000,
-        })
-      } else {
-        toast.error('Có lỗi xảy ra', {
-          description: 'Vui lòng thử lại',
-        })
-      }
+      toast.error('Có lỗi xảy ra', {
+        description: 'Vui lòng thử lại',
+      })
     } finally {
       setIsLoading(false)
     }

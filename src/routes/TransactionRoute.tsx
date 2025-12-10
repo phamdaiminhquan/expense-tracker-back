@@ -12,7 +12,14 @@ export function TransactionRoute() {
 
   const { visibleFunds, enterFund } = useFunds()
   const { currentUserId, currentUserName, resolveUserName } = useAuth()
-  const { addTransaction, updateTransaction, deleteTransaction, getTransactionsByFund, isProcessing } = useTransactions()
+  const {
+    addTransaction,
+    updateTransaction,
+    deleteTransaction,
+    fetchTransactionsByFund,
+    getTransactionsByFund,
+    isProcessing,
+  } = useTransactions()
   const { categories, createCategory, updateCategory, deleteCategory } = useCategories()
 
   const fund = useMemo(() => visibleFunds.find((f) => f.id === fundId), [fundId, visibleFunds])
@@ -23,6 +30,12 @@ export function TransactionRoute() {
   useEffect(() => {
     if (fund) enterFund(fund)
   }, [fund, enterFund])
+
+  useEffect(() => {
+    if (fundId) {
+      fetchTransactionsByFund(fundId)
+    }
+  }, [fundId, fetchTransactionsByFund])
 
   if (!fund) return <div className="h-screen flex items-center justify-center text-sm text-gray-500">Không tìm thấy quỹ</div>
 

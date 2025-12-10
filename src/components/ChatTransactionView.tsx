@@ -14,6 +14,8 @@ import {
   Users,
   CircleNotch,
   Tag,
+  CheckCircle,
+  XCircle,
 } from '@phosphor-icons/react'
 import { formatCurrency } from '@/lib/currency'
 import { EditTransactionDialog } from './EditTransactionDialog'
@@ -29,9 +31,9 @@ interface ChatTransactionViewProps {
   onBack: () => void
   onShowStatistics: () => void
   onManageCategories: () => void
-  onAddTransaction: (transaction: Omit<Transaction, 'id' | 'timestamp'>) => void
-  onUpdateTransaction: (transaction: Transaction) => void
-  onDeleteTransaction: (id: string) => void
+  onAddTransaction: (transaction: Omit<Transaction, 'id' | 'timestamp'>) => Promise<void>
+  onUpdateTransaction: (transaction: Transaction) => Promise<void>
+  onDeleteTransaction: (id: string) => Promise<void>
   isProcessing?: boolean
 }
 
@@ -79,31 +81,33 @@ export function ChatTransactionView({
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!input.trim() || isProcessing) return
+    if (!input.trim()) return
 
-    onAddTransaction({
-      userId: currentUserId,
-      userName: currentUserName,
-      fundId: fund.id,
-      spend: null,
-      earn: null,
-      content: input.trim(),
-      isPendingPrompt: true,
-      originalPrompt: input.trim(),
-      promptCreatedAt: Date.now(),
-    })
-
-    setInput('')
+    try {
+      await onAddTransaction({
+        userId: currentUserId,
+        userName: currentUserName,
+        fundId: fund.id,
+        spend: null,
+        earn: null,
+        content: input.trim(),
+        isPendingPrompt: true,
+        originalPrompt: input.trim(),
+        promptCreatedAt: Date.now(),
+      })
+      setInput('')
+    } catch (error) {
+      // Error toast handled upstream
+    }
   }
 
   useEffect(() => {
-    // Scroll to the bottom only on the initial load and when a new prompt is sent (if not processing the previous one)
-    if (bottomRef.current && !isProcessing) {
+    if (bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth' })
     }
-  }, [transactions.length, isProcessing])
+  }, [transactions.length])
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp)
@@ -198,6 +202,7 @@ export function ChatTransactionView({
             [...visibleTransactions].reverse().map((transaction) => {
               const isPending = transaction.isPendingPrompt === true
               const isCurrentUser = transaction.userId === currentUserId
+              const clientStatus = transaction.clientStatus ?? 'sent'
 
               return (
                 <div
@@ -275,7 +280,9 @@ export function ChatTransactionView({
                         >
                             <Button
                                 size="icon"
-                                onClick={() => onDeleteTransaction(transaction.id)}
+                                onClick={() => {
+                                  onDeleteTransaction(transaction.id).catch(() => {})
+                                }}
                                 className="h-6 w-6 bg-white border border-gray-200 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50 shadow-md"
                             >
                                 <Trash size={12} weight="bold" />
@@ -290,6 +297,18 @@ export function ChatTransactionView({
                         {/* FIXED: Correctly display timestamp */}
                         {formatDate(transaction.promptCreatedAt || transaction.timestamp)}
                       </p>
+
+                      {isCurrentUser && clientStatus === 'sending' && (
+                        <CircleNotch size={12} className="text-gray-400 animate-spin" weight="bold" />
+                      )}
+
+                      {isCurrentUser && clientStatus === 'sent' && (
+                        <CheckCircle size={12} className="text-emerald-500" weight="bold" />
+                      )}
+
+                      {isCurrentUser && clientStatus === 'failed' && (
+                        <XCircle size={12} className="text-red-500" weight="bold" />
+                      )}
                       
                       {isPending && isCurrentUser && (
                         // Reprocess/Edit pending prompt button
@@ -332,21 +351,17 @@ export function ChatTransactionView({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Nhập chi tiêu..."
-              disabled={isProcessing}
+              disabled={false}
               className="flex-1 border-0 bg-[#f0f0f5] rounded-full px-4 py-2.5 text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-400"
             />
             <Button 
               type="submit" 
               size="icon" 
-              disabled={!input.trim() || isProcessing}
+              disabled={!input.trim()}
               className="h-10 w-10 rounded-full bg-[#f0f0f5] hover:bg-gray-200 text-gray-600 disabled:opacity-50 disabled:bg-[#f0f0f5]"
               variant="ghost"
             >
-              {isProcessing ? (
-                <CircleNotch size={20} weight="bold" className="animate-spin" />
-              ) : (
-                <PaperPlaneRight size={20} weight="fill" className={input.trim() ? 'text-[#4169E1]' : 'text-gray-400'} />
-              )}
+              <PaperPlaneRight size={20} weight="fill" className={input.trim() ? 'text-[#4169E1]' : 'text-gray-400'} />
             </Button>
           </form>
         </div>

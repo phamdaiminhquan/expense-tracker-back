@@ -12,9 +12,9 @@ interface TransactionPageProps {
   currentUserName: string
   resolveUserName: (userId: string) => string
   onBack: () => void
-  onAddTransaction: (transaction: Omit<Transaction, 'id' | 'timestamp'>) => void
-  onUpdateTransaction: (transaction: Transaction) => void
-  onDeleteTransaction: (id: string) => void
+  onAddTransaction: (transaction: Omit<Transaction, 'id' | 'timestamp'>) => Promise<void>
+  onUpdateTransaction: (transaction: Transaction) => Promise<void>
+  onDeleteTransaction: (id: string) => Promise<void>
   onCreateCategory: (name: string, description: string) => void
   onUpdateCategory: (categoryId: string, name: string, description: string) => void
   onDeleteCategory: (categoryId: string) => void
