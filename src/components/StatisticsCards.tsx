@@ -1,17 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TrendDown, TrendUp, Wallet } from '@phosphor-icons/react'
-import { Transaction } from '@/lib/types'
+import { Message } from '@/lib/types'
 import { formatFullCurrency } from '@/lib/currency'
 
 interface StatisticsCardsProps {
-  transactions: Transaction[]
+  messages: Message[]
 }
 
-export function StatisticsCards({ transactions }: StatisticsCardsProps) {
-  const validTransactions = transactions.filter(t => !t.isPendingPrompt)
+export function StatisticsCards({ messages }: StatisticsCardsProps) {
+  const validMessages = messages.filter(t => !t.isPendingPrompt)
   
-  const totalSpend = validTransactions.reduce((sum, t) => sum + (t.spend || 0), 0)
-  const totalEarn = validTransactions.reduce((sum, t) => sum + (t.earn || 0), 0)
+  const totalSpend = validMessages.reduce((sum, t) => sum + (t.spend || 0), 0)
+  const totalEarn = validMessages.reduce((sum, t) => sum + (t.earn || 0), 0)
   const netBalance = totalEarn - totalSpend
 
   return (

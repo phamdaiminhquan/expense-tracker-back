@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TrendDown, TrendUp, Wallet, ChartBar } from '@phosphor-icons/react'
-import { Transaction, Fund } from '@/lib/types'
+import { Message, Fund } from '@/lib/types'
 import { formatFullCurrency } from '@/lib/currency'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -13,19 +13,19 @@ import {
 } from '@/components/ui/select'
 
 interface FundStatisticsProps {
-  transactions: Transaction[]
+  messages: Message[]
   fund: Fund | null
 }
 
 type TimeFilter = 'all' | 'day' | 'week' | 'month' | 'year'
 
-export function FundStatistics({ transactions, fund }: FundStatisticsProps) {
+export function FundStatistics({ messages, fund }: FundStatisticsProps) {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('all')
   const [showPerUser, setShowPerUser] = useState(false)
 
-  const validTransactions = transactions.filter((t) => !t.isPendingPrompt)
+  const validMessages = messages.filter((t) => !t.isPendingPrompt)
 
-  const filterTransactionsByTime = (txns: Transaction[]): Transaction[] => {
+  const filterMessagesByTime = (txns: Message[]): Message[] => {
     if (timeFilter === 'all') return txns
 
     const now = Date.now()
@@ -50,13 +50,13 @@ export function FundStatistics({ transactions, fund }: FundStatisticsProps) {
     return txns.filter((t) => t.timestamp >= cutoffTime)
   }
 
-  const filteredTransactions = filterTransactionsByTime(validTransactions)
+  const filteredMessages = filterMessagesByTime(validMessages)
 
-  const totalSpend = filteredTransactions.reduce((sum, t) => sum + (t.spend || 0), 0)
-  const totalEarn = filteredTransactions.reduce((sum, t) => sum + (t.earn || 0), 0)
+  const totalSpend = filteredMessages.reduce((sum, t) => sum + (t.spend || 0), 0)
+  const totalEarn = filteredMessages.reduce((sum, t) => sum + (t.earn || 0), 0)
   const netBalance = totalEarn - totalSpend
 
-  const userStats = filteredTransactions.reduce(
+  const userStats = filteredMessages.reduce(
     (acc, t) => {
       if (!acc[t.userId]) {
         acc[t.userId] = {

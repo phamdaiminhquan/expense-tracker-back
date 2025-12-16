@@ -14,6 +14,6 @@ export function createCategory(
   }
 }
 
-export function canDeleteCategory(categoryId: string, transactions: any[]): boolean {
-  return !transactions.some((t) => t.categoryId === categoryId)
+export function canDeleteCategory(categoryId: string, messages: any[]): boolean {
+  return !messages.some((t) => t.categoryId === categoryId)
 }

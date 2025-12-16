@@ -9,51 +9,51 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Transaction } from '@/lib/types'
+import { Message } from '@/lib/types'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
-export interface EditTransactionDialogProps {
-  transaction: Transaction | null
+export interface EditMessageDialogProps {
+  message: Message | null
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSave: (transaction: Transaction) => Promise<void>
+  onSave: (message: Message) => void
   onDelete?: (id: string) => Promise<void>
 }
 
-export function EditTransactionDialog({
-  transaction,
+export function EditMessageDialog({
+  message,
   open,
   onOpenChange,
   onSave,
   onDelete,
-}: EditTransactionDialogProps) {
+}: EditMessageDialogProps) {
   const [userName, setUserName] = useState('')
   const [amount, setAmount] = useState('')
-  const [content, setContent] = useState('')
+  const [messages, setMessages] = useState('')
   const [type, setType] = useState<'spend' | 'earn'>('spend')
 
   useEffect(() => {
-    if (transaction) {
-      setUserName(transaction.userName)
-      setAmount(String(transaction.spend || transaction.earn || ''))
-      setContent(transaction.content)
-      setType(transaction.spend !== null ? 'spend' : 'earn')
+    if (message) {
+      setUserName(message.userName)
+      setAmount(String(message.spend || message.earn || ''))
+      setMessages(message.message)
+      setType(message.spend !== null ? 'spend' : 'earn')
     }
-  }, [transaction])
+  }, [message])
 
   const handleSave = async () => {
-    if (!transaction || !userName.trim() || !amount.trim() || !content.trim()) return
+    if (!message || !userName.trim() || !amount.trim() || !messages.trim()) return
 
     const numAmount = parseFloat(amount)
     if (isNaN(numAmount)) return
 
     try {
       await onSave({
-        ...transaction,
+        ...message,
         userName: userName.trim(),
         spend: type === 'spend' ? numAmount : null,
         earn: type === 'earn' ? numAmount : null,
-        content: content.trim(),
+        message: messages.trim(),
       })
 
       onOpenChange(false)
@@ -109,11 +109,11 @@ export function EditTransactionDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-content">Nội dung</Label>
+            <Label htmlFor="edit-message">Nội dung</Label>
             <Input
-              id="edit-content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
+              id="edit-message"
+              value={messages}
+              onChange={(e) => setMessages(e.target.value)}
               placeholder="Mô tả giao dịch"
             />
           </div>
@@ -121,13 +121,13 @@ export function EditTransactionDialog({
         <DialogFooter>
           <div className="flex w-full items-center justify-between gap-2">
             <div>
-              {onDelete && transaction && (
+              {onDelete && message && (
                 <Button
                   type="button"
                   variant="destructive"
                   onClick={async () => {
                     try {
-                      await onDelete(transaction.id)
+                      await onDelete(message.id)
                     } finally {
                       onOpenChange(false)
                     }

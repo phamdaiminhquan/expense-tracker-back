@@ -10,20 +10,20 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Transaction, Category } from '@/lib/types'
+import { Message, Category } from '@/lib/types'
 import { toast } from 'sonner'
 import { SpinnerGap } from '@phosphor-icons/react'
 
 interface EditPendingPromptDialogProps {
-  transaction: Transaction | null
+  message: Message | null
   categories: Category[]
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSave: (transaction: Transaction) => Promise<void>
+  onSave: (message: Message) => void
 }
 
 export function EditPendingPromptDialog({
-  transaction,
+  message,
   categories,
   open,
   onOpenChange,
@@ -33,20 +33,20 @@ export function EditPendingPromptDialog({
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    if (transaction) {
-      setPromptText(transaction.originalPrompt || transaction.content)
+    if (message) {
+      setPromptText(message.originalPrompt || message.message)
     }
-  }, [transaction])
+  }, [message])
 
   const handleProcess = async () => {
-    if (!transaction || !promptText.trim()) return
+    if (!message || !promptText.trim()) return
 
     setIsLoading(true)
 
     try {
       await onSave({
-        ...transaction,
-        content: promptText.trim(),
+        ...message,
+        message: promptText.trim(),
         originalPrompt: promptText.trim(),
         isPendingPrompt: true,
         status: 'pending',

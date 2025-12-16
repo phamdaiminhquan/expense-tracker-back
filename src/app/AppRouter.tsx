@@ -1,9 +1,9 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { LoginRoute } from '@/routes/LoginRoute'
 import { FundsRoute } from '@/routes/FundsRoute'
-import { TransactionRoute } from '@/routes/TransactionRoute'
 import { RequireAuth } from '@/routes/RequireAuth'
 import { useAuth } from '@/hooks/useAuth'
+import { MessageRoute } from '@/routes/TransactionRoute'
 
 export function AppRouter() {
   const { isAuthed } = useAuth()
@@ -25,7 +25,7 @@ export function AppRouter() {
         path="/funds/:fundId"
         element={
           <RequireAuth>
-            <TransactionRoute />
+            <MessageRoute />
           </RequireAuth>
         }
       />

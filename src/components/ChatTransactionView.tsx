@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Transaction, Fund, Category } from '@/lib/types'
+import { Message, Fund, Category } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -18,12 +18,12 @@ import {
   XCircle,
 } from '@phosphor-icons/react'
 import { formatCurrency } from '@/lib/currency'
-import { EditTransactionDialog } from './EditTransactionDialog'
 import { EditPendingPromptDialog } from './EditPendingPromptDialog'
+import { EditMessageDialog } from './EditTransactionDialog'
 
-interface ChatTransactionViewProps {
+interface ChatMessageViewProps {
   fund: Fund
-  transactions: Transaction[]
+  messages: Message[]
   categories: Category[]
   currentUserId: string
   currentUserName: string
@@ -31,17 +31,17 @@ interface ChatTransactionViewProps {
   onBack: () => void
   onShowStatistics: () => void
   onManageCategories: () => void
-  onAddTransaction: (transaction: Omit<Transaction, 'id' | 'timestamp'>) => Promise<void>
-  onUpdateTransaction: (transaction: Transaction) => Promise<void>
-  onDeleteTransaction: (id: string) => Promise<void>
+  onAddMessage: (message: Omit<Message, 'id' | 'timestamp'>) => Promise<void>
+  onUpdateMessage: (message: Message) => Promise<void>
+  onDeleteMessage: (id: string) => Promise<void>
   isProcessing?: boolean
 }
 
 const ITEMS_PER_PAGE = 10
 
-export function ChatTransactionView({
+export function ChatMessageView({
   fund,
-  transactions,
+  messages,
   categories,
   currentUserId,
   currentUserName,
@@ -49,29 +49,29 @@ export function ChatTransactionView({
   onBack,
   onShowStatistics,
   onManageCategories,
-  onAddTransaction,
-  onUpdateTransaction,
-  onDeleteTransaction,
+  onAddMessage,
+  onUpdateMessage,
+  onDeleteMessage,
   isProcessing = false,
-}: ChatTransactionViewProps) {
+}: ChatMessageViewProps) {
   const [input, setInput] = useState('')
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
-  const [editingPendingPrompt, setEditingPendingPrompt] = useState<Transaction | null>(null)
+  const [editingMessage, setEditingMessage] = useState<Message | null>(null)
+  const [editingPendingPrompt, setEditingPendingPrompt] = useState<Message | null>(null)
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  const sortedTransactions = [...transactions].sort((a, b) => b.timestamp - a.timestamp)
-  const visibleTransactions = sortedTransactions.slice(0, visibleCount)
+  const sortedMessages = [...messages].sort((a, b) => b.timestamp - a.timestamp)
+  const visibleMessages = sortedMessages.slice(0, visibleCount)
 
   const handleScroll = () => {
     const container = scrollContainerRef.current
     if (!container) return
 
     // Logic to load previous pages when scrolling to the top
-    if (container.scrollTop === 0 && visibleCount < sortedTransactions.length) {
+    if (container.scrollTop === 0 && visibleCount < sortedMessages.length) {
       const oldScrollHeight = container.scrollHeight
-      setVisibleCount((prev) => Math.min(prev + ITEMS_PER_PAGE, sortedTransactions.length))
+      setVisibleCount((prev) => Math.min(prev + ITEMS_PER_PAGE, sortedMessages.length))
       
       // Maintain scroll position after loading more items
       setTimeout(() => {
@@ -86,13 +86,13 @@ export function ChatTransactionView({
     if (!input.trim()) return
 
     try {
-      await onAddTransaction({
+      await onAddMessage({
         userId: currentUserId,
         userName: currentUserName,
         fundId: fund.id,
         spend: null,
         earn: null,
-        content: input.trim(),
+        message: input.trim(),
         isPendingPrompt: true,
         originalPrompt: input.trim(),
         promptCreatedAt: Date.now(),
@@ -107,7 +107,7 @@ export function ChatTransactionView({
     if (bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth' })
     }
-  }, [transactions.length])
+  }, [messages.length])
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp)
@@ -179,12 +179,12 @@ export function ChatTransactionView({
         className="flex-1 overflow-y-auto"
       >
         <div className="max-w-2xl mx-auto px-4 py-4 space-y-1">
-          {visibleCount < sortedTransactions.length && (
+          {visibleCount < sortedMessages.length && (
             <div className="text-center pb-2">
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setVisibleCount((prev) => Math.min(prev + ITEMS_PER_PAGE, sortedTransactions.length))}
+                onClick={() => setVisibleCount((prev) => Math.min(prev + ITEMS_PER_PAGE, sortedMessages.length))}
                 className="text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100"
               >
                 Tải thêm
@@ -192,26 +192,26 @@ export function ChatTransactionView({
             </div>
           )}
 
-          {visibleTransactions.length === 0 ? (
+          {visibleMessages.length === 0 ? (
             <div className="text-center py-16 text-gray-400">
               <p className="text-sm">Chưa có giao dịch nào</p>
               <p className="text-xs mt-1">Nhập giao dịch đầu tiên bên dưới</p>
             </div>
           ) : (
             // Reverse the list for chat view (newest at the bottom)
-            [...visibleTransactions].reverse().map((transaction) => {
-              const isPending = transaction.isPendingPrompt === true
-              const isCurrentUser = transaction.userId === currentUserId
-              const clientStatus = transaction.clientStatus ?? 'sent'
+            [...visibleMessages].reverse().map((message) => {
+              const isPending = message.isPendingPrompt === true
+              const isCurrentUser = message.userId === currentUserId
+              const clientStatus = message.clientStatus ?? 'sent'
 
               return (
                 <div
-                  key={transaction.id}
+                  key={message.id}
                   className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-3 group`}
                 >
                   <div className={`max-w-[75%] space-y-0.5`}>
                     {!isCurrentUser && (
-                      <p className="text-[10px] text-gray-400 px-3 lowercase">{transaction.userName}</p>
+                      <p className="text-[10px] text-gray-400 px-3 lowercase">{message.userName}</p>
                     )}
                     <div className="relative">
                       <div
@@ -227,33 +227,33 @@ export function ChatTransactionView({
                           <p className={`text-sm leading-snug ${
                             isPending ? 'text-gray-500' : isCurrentUser ? 'text-white' : 'text-gray-900'
                           }`}>
-                            {transaction.content}
+                            {message.message}
                           </p>
                           {!isPending && (
                             <>
-                              {(transaction.spend !== null || transaction.earn !== null) && (
+                              {(message.spend !== null || message.earn !== null) && (
                                 <div className="flex items-center gap-1.5 pt-0.5">
-                                  {transaction.spend !== null && (
+                                  {message.spend !== null && (
                                     <span
                                       className={`font-medium text-sm ${
                                         isCurrentUser ? 'text-white' : 'text-red-500'
                                       }`}
                                     >
-                                      -{formatCurrency(transaction.spend)}
+                                      -{formatCurrency(message.spend)}
                                     </span>
                                   )}
-                                  {transaction.earn !== null && (
+                                  {message.earn !== null && (
                                     <span
                                       className={`font-medium text-sm ${
                                         isCurrentUser ? 'text-white' : 'text-green-500'
                                       }`}
                                     >
-                                      +{formatCurrency(transaction.earn)}
+                                      +{formatCurrency(message.earn)}
                                     </span>
                                   )}
                                 </div>
                               )}
-                              {transaction.categoryId && (
+                              {message.categoryId && (
                                 <div className="flex items-center gap-1 pt-0.5">
                                   <Tag 
                                     size={10} 
@@ -263,7 +263,7 @@ export function ChatTransactionView({
                                   <span className={`text-[10px] uppercase tracking-wide ${
                                     isCurrentUser ? 'text-white/80' : 'text-gray-500'
                                   }`}>
-                                    {categories.find((c) => c.id === transaction.categoryId)?.name || 'Không rõ'}
+                                    {categories.find((c) => c.id === message.categoryId)?.name || 'Không rõ'}
                                   </span>
                                 </div>
                               )}
@@ -281,7 +281,7 @@ export function ChatTransactionView({
                             <Button
                                 size="icon"
                                 onClick={() => {
-                                  onDeleteTransaction(transaction.id).catch(() => {})
+                                  onDeleteMessage(message.id).catch(() => {})
                                 }}
                                 className="h-6 w-6 bg-white border border-gray-200 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50 shadow-md"
                             >
@@ -295,7 +295,7 @@ export function ChatTransactionView({
                     <div className="flex items-center gap-1.5 px-3">
                       <p className="text-[10px] text-gray-400">
                         {/* FIXED: Correctly display timestamp */}
-                        {formatDate(transaction.promptCreatedAt || transaction.timestamp)}
+                        {formatDate(message.promptCreatedAt || message.timestamp)}
                       </p>
 
                       {isCurrentUser && clientStatus === 'sending' && (
@@ -315,20 +315,20 @@ export function ChatTransactionView({
                         <Button
                           variant="ghost"
                           className="h-4 w-4 text-yellow-600 hover:text-yellow-700 hover:bg-transparent p-0"
-                          onClick={() => setEditingPendingPrompt(transaction)}
+                          onClick={() => setEditingPendingPrompt(message)}
                         >
                           <ArrowClockwise size={10} weight="bold" />
                         </Button>
                       )}
                       
-                      {/* Edit button for confirmed transactions (if not pending) */}
+                      {/* Edit button for confirmed messages (if not pending) */}
                       {!isPending && isCurrentUser && (
                         <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-4 w-4 text-gray-400 hover:text-gray-600 hover:bg-transparent p-0"
-                            onClick={() => setEditingTransaction(transaction)}
+                            onClick={() => setEditingMessage(message)}
                           >
                             <PencilSimple size={10} weight="bold" />
                           </Button>
@@ -367,20 +367,20 @@ export function ChatTransactionView({
         </div>
       </div>
 
-      <EditTransactionDialog
-        transaction={editingTransaction}
-        open={editingTransaction !== null}
-        onOpenChange={(open) => !open && setEditingTransaction(null)}
-        onSave={onUpdateTransaction}
-        onDelete={onDeleteTransaction}
+      <EditMessageDialog
+        message={editingMessage}
+        open={editingMessage !== null}
+        onOpenChange={(open) => !open && setEditingMessage(null)}
+        onSave={onUpdateMessage}
+        onDelete={onDeleteMessage}
       />
 
       <EditPendingPromptDialog
-        transaction={editingPendingPrompt}
+        message={editingPendingPrompt}
         categories={categories}
         open={editingPendingPrompt !== null}
         onOpenChange={(open) => !open && setEditingPendingPrompt(null)}
-        onSave={onUpdateTransaction}
+        onSave={onUpdateMessage}
       />
     </div>
   )

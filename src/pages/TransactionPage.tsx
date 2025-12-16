@@ -1,59 +1,59 @@
 import { useState } from 'react'
-import { Transaction, Fund, Category } from '@/lib/types'
-import { ChatTransactionView } from '@/components/ChatTransactionView'
+import { Message, Fund, Category } from '@/lib/types'
 import { FundStatisticsDialog } from '@/components/FundStatisticsDialog'
 import { CategoryManagementDialog } from '@/components/CategoryManagementDialog'
+import { ChatMessageView } from '@/components/ChatTransactionView'
 
-interface TransactionPageProps {
+interface MessagePageProps {
   fund: Fund
-  transactions: Transaction[]
+  messages: Message[]
   categories: Category[]
   currentUserId: string
   currentUserName: string
   resolveUserName: (userId: string) => string
   onBack: () => void
-  onAddTransaction: (transaction: Omit<Transaction, 'id' | 'timestamp'>) => Promise<void>
-  onUpdateTransaction: (transaction: Transaction) => Promise<void>
-  onDeleteTransaction: (id: string) => Promise<void>
+  onAddMessage: (message: Omit<Message, 'id' | 'timestamp'>) => Promise<void>
+  onUpdateMessage: (message: Message) => Promise<void>
+  onDeleteMessage: (id: string) => Promise<void>
   onCreateCategory: (name: string, description: string) => void
   onUpdateCategory: (categoryId: string, name: string, description: string) => void
   onDeleteCategory: (categoryId: string) => void
   isProcessing?: boolean
 }
 
-export function TransactionPage({
+export function MessagePage({
   fund,
-  transactions,
+  messages,
   categories,
   currentUserId,
   currentUserName,
   resolveUserName,
   onBack,
-  onAddTransaction,
-  onUpdateTransaction,
-  onDeleteTransaction,
+  onAddMessage,
+  onUpdateMessage,
+  onDeleteMessage,
   onCreateCategory,
   onUpdateCategory,
   onDeleteCategory,
   isProcessing = false,
-}: TransactionPageProps) {
+}: MessagePageProps) {
   const [isStatisticsDialogOpen, setIsStatisticsDialogOpen] = useState(false)
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
 
   return (
     <>
-      <ChatTransactionView
+      <ChatMessageView
         fund={fund}
-        transactions={transactions}
+        messages={messages}
         categories={categories}
         currentUserId={currentUserId}
         currentUserName={currentUserName}
         onBack={onBack}
         onShowStatistics={() => setIsStatisticsDialogOpen(true)}
         onManageCategories={() => setIsCategoryDialogOpen(true)}
-        onAddTransaction={onAddTransaction}
-        onUpdateTransaction={onUpdateTransaction}
-        onDeleteTransaction={onDeleteTransaction}
+        onAddMessage={onAddMessage}
+        onUpdateMessage={onUpdateMessage}
+        onDeleteMessage={onDeleteMessage}
         resolveUserName={resolveUserName}
         isProcessing={isProcessing}
       />
@@ -61,7 +61,7 @@ export function TransactionPage({
       <FundStatisticsDialog
         open={isStatisticsDialogOpen}
         onOpenChange={setIsStatisticsDialogOpen}
-        transactions={transactions}
+        messages={messages}
         categories={categories}
         fund={fund}
         resolveUserName={resolveUserName}
@@ -71,7 +71,7 @@ export function TransactionPage({
         open={isCategoryDialogOpen}
         onOpenChange={setIsCategoryDialogOpen}
         categories={categories}
-        transactions={transactions}
+        messages={messages}
         onCreateCategory={onCreateCategory}
         onUpdateCategory={onUpdateCategory}
         onDeleteCategory={onDeleteCategory}

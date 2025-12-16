@@ -4,15 +4,15 @@ import { Input } from '@/components/ui/input'
 import { Plus, SpinnerGap } from '@phosphor-icons/react'
 import { parseExpenseText, validatePrompt, APISystemError, InvalidPromptError } from '@/lib/gemini'
 import { toast } from 'sonner'
-import { Transaction } from '@/lib/types'
+import { Message } from '@/lib/types'
 
-interface TransactionInputProps {
-  onAdd: (transaction: Omit<Transaction, 'id' | 'timestamp'>) => void
+interface MessageInputProps {
+  onAdd: (message: Omit<Message, 'id' | 'timestamp'>) => void
   currentUserName: string
   currentFundId: string | null
 }
 
-export function TransactionInput({ onAdd, currentUserName, currentFundId }: TransactionInputProps) {
+export function MessageInput({ onAdd, currentUserName, currentFundId }: MessageInputProps) {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
@@ -42,13 +42,13 @@ export function TransactionInput({ onAdd, currentUserName, currentFundId }: Tran
         fundId: currentFundId,
         spend: parsed.spend,
         earn: parsed.earn,
-        content: parsed.content,
+        message: parsed.message,
         isPendingPrompt: false,
         promptCreatedAt: promptTimestamp,
       })
 
       toast.success('Đã thêm giao dịch thành công!', {
-        description: parsed.content,
+        description: parsed.message,
       })
 
       setInput('')
@@ -60,7 +60,7 @@ export function TransactionInput({ onAdd, currentUserName, currentFundId }: Tran
           fundId: currentFundId,
           spend: null,
           earn: null,
-          content: promptText,
+          message: promptText,
           isPendingPrompt: true,
           originalPrompt: promptText,
           promptCreatedAt: promptTimestamp,
@@ -95,7 +95,7 @@ export function TransactionInput({ onAdd, currentUserName, currentFundId }: Tran
         placeholder="Nhập giao dịch (VD: bánh tráng trộn 35)"
         disabled={isLoading || !currentFundId}
         className="flex-1 text-base"
-        id="transaction-input"
+        id="message-input"
       />
       <Button
         type="submit"

@@ -1,7 +1,7 @@
-import { useTransactions as useTransactionsFromProvider, TransactionProvider } from '@/app/providers/TransactionProvider'
+import { useMessages as useMessagesFromProvider, MessageProvider } from '@/app/providers/MessageProvider'
 
-export function useTransactions() {
-  return useTransactionsFromProvider()
+export function useMessages() {
+  return useMessagesFromProvider()
 }
 
-export { TransactionProvider }
+export { MessageProvider }

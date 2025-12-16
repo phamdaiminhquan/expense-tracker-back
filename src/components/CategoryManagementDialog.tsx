@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Category, Transaction } from '@/lib/types'
+import { Category, Message } from '@/lib/types'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,7 +15,7 @@ interface CategoryManagementDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   categories: Category[]
-  transactions: Transaction[]
+  messages: Message[]
   onCreateCategory: (name: string, description: string) => void
   onUpdateCategory: (categoryId: string, name: string, description: string) => void
   onDeleteCategory: (categoryId: string) => void
@@ -25,7 +25,7 @@ export function CategoryManagementDialog({
   open,
   onOpenChange,
   categories,
-  transactions,
+  messages,
   onCreateCategory,
   onUpdateCategory,
   onDeleteCategory,
@@ -70,7 +70,7 @@ export function CategoryManagementDialog({
   }
 
   const handleDelete = (categoryId: string) => {
-    if (!canDeleteCategory(categoryId, transactions)) {
+    if (!canDeleteCategory(categoryId, messages)) {
       toast.error('Không thể xóa', {
         description: 'Danh mục này đang được sử dụng trong các giao dịch',
       })
@@ -174,7 +174,7 @@ export function CategoryManagementDialog({
                 </Card>
               ) : (
                 categories.map((category) => {
-                  const usageCount = transactions.filter((t) => t.categoryId === category.id).length
+                  const usageCount = messages.filter((t) => t.categoryId === category.id).length
                   const isBeingEdited = editingId === category.id
 
                   return (

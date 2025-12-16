@@ -1,35 +1,35 @@
-# Transactions module API
+# Messages module API
 
 Protected with Bearer access token.
 
-## List transactions by fund
-GET `/funds/{fundId}/transactions`
-Response: array of transactions for the fund.
+## List messages by fund
+GET `/funds/{fundId}/messages`
+Response: array of messages for the fund.
 
-## Create transaction
-POST `/funds/{fundId}/transactions`
+## Create message
+POST `/funds/{fundId}/messages`
 ```json
 {
-  "rawPrompt": "Mua cafe 30k",
+  "message": "Mua cafe 30k",
   "spendValue": 30,          // optional
   "earnValue": null,         // optional
   "content": "Cafe với team", // optional
   "categoryId": "uuid"      // optional
 }
 ```
-Response: created transaction. If no spend/earn, status is `pending` and will be parsed by worker.
+Response: created message. If no spend/earn, status is `pending` and will be parsed by worker.
 
-## Transaction detail
-GET `/transactions/{transactionId}`
+## Message detail
+GET `/messages/{transactionId}`
 
-## Update transaction
-PATCH `/transactions/{transactionId}`
+## Update message
+PATCH `/messages/{transactionId}`
 ```json
 { "spendValue": 40, "content": "Cafe và bánh" }
 ```
 
-## Delete transaction
-DELETE `/transactions/{transactionId}`
+## Delete message
+DELETE `/messages/{transactionId}`
 Response: `{ "success": true }`
 
 Notes:

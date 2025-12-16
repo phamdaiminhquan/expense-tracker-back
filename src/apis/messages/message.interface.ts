@@ -1,14 +1,13 @@
-import { TransactionStatus } from '@/lib/types'
+import { MessageStatus } from '@/lib/types'
 
-export type TransactionDto = {
+export type MessageDto = {
   id: string
   fundId: string
-  rawPrompt?: string | null
+  message?: string | null
   spendValue?: number | null
   earnValue?: number | null
-  content?: string | null
   categoryId?: string | null
-  status?: TransactionStatus
+  status?: MessageStatus
   metadata?: Record<string, unknown> | null
   createdAt?: string | number
   createdById?: string | null
@@ -16,18 +15,17 @@ export type TransactionDto = {
   updatedAt?: string | number
 }
 
-export type CreateTransactionPayload = {
-  rawPrompt: string
+export type CreateMessagePayload = {
+  message: string | null,
   spendValue?: number | null
   earnValue?: number | null
-  content?: string | null
   categoryId?: string | null
 }
 
-export type UpdateTransactionPayload = {
+export type UpdateMessagePayload = {
   spendValue?: number | null
   earnValue?: number | null
-  content?: string | null
+  message?: string | null
   categoryId?: string | null
-  status?: TransactionStatus
+  status?: MessageStatus
 }

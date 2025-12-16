@@ -1,4 +1,4 @@
-import { Transaction, Fund, Category } from '@/lib/types'
+import { Message, Fund, Category } from '@/lib/types'
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import { TrendUp, TrendDown, Wallet, User, Tag } from '@phosphor-icons/react'
 interface FundStatisticsDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  transactions: Transaction[]
+  messages: Message[]
   categories: Category[]
   fund: Fund | null
   resolveUserName: (userId: string) => string
@@ -21,44 +21,44 @@ interface FundStatisticsDialogProps {
 export function FundStatisticsDialog({
   open,
   onOpenChange,
-  transactions,
+  messages,
   categories,
   fund,
   resolveUserName,
 }: FundStatisticsDialogProps) {
-  const validTransactions = transactions.filter((t) => !t.isPendingPrompt)
+  const validMessages = messages.filter((t) => !t.isPendingPrompt)
 
-  const totalSpend = validTransactions.reduce((sum, t) => sum + (t.spend || 0), 0)
-  const totalEarn = validTransactions.reduce((sum, t) => sum + (t.earn || 0), 0)
+  const totalSpend = validMessages.reduce((sum, t) => sum + (t.spend || 0), 0)
+  const totalEarn = validMessages.reduce((sum, t) => sum + (t.earn || 0), 0)
   const balance = totalEarn - totalSpend
 
   const userStats =
     fund?.type === 'shared'
       ? fund.memberIds.map((userId) => {
-          const userTransactions = validTransactions.filter((t) => t.userId === userId)
+          const userMessages = validMessages.filter((t) => t.userId === userId)
           const userName = resolveUserName(userId)
-          const spend = userTransactions.reduce((sum, t) => sum + (t.spend || 0), 0)
-          const earn = userTransactions.reduce((sum, t) => sum + (t.earn || 0), 0)
-          return { userId, userName, spend, earn, count: userTransactions.length }
+          const spend = userMessages.reduce((sum, t) => sum + (t.spend || 0), 0)
+          const earn = userMessages.reduce((sum, t) => sum + (t.earn || 0), 0)
+          return { userId, userName, spend, earn, count: userMessages.length }
         })
       : []
 
   const categoryStats = categories.map((category) => {
-    const categoryTransactions = validTransactions.filter((t) => t.categoryId === category.id)
-    const spend = categoryTransactions.reduce((sum, t) => sum + (t.spend || 0), 0)
-    const earn = categoryTransactions.reduce((sum, t) => sum + (t.earn || 0), 0)
+    const categoryMessages = validMessages.filter((t) => t.categoryId === category.id)
+    const spend = categoryMessages.reduce((sum, t) => sum + (t.spend || 0), 0)
+    const earn = categoryMessages.reduce((sum, t) => sum + (t.earn || 0), 0)
     return {
       categoryId: category.id,
       categoryName: category.name,
       spend,
       earn,
-      count: categoryTransactions.length,
+      count: categoryMessages.length,
     }
   }).filter((stat) => stat.count > 0)
 
-  const uncategorizedTransactions = validTransactions.filter((t) => !t.categoryId)
-  const uncategorizedSpend = uncategorizedTransactions.reduce((sum, t) => sum + (t.spend || 0), 0)
-  const uncategorizedEarn = uncategorizedTransactions.reduce((sum, t) => sum + (t.earn || 0), 0)
+  const uncategorizedMessages = validMessages.filter((t) => !t.categoryId)
+  const uncategorizedSpend = uncategorizedMessages.reduce((sum, t) => sum + (t.spend || 0), 0)
+  const uncategorizedEarn = uncategorizedMessages.reduce((sum, t) => sum + (t.earn || 0), 0)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -179,7 +179,7 @@ export function FundStatisticsDialog({
                   </Card>
                 ))}
                 
-                {uncategorizedTransactions.length > 0 && (
+                {uncategorizedMessages.length > 0 && (
                   <Card className="p-4 border-dashed">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
@@ -189,7 +189,7 @@ export function FundStatisticsDialog({
                         <div>
                           <p className="font-semibold text-muted-foreground">Chưa phân loại</p>
                           <p className="text-sm text-muted-foreground">
-                            {uncategorizedTransactions.length} giao dịch
+                            {uncategorizedMessages.length} giao dịch
                           </p>
                         </div>
                       </div>
@@ -216,7 +216,7 @@ export function FundStatisticsDialog({
             </div>
           )}
 
-          {validTransactions.length === 0 && (
+          {validMessages.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
               <p>Chưa có giao dịch hợp lệ nào để thống kê</p>
             </div>

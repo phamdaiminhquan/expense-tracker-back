@@ -1,31 +1,31 @@
 import { useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { TransactionPage } from '@/pages/TransactionPage'
 import { useFunds } from '@/hooks/useFunds'
-import { useTransactions } from '@/hooks/useTransactions'
 import { useCategories } from '@/hooks/useCategories'
 import { useAuth } from '@/hooks/useAuth'
+import { useMessages } from '@/hooks/useTransactions'
+import { MessagePage } from '@/pages/TransactionPage'
 
-export function TransactionRoute() {
+export function MessageRoute() {
   const { fundId } = useParams()
   const navigate = useNavigate()
 
   const { visibleFunds, enterFund } = useFunds()
   const { currentUserId, currentUserName, resolveUserName } = useAuth()
   const {
-    addTransaction,
-    updateTransaction,
-    deleteTransaction,
-    fetchTransactionsByFund,
-    getTransactionsByFund,
+    addMessage,
+    updateMessage,
+    deleteMessage,
+    fetchMessagesByFund,
+    getMessagesByFund,
     isProcessing,
-  } = useTransactions()
+  } = useMessages()
   const { categories, createCategory, updateCategory, deleteCategory } = useCategories()
 
   const fund = useMemo(() => visibleFunds.find((f) => f.id === fundId), [fundId, visibleFunds])
 
   const fundCategories = useMemo(() => categories.filter((c) => c.fundId === fundId), [categories, fundId])
-  const fundTransactions = useMemo(() => getTransactionsByFund(fundId || null), [fundId, getTransactionsByFund])
+  const fundMessages = useMemo(() => getMessagesByFund(fundId || null), [fundId, getMessagesByFund])
 
   useEffect(() => {
     if (fund) enterFund(fund)
@@ -33,24 +33,24 @@ export function TransactionRoute() {
 
   useEffect(() => {
     if (fundId) {
-      fetchTransactionsByFund(fundId)
+      fetchMessagesByFund(fundId)
     }
-  }, [fundId, fetchTransactionsByFund])
+  }, [fundId, fetchMessagesByFund])
 
   if (!fund) return <div className="h-screen flex items-center justify-center text-sm text-gray-500">Không tìm thấy quỹ</div>
 
   return (
-    <TransactionPage
+    <MessagePage
       fund={fund}
-      transactions={fundTransactions}
+      messages={fundMessages}
       categories={fundCategories}
       currentUserId={currentUserId as string}
       currentUserName={currentUserName as string}
       resolveUserName={resolveUserName}
       onBack={() => navigate('/funds')}
-      onAddTransaction={addTransaction}
-      onUpdateTransaction={updateTransaction}
-      onDeleteTransaction={deleteTransaction}
+      onAddMessage={addMessage}
+      onUpdateMessage={updateMessage}
+      onDeleteMessage={deleteMessage}
       onCreateCategory={(name, description) => createCategory(fundId || null, name, description)}
       onUpdateCategory={updateCategory}
       onDeleteCategory={deleteCategory}

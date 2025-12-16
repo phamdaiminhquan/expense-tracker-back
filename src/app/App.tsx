@@ -2,10 +2,10 @@ import { BrowserRouter } from 'react-router-dom'
 import { Toaster } from '@/components/ui/sonner'
 import { AppRouter } from './AppRouter.tsx'
 import { AuthProvider } from './providers/AuthProvider.tsx'
-import { FundProvider } from './providers/FundProvider.tsx'
 import { CategoryProvider } from './providers/CategoryProvider.tsx'
 import { AIParserProvider } from './providers/AIParserProvider.tsx'
-import { TransactionProvider } from './providers/TransactionProvider.tsx'
+import { FundProvider } from './providers/FundProvider.tsx'
+import { MessageProvider } from './providers/MessageProvider.tsx'
 
 function App() {
   return (
@@ -15,9 +15,9 @@ function App() {
         <FundProvider>
           <CategoryProvider>
             <AIParserProvider>
-              <TransactionProvider>
+              <MessageProvider>
                 <AppRouter />
-              </TransactionProvider>
+              </MessageProvider>
             </AIParserProvider>
           </CategoryProvider>
         </FundProvider>

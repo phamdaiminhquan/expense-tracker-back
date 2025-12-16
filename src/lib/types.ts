@@ -1,6 +1,6 @@
 export type FundType = 'personal' | 'shared'
 
-export type TransactionStatus = 'pending' | 'processed' | 'failed'
+export type MessageStatus = 'pending' | 'processed' | 'failed'
 
 export interface Category {
   id: string
@@ -19,17 +19,17 @@ export interface Fund {
   createdAt: number
 }
 
-export interface Transaction {
+export interface Message {
   id: string
   userId: string
   userName: string
   fundId: string
   spend: number | null
   earn: number | null
-  content: string
+  message: string
   categoryId?: string | null
   timestamp: number
-  status?: TransactionStatus
+  status?: MessageStatus
   isPendingPrompt?: boolean
   originalPrompt?: string
   promptCreatedAt?: number
@@ -40,13 +40,13 @@ export interface Transaction {
 export interface ParsedExpense {
   spend: number | null
   earn: number | null
-  content: string
+  message: string
   categoryId?: string | null
 }
 
 export interface GeminiResponse {
   candidates?: Array<{
-    content?: {
+    message?: {
       parts?: Array<{
         text?: string
       }>
