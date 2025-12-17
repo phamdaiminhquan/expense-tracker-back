@@ -3,7 +3,7 @@ import { LoginRoute } from '@/routes/LoginRoute'
 import { FundsRoute } from '@/routes/FundsRoute'
 import { RequireAuth } from '@/routes/RequireAuth'
 import { useAuth } from '@/hooks/useAuth'
-import { MessageRoute } from '@/routes/TransactionRoute'
+import { MessageRoute } from '@/routes/MessageRoute'
 
 export function AppRouter() {
   const { isAuthed } = useAuth()

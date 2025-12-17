@@ -19,7 +19,7 @@ import {
 } from '@phosphor-icons/react'
 import { formatCurrency } from '@/lib/currency'
 import { EditPendingPromptDialog } from './EditPendingPromptDialog'
-import { EditMessageDialog } from './EditTransactionDialog'
+import { EditMessageDialog } from './EditMessageDialog'
 
 interface ChatMessageViewProps {
   fund: Fund

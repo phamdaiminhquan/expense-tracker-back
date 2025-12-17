@@ -3,8 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useFunds } from '@/hooks/useFunds'
 import { useCategories } from '@/hooks/useCategories'
 import { useAuth } from '@/hooks/useAuth'
-import { useMessages } from '@/hooks/useTransactions'
-import { MessagePage } from '@/pages/TransactionPage'
+import { useMessages } from '@/hooks/useMessages'
+import { MessagePage } from '@/pages/MessagePage'
 
 export function MessageRoute() {
   const { fundId } = useParams()

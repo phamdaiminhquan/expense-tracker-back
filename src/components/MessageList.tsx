@@ -13,7 +13,7 @@ import { PencilSimple, Trash, ArrowClockwise, NotePencil } from '@phosphor-icons
 import { Message, Category } from '@/lib/types'
 import { formatCurrency } from '@/lib/currency'
 import { EditPendingPromptDialog } from './EditPendingPromptDialog'
-import { EditMessageDialog } from './EditTransactionDialog'
+import { EditMessageDialog } from './EditMessageDialog'
 
 interface MessageListProps {
   messages: Message[]

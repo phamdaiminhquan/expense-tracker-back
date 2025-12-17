@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Message, Fund, Category } from '@/lib/types'
 import { FundStatisticsDialog } from '@/components/FundStatisticsDialog'
 import { CategoryManagementDialog } from '@/components/CategoryManagementDialog'
-import { ChatMessageView } from '@/components/ChatTransactionView'
+import { ChatMessageView } from '@/components/ChatMessageView'
 
 interface MessagePageProps {
   fund: Fund
