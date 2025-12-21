@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseTextFieldProps, TextField, TextFieldProps } from '@mui/material';
 import React from 'react';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 import { StackLabel } from '../../styles/stack.style';
 import { IconElement } from '../icon/icon.element';
 import { ChangeEventCustom } from '../../../common/interfaces/change-event-custom.interface';

@@ -1,6 +1,6 @@
 import { SxProps, TableCell, TableHead, TableRow, Theme, Typography, useTheme } from '@mui/material';
 import React, { JSX } from 'react';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 import { Column } from '../table.interface';
 import { StackRowJustEnd } from '../../styles/stack.style';
 import { CheckboxElement } from '../../elements/check-box/check-box.element';

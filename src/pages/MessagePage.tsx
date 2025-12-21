@@ -14,12 +14,14 @@ interface MessagePageProps {
   resolveUserName: (userId: string) => string
   onBack: () => void
   onAddMessage: (message: Omit<Message, 'id' | 'timestamp'>) => Promise<void>
+  onResendMessage: (message: Message) => Promise<void>
   onUpdateMessage: (message: Message) => Promise<void>
   onDeleteMessage: (id: string) => Promise<void>
   onCreateCategory: (name: string, description: string) => void
   onUpdateCategory: (categoryId: string, name: string, description: string) => void
   onDeleteCategory: (categoryId: string) => void
   isProcessing?: boolean
+  isLoading?: boolean
 }
 
 export function MessagePage({
@@ -31,12 +33,14 @@ export function MessagePage({
   resolveUserName,
   onBack,
   onAddMessage,
+  onResendMessage,
   onUpdateMessage,
   onDeleteMessage,
   onCreateCategory,
   onUpdateCategory,
   onDeleteCategory,
   isProcessing = false,
+  isLoading = false,
 }: MessagePageProps) {
   const [isStatisticsDialogOpen, setIsStatisticsDialogOpen] = useState(false)
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
@@ -53,10 +57,12 @@ export function MessagePage({
         onShowStatistics={() => setIsStatisticsDialogOpen(true)}
         onManageCategories={() => setIsCategoryDialogOpen(true)}
         onAddMessage={onAddMessage}
+        onResendMessage={onResendMessage}
         onUpdateMessage={onUpdateMessage}
         onDeleteMessage={onDeleteMessage}
         resolveUserName={resolveUserName}
         isProcessing={isProcessing}
+        isLoading={isLoading}
       />
 
       <FundStatisticsDialog

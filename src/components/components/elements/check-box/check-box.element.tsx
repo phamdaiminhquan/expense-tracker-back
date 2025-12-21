@@ -1,6 +1,6 @@
 import { Checkbox, CheckboxProps, FormControlLabel, SxProps, Theme } from '@mui/material';
 import React from 'react';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 
 export interface CheckboxElementProps extends CheckboxProps {
   label?: any;

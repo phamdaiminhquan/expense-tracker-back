@@ -1,4 +1,4 @@
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 import { TextField, debounce, BaseTextFieldProps } from '@mui/material';
 import React from 'react';
 import { IconElement } from '../icon/icon.element';

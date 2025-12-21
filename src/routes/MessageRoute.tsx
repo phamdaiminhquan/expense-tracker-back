@@ -14,11 +14,13 @@ export function MessageRoute() {
   const { currentUserId, currentUserName, resolveUserName } = useAuth()
   const {
     addMessage,
+    resendMessage,
     updateMessage,
     deleteMessage,
     fetchMessagesByFund,
     getMessagesByFund,
     isProcessing,
+    isLoading,
   } = useMessages()
   const { categories, createCategory, updateCategory, deleteCategory } = useCategories()
 
@@ -49,12 +51,14 @@ export function MessageRoute() {
       resolveUserName={resolveUserName}
       onBack={() => navigate('/funds')}
       onAddMessage={addMessage}
+      onResendMessage={resendMessage}
       onUpdateMessage={updateMessage}
       onDeleteMessage={deleteMessage}
       onCreateCategory={(name, description) => createCategory(fundId || null, name, description)}
       onUpdateCategory={updateCategory}
       onDeleteCategory={deleteCategory}
       isProcessing={isProcessing}
+      isLoading={isLoading}
     />
   )
 }

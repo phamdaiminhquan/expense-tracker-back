@@ -2,7 +2,7 @@ import { Stack, SxProps, Theme, Typography } from '@mui/material';
 import React from 'react';
 import { getLimitLineCss } from '../../../common/utils/other.utils';
 import { TypographyOneLine } from './typography-limit-one-line.component';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 
 export interface TypographyContentCaptionProps {
   sx?: SxProps<Theme>;

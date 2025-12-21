@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, SxProps, Theme } from '@mui/material';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 import { WrapperCenterElement } from '../wrapper/wrapper-center.element';
 
 export interface IconImageElementProps {

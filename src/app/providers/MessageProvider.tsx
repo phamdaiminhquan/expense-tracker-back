@@ -8,11 +8,13 @@ import { createMessage, updateMessageApi, deleteMessageApi, listMessagesByFund }
 interface MessageContextValue {
   messages: Message[]
   addMessage: (message: Omit<Message, 'id' | 'timestamp'>) => Promise<void>
+  resendMessage: (message: Message) => Promise<void>
   updateMessage: (message: Message) => Promise<void>
   deleteMessage: (id: string) => Promise<void>
   fetchMessagesByFund: (fundId: string | null) => Promise<void>
   getMessagesByFund: (fundId: string | null) => Message[]
   isProcessing: boolean
+  isLoading: boolean
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>
 }
 
@@ -22,6 +24,7 @@ function useMessageState(): MessageContextValue {
   const { currentUserId, currentUserName } = useAuth()
   const [messages, setMessages] = useState<Message[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const addMessage = useCallback(
     async (newMessage: Omit<Message, 'id' | 'timestamp'>) => {
@@ -76,14 +79,69 @@ function useMessageState(): MessageContextValue {
     [currentUserId, currentUserName]
   )
 
+  const resendMessage = useCallback(
+    async (failedMessage: Message) => {
+      if (!currentUserId || !currentUserName) return
+      if (!failedMessage.fundId) return
+
+      // Update status to sending
+      setMessages((current) =>
+        current.map((msg) =>
+          msg.id === failedMessage.id ? { ...msg, clientStatus: 'sending' as const } : msg
+        )
+      )
+
+      try {
+        // Use originalPrompt if available, otherwise use message
+        const messageText = failedMessage.originalPrompt || failedMessage.message
+        
+        const payload: CreateMessagePayload = {
+          message: messageText,
+        }
+
+        // Only include spend/earn if they were already parsed (not for pending prompts)
+        if (!failedMessage.isPendingPrompt) {
+          if (failedMessage.spend !== null) payload.spendValue = failedMessage.spend
+          if (failedMessage.earn !== null) payload.earnValue = failedMessage.earn
+          if (failedMessage.categoryId) payload.categoryId = failedMessage.categoryId
+        }
+
+        const created = await createMessage(failedMessage.fundId, payload)
+
+        // Replace failed message with new one, preserve originalPrompt
+        setMessages((current) =>
+          current.map((msg) =>
+            msg.id === failedMessage.id 
+              ? { 
+                  ...created, 
+                  clientStatus: 'sent' as const,
+                  originalPrompt: failedMessage.originalPrompt || messageText,
+                  promptCreatedAt: failedMessage.promptCreatedAt || Date.now(),
+                } 
+              : msg
+          )
+        )
+
+        toast.success(created.status === 'pending' ? 'Đã gửi lại, sẽ xử lý sau' : 'Đã gửi lại giao dịch!')
+      } catch (error) {
+        setMessages((current) =>
+          current.map((msg) =>
+            msg.id === failedMessage.id ? { ...msg, clientStatus: 'failed' as const } : msg
+          )
+        )
+        toast.error('Gửi lại thất bại', {
+          description: 'Vui lòng thử lại',
+        })
+      }
+    },
+    [currentUserId, currentUserName]
+  )
+
   const updateMessage = useCallback(async (updatedMessage: Message) => {
     try {
+      // API only accepts message field for update
       const payload: UpdateMessagePayload = {
-        spendValue: updatedMessage.spend,
-        earnValue: updatedMessage.earn,
         message: updatedMessage.message,
-        categoryId: updatedMessage.categoryId ?? undefined,
-        status: updatedMessage.status ?? (updatedMessage.isPendingPrompt ? 'pending' : 'processed'),
       }
 
       const refreshed = await updateMessageApi(updatedMessage.id, payload)
@@ -116,6 +174,7 @@ function useMessageState(): MessageContextValue {
   const fetchMessagesByFund = useCallback(async (fundId: string | null) => {
     if (!fundId) return
 
+    setIsLoading(true)
     try {
       const data = await listMessagesByFund(fundId)
       setMessages((current) => {
@@ -127,6 +186,8 @@ function useMessageState(): MessageContextValue {
       toast.error('Không thể tải giao dịch', {
         description: 'Vui lòng thử lại sau',
       })
+    } finally {
+      setIsLoading(false)
     }
   }, [])
 
@@ -144,11 +205,13 @@ function useMessageState(): MessageContextValue {
   return {
     messages,
     addMessage,
+    resendMessage,
     updateMessage,
     deleteMessage,
     fetchMessagesByFund,
     getMessagesByFund,
     isProcessing,
+    isLoading,
     setMessages,
   }
 }

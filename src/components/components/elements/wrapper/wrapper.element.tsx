@@ -1,6 +1,6 @@
 import { Fade, Stack, SxProps, Theme, useTheme } from '@mui/material';
 import React, { ReactNode } from 'react';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 import { IconContentElement } from '../icon/icon-content.element';
 import { LoadingComponent } from '../../loading/loading.component';
 import { StackRowJustBetween } from '../../styles/stack.style';

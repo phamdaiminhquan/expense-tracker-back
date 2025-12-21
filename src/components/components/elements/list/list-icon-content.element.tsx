@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { List, ListItem, useTheme } from '@mui/material';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 import { IconContentElement } from '../icon/icon-content.element';
 
 export interface ListIconContentElementProps {

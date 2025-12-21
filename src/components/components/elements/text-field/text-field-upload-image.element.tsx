@@ -10,7 +10,7 @@ import {
   useTheme,
 } from '@mui/material';
 import React, { useRef } from 'react';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 import { ImageEmpty } from '../../styles/image.style';
 import { InputLabelCustom } from '../../styles/input.style';
 import { StackLabel } from '../../styles/stack.style';

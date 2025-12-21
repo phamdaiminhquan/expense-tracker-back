@@ -2,7 +2,7 @@ import { SxProps, TablePagination, Theme } from '@mui/material';
 import React, { useEffect } from 'react';
 import { ButtonIconCircleElement } from '../button/button-icon-circle.element';
 import { StackRowAlignCenter } from '../../styles/stack.style';
-import { PADDING_GAP_ITEM_SMALL } from '../../../common/constant/style.constant';
+import { PADDING_GAP_ITEM_SMALL } from '@/common/constant/style.constant';
 
 export interface PaginationElementProps {
   total?: number;

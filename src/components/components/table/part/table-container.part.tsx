@@ -1,6 +1,6 @@
 import { SxProps, TableContainer, Theme, useTheme } from '@mui/material';
 import React, { ReactElement } from 'react';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 import { StackBgPaperBorRadLayCol } from '../../styles/stack.style';
 
 export interface TableContainerPartProps {

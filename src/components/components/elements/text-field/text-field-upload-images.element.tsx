@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import React, { useRef } from 'react';
 import { ButtonUploadFileElement } from '../button/button-upload-file.element';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 import { IconElement } from '../icon/icon.element';
 import { ImageEmpty } from '../../styles/image.style';
 import { InputLabelCustom } from '../../styles/input.style';

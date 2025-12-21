@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import TextField, { BaseTextFieldProps } from '@mui/material/TextField';
 import { MenuItem, useTheme } from '@mui/material';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 import { IconElement } from '../icon/icon.element';
 import { StackLabel } from '../../styles/stack.style';
 

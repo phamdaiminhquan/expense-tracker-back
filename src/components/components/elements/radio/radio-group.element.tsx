@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { FormControl, RadioGroup } from '@mui/material';
 import React, { ReactNode } from 'react';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 import { InputLabel } from '@mui/material';
 import { IconElement } from '../icon/icon.element';
 import { StackLabel } from '../../styles/stack.style';

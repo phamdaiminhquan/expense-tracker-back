@@ -1,6 +1,6 @@
 import { Fade, Stack, SxProps, Theme, Typography } from '@mui/material';
 import React, { ReactNode } from 'react';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 import { LoadingComponent } from '../../loading/loading.component';
 import { StackBgDefaultBorRadLayCol } from '../../styles/stack.style';
 

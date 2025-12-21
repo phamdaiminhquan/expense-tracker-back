@@ -2,7 +2,7 @@ import { SxProps, Theme, useTheme } from '@mui/material';
 import { DatePicker, DatePickerProps } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import React from 'react';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 import { StackLabel } from '../../styles/stack.style';
 import { IconElement } from '../icon/icon.element';
 import { getActionBarSx, getPickerSx, getPopperProps } from '../../styles/picker.style';

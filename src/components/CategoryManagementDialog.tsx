@@ -107,57 +107,63 @@ export function CategoryManagementDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Quản lý danh mục</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">Quản lý danh mục</DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 overflow-hidden flex flex-col gap-4">
-          <Button onClick={startCreate} className="gap-2 w-full" disabled={isCreating || editingId !== null}>
+          <Button 
+            onClick={startCreate} 
+            className="gap-2 w-full shadow-md hover:shadow-lg transition-all" 
+            disabled={isCreating || editingId !== null}
+          >
             <Plus weight="bold" />
             Tạo danh mục mới
           </Button>
 
           {(isCreating || editingId) && (
-            <Card className="p-4 space-y-3 border-primary/50">
+            <Card className="p-5 space-y-4 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent shadow-md">
               <div className="space-y-2">
-                <Label htmlFor="category-name">Tên danh mục</Label>
+                <Label htmlFor="category-name" className="text-sm font-semibold">Tên danh mục</Label>
                 <Input
                   id="category-name"
                   placeholder="VD: Siêu thị, Ăn uống, Di chuyển..."
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  className="h-11 transition-all focus-visible:ring-2 focus-visible:ring-primary/20"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category-description">Mô tả</Label>
+                <Label htmlFor="category-description" className="text-sm font-semibold">Mô tả</Label>
                 <Textarea
                   id="category-description"
                   placeholder="Mô tả để AI hiểu cách phân loại, VD: Những chi tiêu cho việc mua sắm ở siêu thị"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
+                  className="transition-all focus-visible:ring-2 focus-visible:ring-primary/20"
                 />
               </div>
 
               <div className="flex gap-2">
                 {isCreating ? (
                   <React.Fragment>
-                    <Button onClick={handleCreate} className="gap-2 flex-1">
+                    <Button onClick={handleCreate} className="gap-2 flex-1 shadow-md hover:shadow-lg transition-all">
                       <Check weight="bold" />
                       Tạo
                     </Button>
-                    <Button variant="outline" onClick={cancelEdit} className="gap-2">
+                    <Button variant="outline" onClick={cancelEdit} className="gap-2 shadow-sm">
                       <X weight="bold" />
                       Hủy
                     </Button>
                   </React.Fragment>
                 ) : (
                   <React.Fragment>
-                    <Button onClick={() => handleUpdate(editingId!)} className="gap-2 flex-1">
+                    <Button onClick={() => handleUpdate(editingId!)} className="gap-2 flex-1 shadow-md hover:shadow-lg transition-all">
                       <Check weight="bold" />
                       Lưu
                     </Button>
-                    <Button variant="outline" onClick={cancelEdit} className="gap-2">
+                    <Button variant="outline" onClick={cancelEdit} className="gap-2 shadow-sm">
                       <X weight="bold" />
                       Hủy
                     </Button>
@@ -168,9 +174,9 @@ export function CategoryManagementDialog({
           )}
 
           <ScrollArea className="flex-1">
-            <div className="space-y-2 pr-4">
+            <div className="space-y-3 pr-4">
               {categories.length === 0 ? (
-                <Card className="p-8 text-center">
+                <Card className="p-12 text-center border-dashed border-2 bg-muted/20">
                   <p className="text-muted-foreground text-sm">Chưa có danh mục nào</p>
                 </Card>
               ) : (
@@ -181,37 +187,39 @@ export function CategoryManagementDialog({
                   return (
                     <Card
                       key={category.id}
-                      className={`p-4 ${isBeingEdited ? 'opacity-50' : ''}`}
+                      className={`p-4 border-border/50 shadow-sm hover:shadow-md transition-all ${isBeingEdited ? 'opacity-50' : 'hover:border-primary/30'}`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-sm">{category.name}</h3>
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                          <h3 className="font-semibold text-base">{category.name}</h3>
+                          <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2">
                             {category.description}
                           </p>
                           {usageCount > 0 && (
-                            <p className="text-xs text-primary mt-2">
+                            <p className="text-xs text-primary mt-2 font-medium">
                               Đang sử dụng: {usageCount} giao dịch
                             </p>
                           )}
                         </div>
 
-                        <div className="flex gap-1 shrink-0">
+                        <div className="flex gap-2 shrink-0">
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => startEdit(category)}
                             disabled={isCreating || editingId !== null}
+                            className="hover:bg-muted/50 rounded-lg"
                           >
-                            <PencilSimple />
+                            <PencilSimple size={18} />
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDelete(category.id)}
                             disabled={isCreating || editingId !== null || usageCount > 0}
+                            className="hover:bg-destructive/10 rounded-lg"
                           >
-                            <Trash className={usageCount > 0 ? 'text-muted-foreground' : 'text-destructive'} />
+                            <Trash size={18} className={usageCount > 0 ? 'text-muted-foreground' : 'text-destructive'} />
                           </Button>
                         </div>
                       </div>

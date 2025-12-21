@@ -1,6 +1,6 @@
 import { FormControlLabel, Radio, RadioProps } from '@mui/material';
 import React from 'react';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 
 export interface RadioElementProps extends RadioProps {
   name?: string;

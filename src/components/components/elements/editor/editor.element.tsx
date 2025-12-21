@@ -15,9 +15,9 @@
 // import { FileTypeEnum } from '../../../common/enums/file-type.enum';
 // import { checkUploadFile } from '../../../common/utils/file.utils';
 // import { SnackbarType, useSnackbar } from '../../../hooks/use-snackbar.hook';
-// import { PADDING_GAP_ITEM } from '../../../common/constant/style.constant';
+// import { PADDING_GAP_ITEM } from '@/common/constant/style.constant';
 // import { toolbarFull } from './ckeditor.constant';
-// import { STYLE } from '../../../common/constant';
+// import { STYLE } from '@/common/constant';
 // import { getErrorMessage } from '@/common/utils/string.utils';
 // import { LoadingComponent } from '../../loading/loading.component';
 // import { StackLabel } from '../../styles/stack.style';

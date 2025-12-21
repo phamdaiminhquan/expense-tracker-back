@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 import { StackRowAlignCenter } from '../../styles/stack.style';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IconContentElementProps } from './icon-content.element';

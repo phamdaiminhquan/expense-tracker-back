@@ -1,7 +1,7 @@
 import { SxProps, Theme, Typography } from '@mui/material';
 import React from 'react';
-import { STYLE } from '../../../common/constant';
-import { TYPOGRAPHY_STYLES } from '../../../common/constant/typography.constant';
+import { STYLE } from '@/common/constant';
+import { TYPOGRAPHY_STYLES } from '@/common/constant/typography.constant';
 import { getLimitLineCss } from '../../../common/utils/other.utils';
 import { StackWrap } from '../../styles/stack.style';
 

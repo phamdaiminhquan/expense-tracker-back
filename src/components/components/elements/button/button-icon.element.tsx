@@ -1,5 +1,5 @@
 import { Button, ButtonProps } from '@mui/material';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 import React from 'react';
 import { LoadingComponent } from '../../loading/loading.component';
 import { IconElement } from '../icon/icon.element';

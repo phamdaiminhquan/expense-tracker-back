@@ -58,50 +58,56 @@ export function CreateFundDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Tạo quỹ mới</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="sm:max-w-lg backdrop-blur-xl bg-card/95 border-border/40 shadow-2xl">
+        <DialogHeader className="space-y-2">
+          <DialogTitle className="text-3xl font-extrabold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            Tạo quỹ mới
+          </DialogTitle>
+          <DialogDescription className="text-base text-muted-foreground font-medium">
             Tạo quỹ để quản lý thu chi riêng hoặc chung với người khác
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="fund-name">Tên quỹ</Label>
+        <form onSubmit={handleSubmit} className="space-y-7">
+          <div className="space-y-2.5">
+            <Label htmlFor="fund-name" className="text-sm font-bold">Tên quỹ</Label>
             <Input
               id="fund-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="VD: Quỹ đi chơi, Quỹ sinh nhật..."
-              className="text-base"
+              className="text-base h-12 border-border/60 bg-background/50 backdrop-blur-sm focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary/50 transition-all shadow-md"
             />
           </div>
 
-          <div className="space-y-3">
-            <Label>Loại quỹ</Label>
+          <div className="space-y-4">
+            <Label className="text-sm font-bold">Loại quỹ</Label>
             <RadioGroup value={type} onValueChange={(v) => setType(v as FundType)}>
-              <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+              <div className="flex items-center space-x-4 p-5 border-2 border-border/50 rounded-2xl hover:bg-muted/40 hover:border-primary/40 transition-all duration-200 cursor-pointer group shadow-md">
                 <RadioGroupItem value="personal" id="personal" />
                 <Label
                   htmlFor="personal"
-                  className="flex-1 cursor-pointer flex items-center gap-2"
+                  className="flex-1 cursor-pointer flex items-center gap-4"
                 >
-                  <UserIcon weight="bold" className="text-secondary" />
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-secondary/25 to-secondary/15 group-hover:from-secondary/35 group-hover:to-secondary/20 transition-all shadow-lg">
+                    <UserIcon weight="bold" className="text-secondary" size={24} />
+                  </div>
                   <div>
-                    <div className="font-medium">Quỹ riêng</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="font-bold text-base">Quỹ riêng</div>
+                    <div className="text-sm text-muted-foreground font-medium">
                       Chỉ bạn có thể sử dụng
                     </div>
                   </div>
                 </Label>
               </div>
-              <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+              <div className="flex items-center space-x-4 p-5 border-2 border-border/50 rounded-2xl hover:bg-muted/40 hover:border-primary/40 transition-all duration-200 cursor-pointer group shadow-md">
                 <RadioGroupItem value="shared" id="shared" />
-                <Label htmlFor="shared" className="flex-1 cursor-pointer flex items-center gap-2">
-                  <Users weight="bold" className="text-primary" />
+                <Label htmlFor="shared" className="flex-1 cursor-pointer flex items-center gap-4">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-primary/25 to-primary/15 group-hover:from-primary/35 group-hover:to-primary/20 transition-all shadow-lg">
+                    <Users weight="bold" className="text-primary" size={24} />
+                  </div>
                   <div>
-                    <div className="font-medium">Quỹ chung</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="font-bold text-base">Quỹ chung</div>
+                    <div className="text-sm text-muted-foreground font-medium">
                       Chia sẻ với nhiều người
                     </div>
                   </div>
@@ -111,15 +117,15 @@ export function CreateFundDialog({
           </div>
 
           {type === 'shared' && (
-            <div className="space-y-3">
-              <Label>Thành viên</Label>
-              <div className="space-y-2 border rounded-lg p-3">
+            <div className="space-y-4">
+              <Label className="text-sm font-bold">Thành viên</Label>
+              <div className="space-y-2.5 border-2 border-border/50 rounded-2xl p-5 bg-muted/30 backdrop-blur-sm shadow-lg">
                 {allUsers.map((user) => {
                   const isCurrentUser = user.id === currentUserId
                   const isChecked = selectedMembers.includes(user.id)
 
                   return (
-                    <div key={user.id} className="flex items-center space-x-2">
+                    <div key={user.id} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-background/60 transition-all">
                       <Checkbox
                         id={`member-${user.id}`}
                         checked={isChecked}
@@ -128,11 +134,11 @@ export function CreateFundDialog({
                       />
                       <Label
                         htmlFor={`member-${user.id}`}
-                        className="flex-1 cursor-pointer text-sm"
+                        className="flex-1 cursor-pointer text-sm font-semibold"
                       >
                         {user.name}
                         {isCurrentUser && (
-                          <span className="text-muted-foreground ml-1">(Bạn)</span>
+                          <span className="text-muted-foreground ml-2 font-normal">(Bạn)</span>
                         )}
                       </Label>
                     </div>
@@ -142,11 +148,20 @@ export function CreateFundDialog({
             </div>
           )}
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <DialogFooter className="gap-3 pt-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => onOpenChange(false)} 
+              className="shadow-md font-semibold"
+            >
               Hủy
             </Button>
-            <Button type="submit" disabled={!name.trim()}>
+            <Button 
+              type="submit" 
+              disabled={!name.trim()} 
+              className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold"
+            >
               Tạo quỹ
             </Button>
           </DialogFooter>

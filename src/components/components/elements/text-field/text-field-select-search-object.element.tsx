@@ -2,7 +2,7 @@
 import React from 'react';
 import TextField, { BaseTextFieldProps } from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 import { IconElement } from '../icon/icon.element';
 import { EmptyComponent } from '../../empty/empty.component';
 import { LoadingComponent } from '../../loading/loading.component';

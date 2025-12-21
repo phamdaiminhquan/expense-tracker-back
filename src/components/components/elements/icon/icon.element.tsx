@@ -1,6 +1,6 @@
 import { Icon, IconProps, SxProps, Theme, useTheme } from '@mui/material';
 import React from 'react';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant/index';
 
 export interface IconElementProps extends IconProps {
   icon: any;

@@ -1,7 +1,7 @@
 import { SxProps, Theme, Typography } from '@mui/material';
 import React from 'react';
-import { STYLE } from '../../../common/constant';
-import { getLimitLineCss } from '../../../common/utils/other.utils';
+import { STYLE } from '@/common/constant/index';
+import { getLimitLineCss } from '../../../../common/utils/other.utils';
 import { StackRowAlignCenter } from '../../styles/stack.style';
 import { IconElement, IconElementProps } from './icon.element';
 

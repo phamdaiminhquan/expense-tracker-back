@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Box, BoxProps, Skeleton, useTheme } from '@mui/material';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant/index';
 import { ImageSizeType } from './image.enum';
 import { WrapperCenterElement } from '../wrapper/wrapper-center.element';
 import { DialogElement } from '../dialog/dialog.element';
-import { FileWithPreviewOrUrl } from '../../../common/interfaces/file.interface';
+import { FileWithPreviewOrUrl } from '../../../../common/interfaces/file.interface';
 
 export interface ImageElementProps extends BoxProps {
   url: FileWithPreviewOrUrl;

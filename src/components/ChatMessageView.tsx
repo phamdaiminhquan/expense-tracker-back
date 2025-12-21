@@ -16,10 +16,12 @@ import {
   Tag,
   CheckCircle,
   XCircle,
+  ArrowRight,
 } from '@phosphor-icons/react'
 import { formatCurrency } from '@/lib/currency'
 import { EditPendingPromptDialog } from './EditPendingPromptDialog'
 import { EditMessageDialog } from './EditMessageDialog'
+import { Skeleton } from '@/components/ui/skeleton'
 import React from 'react'
 
 interface ChatMessageViewProps {
@@ -33,9 +35,11 @@ interface ChatMessageViewProps {
   onShowStatistics: () => void
   onManageCategories: () => void
   onAddMessage: (message: Omit<Message, 'id' | 'timestamp'>) => Promise<void>
+  onResendMessage: (message: Message) => Promise<void>
   onUpdateMessage: (message: Message) => Promise<void>
   onDeleteMessage: (id: string) => Promise<void>
   isProcessing?: boolean
+  isLoading?: boolean
 }
 
 const ITEMS_PER_PAGE = 10
@@ -51,9 +55,11 @@ export function ChatMessageView({
   onShowStatistics,
   onManageCategories,
   onAddMessage,
+  onResendMessage,
   onUpdateMessage,
   onDeleteMessage,
   isProcessing = false,
+  isLoading = false,
 }: ChatMessageViewProps) {
   const [input, setInput] = useState('')
   const [editingMessage, setEditingMessage] = useState<Message | null>(null)
@@ -86,6 +92,10 @@ export function ChatMessageView({
     e.preventDefault()
     if (!input.trim()) return
 
+    const messageText = input.trim()
+    // Clear input immediately for better UX
+    setInput('')
+
     try {
       await onAddMessage({
         userId: currentUserId,
@@ -93,12 +103,11 @@ export function ChatMessageView({
         fundId: fund.id,
         spend: null,
         earn: null,
-        message: input.trim(),
+        message: messageText,
         isPendingPrompt: true,
-        originalPrompt: input.trim(),
+        originalPrompt: messageText,
         promptCreatedAt: Date.now(),
       })
-      setInput('')
     } catch (error) {
       // Error toast handled upstream
     }
@@ -132,42 +141,46 @@ export function ChatMessageView({
   }
 
   return (
-    <div className="h-screen flex flex-col bg-[#f0f0f5]">
-      <header className="sticky top-0 z-10 bg-white border-b border-gray-200">
-        <div className="max-w-2xl mx-auto px-4 py-3">
+    <div className="h-screen flex flex-col relative overflow-hidden">
+      {/* Premium Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/[0.01] to-background" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(120,119,198,0.05),transparent_70%)]" />
+      
+      <header className="sticky top-0 z-20 bg-background/95 border-b border-border/40 shadow-lg">
+        <div className="max-w-2xl mx-auto px-5 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={onBack}
-                className="h-9 w-9 hover:bg-gray-100"
+                className="h-11 w-11 hover:bg-muted/60 rounded-xl transition-all"
               >
-                <ArrowLeft size={20} weight="regular" />
+                <ArrowLeft size={22} weight="bold" />
               </Button>
               <div className="flex-1 min-w-0">
-                <h1 className="font-semibold text-base truncate text-gray-900">{fund.name}</h1>
-                <p className="text-xs text-gray-500 truncate">
+                <h1 className="font-bold text-xl truncate text-foreground">{fund.name}</h1>
+                <p className="text-xs text-muted-foreground truncate font-medium">
                   {fund.type === 'shared' ? getMemberNames() : 'AI Bot'}
                 </p>
               </div>
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-2">
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={onManageCategories}
-                className="h-9 w-9 hover:bg-gray-100 text-gray-600"
+                className="h-11 w-11 hover:bg-muted/60 rounded-xl text-muted-foreground hover:text-foreground transition-all"
               >
-                <Tag size={20} weight="regular" />
+                <Tag size={22} weight="bold" />
               </Button>
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={onShowStatistics}
-                className="h-9 w-9 hover:bg-gray-100 text-gray-600"
+                className="h-11 w-11 hover:bg-muted/60 rounded-xl text-muted-foreground hover:text-foreground transition-all"
               >
-                <ChartBar size={20} weight="regular" />
+                <ChartBar size={22} weight="bold" />
               </Button>
             </div>
           </div>
@@ -177,26 +190,48 @@ export function ChatMessageView({
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto"
+        className="flex-1 overflow-y-auto relative z-10"
       >
-        <div className="max-w-2xl mx-auto px-4 py-4 space-y-1">
+        {/* Gradient overlay for de-emphasized background when input is focused */}
+        <div className="fixed bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background/90 via-background/50 to-transparent pointer-events-none z-10" />
+        
+        <div className="max-w-2xl mx-auto px-5 py-8 space-y-4" style={{ paddingBottom: 'calc(max(1rem, env(safe-area-inset-bottom)) + 5rem)' }}>
           {visibleCount < sortedMessages.length && (
-            <div className="text-center pb-2">
+            <div className="text-center pb-3">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setVisibleCount((prev) => Math.min(prev + ITEMS_PER_PAGE, sortedMessages.length))}
-                className="text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                className="text-xs text-muted-foreground hover:text-foreground hover:bg-muted/60 rounded-full transition-all font-medium"
               >
                 Tải thêm
               </Button>
             </div>
           )}
 
-          {visibleMessages.length === 0 ? (
-            <div className="text-center py-16 text-gray-400">
-              <p className="text-sm">Chưa có giao dịch nào</p>
-              <p className="text-xs mt-1">Nhập giao dịch đầu tiên bên dưới</p>
+          {isLoading ? (
+            <div className="space-y-5">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'} mb-5`}
+                >
+                  <div className="max-w-[78%] space-y-1.5">
+                    {i % 2 === 0 && (
+                      <Skeleton className="h-3 w-16 ml-5 mb-1" />
+                    )}
+                    <Skeleton className="h-20 w-48 rounded-2xl" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : visibleMessages.length === 0 ? (
+            <div className="text-center py-24">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 mb-6 shadow-lg">
+                <NotePencil size={40} className="text-primary" weight="duotone" />
+              </div>
+              <p className="text-base font-bold text-foreground mb-2">Chưa có giao dịch nào</p>
+              <p className="text-sm text-muted-foreground">Nhập giao dịch đầu tiên bên dưới</p>
             </div>
           ) : (
             // Reverse the list for chat view (newest at the bottom)
@@ -208,61 +243,53 @@ export function ChatMessageView({
               return (
                 <div
                   key={message.id}
-                  className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-3 group`}
+                  className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-5 group animate-in fade-in slide-in-from-bottom-3`}
                 >
-                  <div className={`max-w-[75%] space-y-0.5`}>
+                  <div className={`max-w-[78%] space-y-1.5`}>
                     {!isCurrentUser && (
-                      <p className="text-[10px] text-gray-400 px-3 lowercase">{message.userName}</p>
+                      <p className="text-[11px] text-muted-foreground px-5 lowercase font-semibold tracking-wide">{message.userName}</p>
                     )}
                     <div className="relative">
                       <div
-                        className={`rounded-2xl px-3.5 py-2.5 ${
+                        className={`rounded-2xl px-5 py-3.5 shadow-lg ${
                           isCurrentUser
                             ? isPending
-                              ? 'bg-white border border-gray-200'
-                              : 'bg-[#4169E1] text-white'
-                            : 'bg-white border border-gray-200'
-                        }`}
+                              ? 'bg-card/95 border border-border/60'
+                              : 'bg-gradient-to-br from-primary via-primary/95 to-primary/90 text-primary-foreground shadow-xl'
+                            : 'bg-card/95 border border-border/60'
+                        } transition-all duration-300 group-hover:shadow-xl group-hover:scale-[1.02]`}
                       >
-                        <div className="space-y-1.5">
-                          <p className={`text-sm leading-snug ${
-                            isPending ? 'text-gray-500' : isCurrentUser ? 'text-white' : 'text-gray-900'
+                        <div className="space-y-2.5">
+                          <p className={`text-sm leading-relaxed font-medium ${
+                            isPending ? 'text-muted-foreground italic' : isCurrentUser ? 'text-primary-foreground' : 'text-foreground'
                           }`}>
                             {message.message}
                           </p>
                           {!isPending && (
                             <React.Fragment>
                               {(message.spend !== null || message.earn !== null) && (
-                                <div className="flex items-center gap-1.5 pt-0.5">
+                                <div className="flex items-center gap-3 pt-1.5">
                                   {message.spend !== null && (
-                                    <span
-                                      className={`font-medium text-sm ${
-                                        isCurrentUser ? 'text-white' : 'text-red-500'
-                                      }`}
-                                    >
+                                    <span className="font-bold text-base text-red-500">
                                       -{formatCurrency(message.spend)}
                                     </span>
                                   )}
                                   {message.earn !== null && (
-                                    <span
-                                      className={`font-medium text-sm ${
-                                        isCurrentUser ? 'text-white' : 'text-green-500'
-                                      }`}
-                                    >
+                                    <span className="font-bold text-base text-green-500">
                                       +{formatCurrency(message.earn)}
                                     </span>
                                   )}
                                 </div>
                               )}
                               {message.categoryId && (
-                                <div className="flex items-center gap-1 pt-0.5">
+                                <div className="flex items-center gap-2 pt-1.5">
                                   <Tag 
-                                    size={10} 
+                                    size={12} 
                                     weight="fill" 
-                                    className={isCurrentUser ? 'text-white/70' : 'text-gray-400'}
+                                    className={isCurrentUser ? 'text-primary-foreground/80' : 'text-muted-foreground'}
                                   />
-                                  <span className={`text-[10px] uppercase tracking-wide ${
-                                    isCurrentUser ? 'text-white/80' : 'text-gray-500'
+                                  <span className={`text-[11px] uppercase tracking-wider font-semibold ${
+                                    isCurrentUser ? 'text-primary-foreground/90' : 'text-muted-foreground'
                                   }`}>
                                     {categories.find((c) => c.id === message.categoryId)?.name || 'Không rõ'}
                                   </span>
@@ -277,14 +304,14 @@ export function ChatMessageView({
                       {/* Delete button only appears for non-pending messages */}
                       {!isPending && (
                         <div 
-                          className={`absolute bottom-0 transition-opacity ${isCurrentUser ? '-left-8' : '-right-8'} opacity-0 group-hover:opacity-100`}
+                          className={`absolute bottom-0 transition-opacity ${isCurrentUser ? '-left-10' : '-right-10'} opacity-0 group-hover:opacity-100`}
                         >
                             <Button
                                 size="icon"
                                 onClick={() => {
                                   onDeleteMessage(message.id).catch(() => {})
                                 }}
-                                className="h-6 w-6 bg-white border border-gray-200 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50 shadow-md"
+                                className="h-7 w-7 bg-background border border-border rounded-full text-destructive hover:text-destructive hover:bg-destructive/10 shadow-lg transition-all"
                             >
                                 <Trash size={12} weight="bold" />
                             </Button>
@@ -293,14 +320,14 @@ export function ChatMessageView({
                     </div>
 
                     {/* Footer: Timestamp, Reprocess/Edit/Pending status */}
-                    <div className="flex items-center gap-1.5 px-3">
-                      <p className="text-[10px] text-gray-400">
+                    <div className="flex items-center gap-2 px-4">
+                      <p className="text-[10px] text-muted-foreground">
                         {/* FIXED: Correctly display timestamp */}
                         {formatDate(message.promptCreatedAt || message.timestamp)}
                       </p>
 
                       {isCurrentUser && clientStatus === 'sending' && (
-                        <CircleNotch size={12} className="text-gray-400 animate-spin" weight="bold" />
+                        <CircleNotch size={12} className="text-muted-foreground animate-spin" weight="bold" />
                       )}
 
                       {isCurrentUser && clientStatus === 'sent' && (
@@ -308,30 +335,57 @@ export function ChatMessageView({
                       )}
 
                       {isCurrentUser && clientStatus === 'failed' && (
-                        <XCircle size={12} className="text-red-500" weight="bold" />
+                        <>
+                          <XCircle size={12} className="text-destructive" weight="bold" />
+                          {/* Resend button for failed messages */}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-5 px-2 text-[10px] text-destructive hover:text-destructive hover:bg-destructive/10 rounded-full transition-all ml-1 font-medium"
+                            onClick={() => onResendMessage(message).catch(() => {})}
+                            title="Gửi lại"
+                          >
+                            <ArrowRight size={10} weight="bold" className="mr-0.5" />
+                            Gửi lại
+                          </Button>
+                        </>
                       )}
                       
                       {isPending && isCurrentUser && (
                         // Reprocess/Edit pending prompt button
                         <Button
                           variant="ghost"
-                          className="h-4 w-4 text-yellow-600 hover:text-yellow-700 hover:bg-transparent p-0"
+                          className="h-5 w-5 text-accent hover:text-accent hover:bg-accent/10 rounded-full p-0 transition-all"
                           onClick={() => setEditingPendingPrompt(message)}
+                          title="Chỉnh sửa và xử lý lại"
                         >
-                          <ArrowClockwise size={10} weight="bold" />
+                          <ArrowClockwise size={11} weight="bold" />
                         </Button>
                       )}
                       
-                      {/* Edit button for confirmed messages (if not pending) */}
-                      {!isPending && isCurrentUser && (
-                        <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {/* Edit prompt button for messages without transaction (no spend/earn) */}
+                      {!isPending && isCurrentUser && message.spend === null && message.earn === null && (
+                        <Button
+                          variant="ghost"
+                          className="h-5 px-2 text-[10px] text-accent hover:text-accent hover:bg-accent/10 rounded-full transition-all ml-1 font-medium"
+                          onClick={() => setEditingPendingPrompt(message)}
+                          title="Chỉnh sửa prompt và xử lý lại"
+                        >
+                          <ArrowClockwise size={10} weight="bold" className="mr-0.5" />
+                          Xử lý lại
+                        </Button>
+                      )}
+                      
+                      {/* Edit button for confirmed messages with transaction (if not pending) */}
+                      {!isPending && isCurrentUser && (message.spend !== null || message.earn !== null) && (
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-4 w-4 text-gray-400 hover:text-gray-600 hover:bg-transparent p-0"
+                            className="h-5 w-5 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full p-0 transition-all"
                             onClick={() => setEditingMessage(message)}
                           >
-                            <PencilSimple size={10} weight="bold" />
+                            <PencilSimple size={11} weight="bold" />
                           </Button>
                         </div>
                       )}
@@ -345,25 +399,50 @@ export function ChatMessageView({
         </div>
       </div>
 
-      <div className="sticky bottom-0 bg-background border-t shadow-lg">
-        <div className="container max-w-4xl mx-auto px-4 py-4">
-          <form onSubmit={handleSubmit} className="flex gap-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Nhập chi tiêu..."
-              disabled={false}
-              className="flex-1 border-0 bg-[#f0f0f5] rounded-full px-4 py-2.5 text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-400"
-            />
-            <Button 
-              type="submit" 
-              size="icon" 
-              disabled={!input.trim()}
-              className="h-10 w-10 rounded-full bg-[#f0f0f5] hover:bg-gray-200 text-gray-600 disabled:opacity-50 disabled:bg-[#f0f0f5]"
-              variant="ghost"
-            >
-              <PaperPlaneRight size={20} weight="fill" className={input.trim() ? 'text-[#4169E1]' : 'text-gray-400'} />
-            </Button>
+      {/* Premium iOS-style Chat Input */}
+      <div className="fixed bottom-0 left-0 right-0 z-30 flex items-end justify-center" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
+        <div className="w-full max-w-2xl px-4 sm:px-6">
+          <form onSubmit={handleSubmit} className="relative">
+            {/* Floating Card Container */}
+            <div className="relative bg-white rounded-[28px] sm:rounded-[32px] shadow-[0_4px_20px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.1)] border border-border/15">
+              <div className="flex items-center gap-3 px-4 py-3 sm:px-5 sm:py-4">
+                {/* Input Field */}
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Nhập giao dịch (VD: bánh tráng trộn 35)"
+                  disabled={false}
+                  className="flex-1 h-14 sm:h-16 px-0 text-base sm:text-[17px] bg-transparent border-0 outline-none placeholder:text-muted-foreground/60 placeholder:font-normal text-foreground focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  style={{
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                    WebkitAppearance: 'none',
+                    appearance: 'none',
+                  }}
+                />
+                
+                {/* Send Button */}
+                <button
+                  type="submit"
+                  disabled={!input.trim()}
+                  className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-primary/90 hover:bg-primary active:bg-primary/80 disabled:bg-muted/60 disabled:opacity-40 transition-all duration-200 hover:scale-105 active:scale-95 disabled:scale-100 shadow-sm hover:shadow-md active:shadow-sm disabled:shadow-none disabled:cursor-not-allowed group touch-manipulation"
+                  aria-label="Gửi tin nhắn"
+                >
+                  <PaperPlaneRight 
+                    size={20} 
+                    weight="fill" 
+                    className="text-white transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-active:translate-x-0 group-active:translate-y-0" 
+                  />
+                </button>
+              </div>
+              
+              {/* Subtle Focus Ring - appears when input has content */}
+              <div className={`absolute inset-0 rounded-[28px] sm:rounded-[32px] pointer-events-none transition-opacity duration-300 ${
+                input.trim() ? 'opacity-100' : 'opacity-0'
+              }`}>
+                <div className="absolute inset-0 rounded-[28px] sm:rounded-[32px] ring-1 ring-primary/15" />
+              </div>
+            </div>
           </form>
         </div>
       </div>

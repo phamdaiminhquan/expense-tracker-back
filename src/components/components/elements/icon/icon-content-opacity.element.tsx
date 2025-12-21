@@ -2,7 +2,7 @@ import { Box, SxProps, Theme, Typography } from '@mui/material';
 import React from 'react';
 import { StackRowAlignJustCenter } from '../../styles/stack.style';
 import { IconElement } from './icon.element';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 
 export interface IconContentOpacityElementProps {
   icon: string;

@@ -1,8 +1,8 @@
 import { Stack, SxProps, Theme, useTheme } from '@mui/material';
 import React, { useState } from 'react';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 import { IconElement } from './icon.element';
-import { iconsMui } from '../../../common/constant/icons-mui.constant';
+import { iconsMui } from '@/common/constant/icons-mui.constant';
 import { TextFieldElement } from '../text-field/text-field.element';
 import { EmptyComponent } from '../../empty/empty.component';
 import { StackRow, StackWrap } from '../../styles/stack.style';

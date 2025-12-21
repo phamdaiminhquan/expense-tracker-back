@@ -106,49 +106,59 @@ export function FundStatistics({ messages, fund }: FundStatisticsProps) {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="border-destructive/20 bg-destructive/5">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground uppercase tracking-wide">
-              <TrendDown className="text-destructive" weight="bold" />
+        <Card className="border-destructive/30 bg-gradient-to-br from-destructive/10 to-destructive/5 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-destructive/10 rounded-full blur-2xl -mr-10 -mt-10" />
+          <CardHeader className="pb-3 relative z-10">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2 text-muted-foreground uppercase tracking-wide">
+              <div className="p-1.5 rounded-lg bg-destructive/20">
+                <TrendDown className="text-destructive" size={16} weight="bold" />
+              </div>
               Chi tiêu
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold font-mono text-destructive">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold font-mono text-destructive">
               {formatFullCurrency(totalSpend)}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-accent/20 bg-accent/5">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground uppercase tracking-wide">
-              <TrendUp className="text-accent" weight="bold" />
+        <Card className="border-accent/30 bg-gradient-to-br from-accent/10 to-accent/5 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-accent/10 rounded-full blur-2xl -mr-10 -mt-10" />
+          <CardHeader className="pb-3 relative z-10">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2 text-muted-foreground uppercase tracking-wide">
+              <div className="p-1.5 rounded-lg bg-accent/20">
+                <TrendUp className="text-accent" size={16} weight="bold" />
+              </div>
               Thu nhập
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold font-mono text-accent">
+          <CardContent className="relative z-10">
+            <div className="text-3xl font-bold font-mono text-accent">
               {formatFullCurrency(totalEarn)}
             </div>
           </CardContent>
         </Card>
 
         <Card
-          className={`border-primary/20 ${netBalance >= 0 ? 'bg-primary/5' : 'bg-destructive/5'}`}
+          className={`border-primary/30 ${netBalance >= 0 ? 'bg-gradient-to-br from-primary/10 to-primary/5' : 'bg-gradient-to-br from-destructive/10 to-destructive/5'} backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden relative`}
         >
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground uppercase tracking-wide">
-              <Wallet
-                className={netBalance >= 0 ? 'text-primary' : 'text-destructive'}
-                weight="bold"
-              />
+          <div className={`absolute top-0 right-0 w-20 h-20 ${netBalance >= 0 ? 'bg-primary/10' : 'bg-destructive/10'} rounded-full blur-2xl -mr-10 -mt-10`} />
+          <CardHeader className="pb-3 relative z-10">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2 text-muted-foreground uppercase tracking-wide">
+              <div className={`p-1.5 rounded-lg ${netBalance >= 0 ? 'bg-primary/20' : 'bg-destructive/20'}`}>
+                <Wallet
+                  className={netBalance >= 0 ? 'text-primary' : 'text-destructive'}
+                  size={16}
+                  weight="bold"
+                />
+              </div>
               Còn lại
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative z-10">
             <div
-              className={`text-2xl font-bold font-mono ${netBalance >= 0 ? 'text-primary' : 'text-destructive'}`}
+              className={`text-3xl font-bold font-mono ${netBalance >= 0 ? 'text-primary' : 'text-destructive'}`}
             >
               {formatFullCurrency(netBalance)}
             </div>
@@ -156,25 +166,25 @@ export function FundStatistics({ messages, fund }: FundStatisticsProps) {
         </Card>
       </div>
 
-      {isSharedFund && showPerUser && Object.keys(userStats).length > 0 && (
-        <Card>
+        {isSharedFund && showPerUser && Object.keys(userStats).length > 0 && (
+        <Card className="shadow-md border-border/50 bg-card/80 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="text-base">Thống kê theo người</CardTitle>
+            <CardTitle className="text-base font-semibold">Thống kê theo người</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {Object.entries(userStats).map(([userId, stats]) => (
                 <div
                   key={userId}
-                  className="flex items-center justify-between p-3 rounded-lg border bg-muted/30"
+                  className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-muted/20 hover:bg-muted/30 transition-all shadow-sm"
                 >
-                  <div className="font-medium">{stats.userName}</div>
+                  <div className="font-semibold text-foreground">{stats.userName}</div>
                   <div className="flex gap-4 text-sm">
-                    <div className="text-destructive font-mono">
+                    <div className="text-destructive font-mono font-semibold">
                       Chi: {formatFullCurrency(stats.spend)}
                     </div>
                     {stats.earn > 0 && (
-                      <div className="text-accent font-mono">
+                      <div className="text-accent font-mono font-semibold">
                         Thu: {formatFullCurrency(stats.earn)}
                       </div>
                     )}

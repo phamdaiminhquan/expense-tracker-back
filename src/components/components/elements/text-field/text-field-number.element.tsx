@@ -2,7 +2,7 @@
 import { BaseTextFieldProps, TextField } from '@mui/material';
 import React from 'react';
 import { NumericFormat } from 'react-number-format';
-import { STYLE } from '../../../common/constant';
+import { STYLE } from '@/common/constant';
 import { StackLabel } from '../../styles/stack.style';
 import { IconElement } from '../icon/icon.element';
 

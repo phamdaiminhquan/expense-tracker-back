@@ -45,6 +45,7 @@ export function EditPendingPromptDialog({
     setIsLoading(true)
 
     try {
+      // Update message with new prompt and set status to 'pending' to trigger AI processing
       await onSave({
         ...message,
         message: promptText.trim(),
@@ -56,7 +57,7 @@ export function EditPendingPromptDialog({
         categoryId: null,
       })
 
-      toast.success('Đã lưu ghi chú, backend sẽ xử lý.', {
+      toast.success('Đã cập nhật prompt, AI sẽ xử lý lại.', {
         description: promptText.trim(),
       })
 
@@ -72,33 +73,34 @@ export function EditPendingPromptDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Chỉnh sửa và xử lý ghi chú</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-2xl font-bold">Chỉnh sửa và xử lý ghi chú</DialogTitle>
+          <DialogDescription className="text-base">
             Chỉnh sửa prompt và xử lý lại để tạo giao dịch hợp lệ. Thời gian giao dịch sẽ là thời điểm bạn tạo ghi chú ban đầu.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="pending-prompt">Prompt giao dịch</Label>
+            <Label htmlFor="pending-prompt" className="text-sm font-semibold">Prompt giao dịch</Label>
             <Input
               id="pending-prompt"
               value={promptText}
               onChange={(e) => setPromptText(e.target.value)}
               placeholder="VD: bánh tráng trộn 35"
               disabled={isLoading}
+              className="h-11 transition-all focus-visible:ring-2 focus-visible:ring-primary/20"
             />
             <p className="text-xs text-muted-foreground">
               Mô tả giao dịch và số tiền (VD: "cơm trưa 45" hoặc "nhận lương 5000")
             </p>
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading} className="shadow-sm">
             Hủy
           </Button>
-          <Button onClick={handleProcess} disabled={isLoading || !promptText.trim()}>
+          <Button onClick={handleProcess} disabled={isLoading || !promptText.trim()} className="shadow-md hover:shadow-lg transition-all">
             {isLoading ? (
               <React.Fragment>
                 <SpinnerGap className="animate-spin mr-2" />

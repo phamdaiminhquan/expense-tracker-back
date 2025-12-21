@@ -12,7 +12,6 @@ function App() {
   return (
     <BrowserRouter>
       <Toaster position="top-right" />
-      <LogoComponent url="/assets/image/logo.jpg" />
       <AuthProvider>
         <FundProvider>
           <CategoryProvider>
