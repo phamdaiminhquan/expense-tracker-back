@@ -2,6 +2,7 @@ import { ComponentProps, ComponentType, createContext, CSSProperties, ReactNode,
 import * as RechartsPrimitive from "recharts"
 
 import { cn } from "@/lib/utils"
+import React from "react"
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const
@@ -193,7 +194,7 @@ function ChartTooltipContent({
               {formatter && item?.value !== undefined && item.name ? (
                 formatter(item.value, item.name, item, index, item.payload)
               ) : (
-                <>
+                <React.Fragment>
                   {itemConfig?.icon ? (
                     <itemConfig.icon />
                   ) : (
@@ -236,7 +237,7 @@ function ChartTooltipContent({
                       </span>
                     )}
                   </div>
-                </>
+                </React.Fragment>
               )}
             </div>
           )

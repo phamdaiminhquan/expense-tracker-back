@@ -72,7 +72,6 @@ export function FundListScreen({
               Chi cần nhập, AI sẽ lo phần còn lại.
             </p>
           </div>
-
           <div className="flex items-center gap-2">
             <Input
               placeholder="Tên quỹ mới..."

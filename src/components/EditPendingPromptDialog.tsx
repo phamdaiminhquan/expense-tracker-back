@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Message, Category } from '@/lib/types'
 import { toast } from 'sonner'
 import { SpinnerGap } from '@phosphor-icons/react'
+import React from 'react'
 
 interface EditPendingPromptDialogProps {
   message: Message | null
@@ -99,10 +100,10 @@ export function EditPendingPromptDialog({
           </Button>
           <Button onClick={handleProcess} disabled={isLoading || !promptText.trim()}>
             {isLoading ? (
-              <>
+              <React.Fragment>
                 <SpinnerGap className="animate-spin mr-2" />
                 Đang xử lý...
-              </>
+              </React.Fragment>
             ) : (
               'Xử lý'
             )}

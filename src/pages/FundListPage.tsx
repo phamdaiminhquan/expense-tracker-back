@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Fund } from '@/lib/types'
 import { FundListScreen } from '@/components/FundListScreen'
 import { CreateFundDialog } from '@/components/CreateFundDialog'
@@ -53,7 +53,7 @@ export function FundListPage({
   }
 
   return (
-    <>
+    <React.Fragment>
       <FundListScreen
         funds={visibleFunds}
         currentUserId={currentUserId}
@@ -72,6 +72,6 @@ export function FundListPage({
         currentUserId={currentUserId}
         allUsers={currentUser ? [currentUser] : []}
       />
-    </>
+    </React.Fragment>
   )
 }

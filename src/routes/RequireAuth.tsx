@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
+import { JSX } from 'react'
 
 export function RequireAuth({ children }: { children: JSX.Element }) {
   const { isAuthed } = useAuth()

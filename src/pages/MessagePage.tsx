@@ -3,6 +3,7 @@ import { Message, Fund, Category } from '@/lib/types'
 import { FundStatisticsDialog } from '@/components/FundStatisticsDialog'
 import { CategoryManagementDialog } from '@/components/CategoryManagementDialog'
 import { ChatMessageView } from '@/components/ChatMessageView'
+import React from 'react'
 
 interface MessagePageProps {
   fund: Fund
@@ -41,7 +42,7 @@ export function MessagePage({
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
 
   return (
-    <>
+    <React.Fragment>
       <ChatMessageView
         fund={fund}
         messages={messages}
@@ -76,6 +77,6 @@ export function MessagePage({
         onUpdateCategory={onUpdateCategory}
         onDeleteCategory={onDeleteCategory}
       />
-    </>
+    </React.Fragment>
   )
 }

@@ -14,6 +14,7 @@ import { Message, Category } from '@/lib/types'
 import { formatCurrency } from '@/lib/currency'
 import { EditPendingPromptDialog } from './EditPendingPromptDialog'
 import { EditMessageDialog } from './EditMessageDialog'
+import React from 'react'
 
 interface MessageListProps {
   messages: Message[]
@@ -49,7 +50,7 @@ export function MessageList({ messages, categories = [], onUpdate, onDelete }: M
   }
 
   return (
-    <>
+    <React.Fragment>
       <div className="rounded-lg border bg-card overflow-hidden">
         <Table>
           <TableHeader>
@@ -156,6 +157,6 @@ export function MessageList({ messages, categories = [], onUpdate, onDelete }: M
         onOpenChange={(open) => !open && setEditingPendingPrompt(null)}
         onSave={onUpdate}
       />
-    </>
+    </React.Fragment>
   )
 }

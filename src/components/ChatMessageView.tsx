@@ -20,6 +20,7 @@ import {
 import { formatCurrency } from '@/lib/currency'
 import { EditPendingPromptDialog } from './EditPendingPromptDialog'
 import { EditMessageDialog } from './EditMessageDialog'
+import React from 'react'
 
 interface ChatMessageViewProps {
   fund: Fund
@@ -230,7 +231,7 @@ export function ChatMessageView({
                             {message.message}
                           </p>
                           {!isPending && (
-                            <>
+                            <React.Fragment>
                               {(message.spend !== null || message.earn !== null) && (
                                 <div className="flex items-center gap-1.5 pt-0.5">
                                   {message.spend !== null && (
@@ -267,7 +268,7 @@ export function ChatMessageView({
                                   </span>
                                 </div>
                               )}
-                            </>
+                            </React.Fragment>
                           )}
                         </div>
                       </div>

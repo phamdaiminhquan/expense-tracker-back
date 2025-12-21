@@ -10,6 +10,7 @@ import { Plus, Trash, PencilSimple, X, Check } from '@phosphor-icons/react'
 import { canDeleteCategory } from '@/lib/categories'
 import { toast } from 'sonner'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import React from 'react'
 
 interface CategoryManagementDialogProps {
   open: boolean
@@ -140,7 +141,7 @@ export function CategoryManagementDialog({
 
               <div className="flex gap-2">
                 {isCreating ? (
-                  <>
+                  <React.Fragment>
                     <Button onClick={handleCreate} className="gap-2 flex-1">
                       <Check weight="bold" />
                       Tạo
@@ -149,9 +150,9 @@ export function CategoryManagementDialog({
                       <X weight="bold" />
                       Hủy
                     </Button>
-                  </>
+                  </React.Fragment>
                 ) : (
-                  <>
+                  <React.Fragment>
                     <Button onClick={() => handleUpdate(editingId!)} className="gap-2 flex-1">
                       <Check weight="bold" />
                       Lưu
@@ -160,7 +161,7 @@ export function CategoryManagementDialog({
                       <X weight="bold" />
                       Hủy
                     </Button>
-                  </>
+                  </React.Fragment>
                 )}
               </div>
             </Card>
