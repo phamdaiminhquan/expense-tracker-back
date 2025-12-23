@@ -5,6 +5,8 @@ import {
 	CreateFundPayload,
 	FundDto,
 	FundMemberDto,
+	FundsListResponse,
+	FundsListQuery,
 	UpdateFundPayload,
 } from './fund.interface'
 
@@ -17,12 +19,35 @@ function mapFund(dto: FundDto): Fund {
 		// Ensure owner is always included as member for access control
 		memberIds: dto.memberIds && dto.memberIds.length > 0 ? dto.memberIds : [dto.ownerId],
 		createdAt: typeof dto.createdAt === 'string' ? Date.parse(dto.createdAt) : dto.createdAt,
+		lastMessage: dto.lastMessage ? {
+			id: dto.lastMessage.id,
+			text: dto.lastMessage.message || '',
+			timestamp: typeof dto.lastMessage.createdAt === 'string' 
+				? Date.parse(dto.lastMessage.createdAt) 
+				: dto.lastMessage.createdAt,
+			processedAt: dto.lastMessage.processedAt 
+				? (typeof dto.lastMessage.processedAt === 'string' 
+					? Date.parse(dto.lastMessage.processedAt) 
+					: dto.lastMessage.processedAt)
+				: null,
+		} : undefined,
 	}
 }
 
-export async function getListFunds(): Promise<Fund[]> {
-	const res = await axiosRequest.get<FundDto[]>('/funds')
-	return (res.data || []).map(mapFund)
+export async function getListFunds(query: FundsListQuery = {}): Promise<{ funds: Fund[], total: number }> {
+	const params = new URLSearchParams({
+		page: String(query.page || 1),
+		take: String(query.take || 10),
+		orderBy: query.orderBy || 'lastActivityTime',
+		orderType: query.orderType || 'DESC',
+		...(query.search && { search: query.search }),
+	})
+
+	const res = await axiosRequest.get<FundsListResponse>(`/funds?${params}`)
+	return {
+		funds: (res.data?.data || []).map(mapFund),
+		total: res.data?.total || 0,
+	}
 }
 
 export async function createFund(payload: CreateFundPayload): Promise<Fund> {

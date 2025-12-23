@@ -10,6 +10,13 @@ export interface Category {
   createdAt: number
 }
 
+export interface FundLastMessage {
+  id: string
+  text: string
+  timestamp: number
+  processedAt?: number | null
+}
+
 export interface Fund {
   id: string
   name: string
@@ -17,6 +24,7 @@ export interface Fund {
   ownerId: string
   memberIds: string[]
   createdAt: number
+  lastMessage?: FundLastMessage  // Message mới nhất từ BE
 }
 
 export interface Message {

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import {
-  ArrowLeft,
+  List,
   ChartBar,
   PaperPlaneRight,
   PencilSimple,
@@ -25,13 +25,13 @@ import { Skeleton } from '@/components/ui/skeleton'
 import React from 'react'
 
 interface ChatMessageViewProps {
-  fund: Fund
+  fund: Fund | null
   messages: Message[]
   categories: Category[]
   currentUserId: string
   currentUserName: string
   resolveUserName: (userId: string) => string
-  onBack: () => void
+  onOpenDrawer: () => void
   onShowStatistics: () => void
   onManageCategories: () => void
   onAddMessage: (message: Omit<Message, 'id' | 'timestamp'>) => Promise<void>
@@ -51,7 +51,7 @@ export function ChatMessageView({
   currentUserId,
   currentUserName,
   resolveUserName,
-  onBack,
+  onOpenDrawer,
   onShowStatistics,
   onManageCategories,
   onAddMessage,
@@ -90,7 +90,7 @@ export function ChatMessageView({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!input.trim()) return
+    if (!input.trim() || !fund) return
 
     const messageText = input.trim()
     // Clear input immediately for better UX
@@ -137,6 +137,7 @@ export function ChatMessageView({
   }
 
   const getMemberNames = () => {
+    if (!fund) return ''
     return fund.memberIds.map((id) => resolveUserName(id)).join(', ')
   }
 
@@ -153,36 +154,41 @@ export function ChatMessageView({
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={onBack}
+                onClick={onOpenDrawer}
                 className="h-11 w-11 hover:bg-muted/60 rounded-xl transition-all"
+                aria-label="Open navigation"
               >
-                <ArrowLeft size={22} weight="bold" />
+                <List size={22} weight="bold" />
               </Button>
               <div className="flex-1 min-w-0">
-                <h1 className="font-bold text-xl truncate text-foreground">{fund.name}</h1>
+                <h1 className="font-bold text-xl truncate text-foreground">
+                  {fund ? fund.name : 'Chọn quỹ để bắt đầu'}
+                </h1>
                 <p className="text-xs text-muted-foreground truncate font-medium">
-                  {fund.type === 'shared' ? getMemberNames() : 'AI Bot'}
+                  {fund ? (fund.type === 'shared' ? getMemberNames() : 'AI Bot') : 'Mở menu để chọn quỹ'}
                 </p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={onManageCategories}
-                className="h-11 w-11 hover:bg-muted/60 rounded-xl text-muted-foreground hover:text-foreground transition-all"
-              >
-                <Tag size={22} weight="bold" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={onShowStatistics}
-                className="h-11 w-11 hover:bg-muted/60 rounded-xl text-muted-foreground hover:text-foreground transition-all"
-              >
-                <ChartBar size={22} weight="bold" />
-              </Button>
-            </div>
+            {fund && (
+              <div className="flex gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={onManageCategories}
+                  className="h-11 w-11 hover:bg-muted/60 rounded-xl text-muted-foreground hover:text-foreground transition-all"
+                >
+                  <Tag size={22} weight="bold" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={onShowStatistics}
+                  className="h-11 w-11 hover:bg-muted/60 rounded-xl text-muted-foreground hover:text-foreground transition-all"
+                >
+                  <ChartBar size={22} weight="bold" />
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -224,6 +230,21 @@ export function ChatMessageView({
                   </div>
                 </div>
               ))}
+            </div>
+          ) : !fund ? (
+            <div className="text-center py-24">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 mb-6 shadow-lg">
+                <NotePencil size={40} className="text-primary" weight="duotone" />
+              </div>
+              <p className="text-base font-bold text-foreground mb-2">Chưa có quỹ nào</p>
+              <p className="text-sm text-muted-foreground mb-4">Tạo quỹ đầu tiên để bắt đầu quản lý chi tiêu</p>
+              <Button
+                variant="default"
+                onClick={onOpenDrawer}
+                className="mt-2"
+              >
+                Tạo quỹ mới
+              </Button>
             </div>
           ) : visibleMessages.length === 0 ? (
             <div className="text-center py-24">
@@ -411,8 +432,8 @@ export function ChatMessageView({
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Nhập giao dịch (VD: bánh tráng trộn 35)"
-                  disabled={false}
+                  placeholder={fund ? "Nhập giao dịch (VD: bánh tráng trộn 35)" : "Chọn quỹ để bắt đầu"}
+                  disabled={!fund}
                   className="flex-1 h-14 sm:h-16 px-0 text-base sm:text-[17px] bg-transparent border-0 outline-none placeholder:text-muted-foreground/60 placeholder:font-normal text-foreground focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                   style={{
                     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
@@ -424,7 +445,7 @@ export function ChatMessageView({
                 {/* Send Button */}
                 <button
                   type="submit"
-                  disabled={!input.trim()}
+                  disabled={!input.trim() || !fund}
                   className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-primary/90 hover:bg-primary active:bg-primary/80 disabled:bg-muted/60 disabled:opacity-40 transition-all duration-200 hover:scale-105 active:scale-95 disabled:scale-100 shadow-sm hover:shadow-md active:shadow-sm disabled:shadow-none disabled:cursor-not-allowed group touch-manipulation"
                   aria-label="Gửi tin nhắn"
                 >

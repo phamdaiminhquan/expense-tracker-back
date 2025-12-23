@@ -9,12 +9,16 @@ interface FundContextValue {
   visibleFunds: Fund[]
   selectedFund: Fund | null
   fundId: string | null
+  total: number
+  hasMore: boolean
   enterFund: (fund: Fund) => void
   backToFundList: () => void
   createFund: (name: string, type: FundType, memberIds: string[]) => Promise<Fund>
   fetchFunds: () => Promise<void>
+  loadMoreFunds: () => Promise<void>
   isLoading: boolean
   isCreating: boolean
+  isLoadingMore: boolean
   setFunds: React.Dispatch<React.SetStateAction<Fund[]>>
 }
 
@@ -25,16 +29,45 @@ function useFundState(currentUserId: string | null): FundContextValue {
   const [selectedFund, setSelectedFund] = useState<Fund | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [total, setTotal] = useState(0)
+  const [currentPage, setCurrentPage] = useState(1)
 
-  const fetchFunds = useCallback(async () => {
-    setIsLoading(true)
+  const fetchFunds = useCallback(async (page: number = 1, append: boolean = false) => {
+    if (page === 1) {
+      setIsLoading(true)
+    } else {
+      setIsLoadingMore(true)
+    }
+    
     try {
-      const data = await getListFunds()
-      setFunds(data)
+      const { funds: fundsData, total: totalCount } = await getListFunds({
+        page,
+        take: 10, // Load 10 funds mỗi lần
+        orderBy: 'lastActivityTime',
+        orderType: 'DESC',
+      })
+      
+      if (append) {
+        setFunds((prev) => [...prev, ...fundsData])
+      } else {
+        setFunds(fundsData)
+      }
+      
+      setTotal(totalCount)
+      setCurrentPage(page)
     } finally {
       setIsLoading(false)
+      setIsLoadingMore(false)
     }
   }, [])
+
+  const loadMoreFunds = useCallback(async () => {
+    if (isLoadingMore || funds.length >= total) return
+    
+    const nextPage = currentPage + 1
+    await fetchFunds(nextPage, true)
+  }, [isLoadingMore, funds.length, total, currentPage, fetchFunds])
 
   useEffect(() => {
     if (!currentUserId) {
@@ -71,7 +104,9 @@ function useFundState(currentUserId: string | null): FundContextValue {
       setIsCreating(true)
       try {
         const newFund = await apiCreateFund({ name, type, memberIds })
-        setFunds((current) => [...current, newFund])
+        // Thêm vào đầu list vì fund mới sẽ có lastActivityTime mới nhất
+        setFunds((current) => [newFund, ...current])
+        setTotal((prev) => prev + 1)
         return newFund
       } finally {
         setIsCreating(false)
@@ -86,18 +121,23 @@ function useFundState(currentUserId: string | null): FundContextValue {
   }, [currentUserId, funds])
 
   const fundId = selectedFund?.id ?? null
+  const hasMore = funds.length < total
 
   return {
     funds,
     visibleFunds,
     selectedFund,
     fundId,
+    total,
+    hasMore,
     enterFund,
     backToFundList,
     createFund,
-    fetchFunds,
+    fetchFunds: () => fetchFunds(1, false),
+    loadMoreFunds,
     isLoading,
     isCreating,
+    isLoadingMore,
     setFunds,
   }
 }

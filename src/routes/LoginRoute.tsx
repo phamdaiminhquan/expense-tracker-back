@@ -10,7 +10,7 @@ export function LoginRoute() {
   const [showLoadingScreen, setShowLoadingScreen] = useState(false)
   const hasShownInitialBanner = useRef(false)
 
-  if (isAuthed) return <Navigate to="/funds" replace />
+  if (isAuthed) return <Navigate to="/chat" replace />
 
   // Show banner when user first enters the app (not authenticated)
   useEffect(() => {
@@ -35,7 +35,7 @@ export function LoginRoute() {
     // Set flag to show loading screen
     sessionStorage.setItem('justLoggedIn', 'true')
     login(session)
-    navigate('/funds', { state: { fromLogin: true } })
+    navigate('/chat', { state: { fromLogin: true } })
   }
 
   const handleLoadingComplete = () => {
