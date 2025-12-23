@@ -25,6 +25,7 @@ export interface Fund {
   memberIds: string[]
   createdAt: number
   lastMessage?: FundLastMessage  // Message mới nhất từ BE
+  isOpenDialogCate?: boolean
 }
 
 export interface Message {

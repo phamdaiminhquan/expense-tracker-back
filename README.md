@@ -1,23 +1,50 @@
-# ✨ Welcome to Your Spark Template!
-You've just launched your brand-new Spark Template Codespace — everything’s fired up and ready for you to explore, build, and create with Spark!
+# FinCap - Expense Tracker
 
-This template is your blank canvas. It comes with a minimal setup to help you get started quickly with Spark development.
+FinCap là ứng dụng quản lý chi tiêu cá nhân & nhóm, hỗ trợ theo dõi, phân tích và tối ưu hóa tài chính cá nhân.
 
-🚀 What's Inside?
-- A clean, minimal Spark environment
-- Pre-configured for local development
-- Ready to scale with your ideas
-  
-🧠 What Can You Do?
+## Tính năng chính
+- Quản lý quỹ chi tiêu cá nhân và nhóm
+- Đăng ký, phân loại danh mục chi tiêu
+- Giao diện chat để nhập và quản lý giao dịch
+- Thống kê, báo cáo chi tiêu trực quan
+- Quản lý thành viên quỹ, phân quyền
+- Đăng nhập xác thực người dùng
 
-Right now, this is just a starting point — the perfect place to begin building and testing your Spark applications.
+## Cài đặt & chạy dự án
 
-🧹 Just Exploring?
-No problem! If you were just checking things out and don’t need to keep this code:
+### Yêu cầu
+- Node.js >= 18
+- Yarn hoặc npm
 
-- Simply delete your Spark.
-- Everything will be cleaned up — no traces left behind.
+### Cài đặt
 
-📄 License For Spark Template Resources 
+```bash
+# Cài dependencies
+npm install
+# hoặc
+yarn install
+```
 
-The Spark Template files and resources from GitHub are licensed under the terms of the MIT license, Copyright GitHub, Inc.
+### Chạy ứng dụng
+
+```bash
+npm run dev
+# hoặc
+yarn dev
+```
+
+Ứng dụng sẽ chạy ở địa chỉ: http://localhost:5173
+
+## Cấu trúc thư mục
+- `src/` - Mã nguồn chính
+  - `apis/` - Giao tiếp API backend
+  - `components/` - Các thành phần UI
+  - `pages/` - Các trang chính
+  - `redux/` - State management
+  - `common/`, `lib/`, `hooks/` - Tiện ích, logic dùng chung
+
+## Đóng góp
+Mọi ý kiến đóng góp, báo lỗi hoặc đề xuất vui lòng tạo issue hoặc pull request.
+
+## Giấy phép
+MIT License

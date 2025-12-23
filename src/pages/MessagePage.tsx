@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Message, Fund, Category } from '@/lib/types'
 import { FundStatisticsDialog } from '@/components/FundStatisticsDialog'
-import { CategoryManagementDialog } from '@/components/CategoryManagementDialog'
+// import { CategoryManagementDialog } from '@/components/CategoryManagementDialog'
 import { CategorySubscriptionDialog } from '@/components/CategorySubscriptionDialog'
 
 import { ChatMessageView } from '@/components/ChatMessageView'
@@ -76,7 +76,7 @@ export function MessagePage({
   // Hiển thị banner khi đang load funds (lần đầu vào app)
   useEffect(() => {
     if (hasShownInitialBanner.current) return
-    
+
     // Chỉ hiển thị lần đầu khi vào app và đang load funds
     const hasSeenBanner = sessionStorage.getItem('hasSeenChatBanner')
     if (!hasSeenBanner && isLoadingFunds) {
@@ -107,25 +107,19 @@ export function MessagePage({
     setIsCreateFundDialogOpen(false)
   }
 
-    const fundCategories = fund ? categories.filter((c) => c.fundId === fund.id) : []
+  const fundCategories = fund ? categories.filter((c) => c.fundId === fund.id) : []
   const fundMessages = fund ? messages.filter((m) => m.fundId === fund.id) : []
 
   useEffect(() => {
     if (!fund?.id) return
-    const storageKey = `fundCategorySetupSeen:${fund.id}`
-    const hasSeen = sessionStorage.getItem(storageKey)
-    if (!hasSeen) {
+    if (fund.isOpenDialogCate) {
       setIsAutoCategorySubscription(true)
       setIsCategorySubscriptionOpen(true)
     }
-  }, [fund?.id])
+  }, [fund?.id, fund?.isOpenDialogCate])
 
-  const markCategorySetupSeen = () => {
-    if (!fund?.id) return
-    const storageKey = `fundCategorySetupSeen:${fund.id}`
-    sessionStorage.setItem(storageKey, 'true')
-  }
-  
+
+
   // Banner chỉ hiển thị khi đang load funds lần đầu
   const isInitialLoading = isLoadingFunds
 
@@ -133,67 +127,67 @@ export function MessagePage({
   return (
     <React.Fragment>
       {showLoadingScreen && (
-        <LoadingScreen 
+        <LoadingScreen
           onComplete={handleLoadingComplete}
           isLoading={isInitialLoading}
         />
       )}
-      
+
       <div className={showLoadingScreen ? 'opacity-0 pointer-events-none' : 'opacity-100 transition-opacity duration-500 pointer-events-auto'}>
         <NavigationDrawer
-        open={isDrawerOpen}
-        onOpenChange={setIsDrawerOpen}
-        funds={funds}
-        messages={messages}
-        currentUserId={currentUserId}
-        currentUserName={currentUserName}
-        currentFundId={fund?.id || null}
-        isLoadingFunds={isLoadingFunds}
-        isLoadingMore={isLoadingMoreFunds}
-        hasMore={hasMoreFunds}
-        onSelectFund={onSelectFund}
-        onCreateFund={handleOpenCreateFund}
-        onLoadMore={onLoadMoreFunds || (() => {})}
-        onLogout={onLogout}
-        resolveUserName={resolveUserName}
-      />
+          open={isDrawerOpen}
+          onOpenChange={setIsDrawerOpen}
+          funds={funds}
+          messages={messages}
+          currentUserId={currentUserId}
+          currentUserName={currentUserName}
+          currentFundId={fund?.id || null}
+          isLoadingFunds={isLoadingFunds}
+          isLoadingMore={isLoadingMoreFunds}
+          hasMore={hasMoreFunds}
+          onSelectFund={onSelectFund}
+          onCreateFund={handleOpenCreateFund}
+          onLoadMore={onLoadMoreFunds || (() => { })}
+          onLogout={onLogout}
+          resolveUserName={resolveUserName}
+        />
 
-            <ChatMessageView
-        fund={fund}
-        messages={fundMessages}
-        categories={fundCategories}
-        currentUserId={currentUserId}
-        currentUserName={currentUserName}
-        onOpenDrawer={() => setIsDrawerOpen(true)}
-        onShowStatistics={() => setIsStatisticsDialogOpen(true)}
-        onManageCategories={() => setIsCategoryDialogOpen(true)}
-        onShowCategorySubscription={() => {
-          setIsAutoCategorySubscription(false)
-          setIsCategorySubscriptionOpen(true)
-        }}
-        onAddMessage={onAddMessage}
-        onResendMessage={onResendMessage}
-        onUpdateMessage={onUpdateMessage}
-        onDeleteMessage={onDeleteMessage}
-        resolveUserName={resolveUserName}
-        isProcessing={isProcessing}
-        isLoading={isLoading}
-        isLoadingFunds={isLoadingFunds}
-      />
+        <ChatMessageView
+          fund={fund}
+          messages={fundMessages}
+          categories={fundCategories}
+          currentUserId={currentUserId}
+          currentUserName={currentUserName}
+          onOpenDrawer={() => setIsDrawerOpen(true)}
+          onShowStatistics={() => setIsStatisticsDialogOpen(true)}
+          onManageCategories={() => setIsCategoryDialogOpen(true)}
+          onShowCategorySubscription={() => {
+            setIsAutoCategorySubscription(false)
+            setIsCategorySubscriptionOpen(true)
+          }}
+          onAddMessage={onAddMessage}
+          onResendMessage={onResendMessage}
+          onUpdateMessage={onUpdateMessage}
+          onDeleteMessage={onDeleteMessage}
+          resolveUserName={resolveUserName}
+          isProcessing={isProcessing}
+          isLoading={isLoading}
+          isLoadingFunds={isLoadingFunds}
+        />
 
 
-            {fund && (
-        <>
-          <FundStatisticsDialog
-            open={isStatisticsDialogOpen}
-            onOpenChange={setIsStatisticsDialogOpen}
-            messages={fundMessages}
-            categories={fundCategories}
-            fund={fund}
-            resolveUserName={resolveUserName}
-          />
+        {fund && (
+          <>
+            <FundStatisticsDialog
+              open={isStatisticsDialogOpen}
+              onOpenChange={setIsStatisticsDialogOpen}
+              messages={fundMessages}
+              categories={fundCategories}
+              fund={fund}
+              resolveUserName={resolveUserName}
+            />
 
-          <CategoryManagementDialog
+            {/* <CategoryManagementDialog
             open={isCategoryDialogOpen}
             onOpenChange={setIsCategoryDialogOpen}
             categories={fundCategories}
@@ -201,35 +195,33 @@ export function MessagePage({
             onCreateCategory={onCreateCategory}
             onUpdateCategory={onUpdateCategory}
             onDeleteCategory={onDeleteCategory}
-          />
+          /> */}
 
-          <CategorySubscriptionDialog
-            open={isCategorySubscriptionOpen}
-            onOpenChange={(nextOpen) => {
-              setIsCategorySubscriptionOpen(nextOpen)
-              if (!nextOpen && isAutoCategorySubscription) {
-                markCategorySetupSeen()
+            <CategorySubscriptionDialog
+              open={isCategorySubscriptionOpen}
+              onOpenChange={(nextOpen) => {
+                setIsCategorySubscriptionOpen(nextOpen)
+                if (!nextOpen && isAutoCategorySubscription) {
+                  setIsAutoCategorySubscription(false)
+                }
+              }}
+              fundId={fund.id}
+              onSkip={() => {
                 setIsAutoCategorySubscription(false)
-              }
-            }}
-            fundId={fund.id}
-            onSkip={() => {
-              markCategorySetupSeen()
-              setIsAutoCategorySubscription(false)
-              setIsCategorySubscriptionOpen(false)
-            }}
-          />
-        </>
-      )}
+                setIsCategorySubscriptionOpen(false)
+              }}
+            />
+          </>
+        )}
 
 
-      <CreateFundDialog
-        open={isCreateFundDialogOpen}
-        onOpenChange={setIsCreateFundDialogOpen}
-        onCreateFund={handleCreateFundComplete}
-        currentUserId={currentUserId}
-        allUsers={currentUser ? [currentUser] : []}
-      />
+        <CreateFundDialog
+          open={isCreateFundDialogOpen}
+          onOpenChange={setIsCreateFundDialogOpen}
+          onCreateFund={handleCreateFundComplete}
+          currentUserId={currentUserId}
+          allUsers={currentUser ? [currentUser] : []}
+        />
       </div>
     </React.Fragment>
   )

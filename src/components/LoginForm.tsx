@@ -35,24 +35,22 @@ function SegmentedControl({
       <button
         type="button"
         onClick={() => onChange('login')}
-        className={`relative px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
-          value === 'login'
-            ? 'bg-blue-600 text-white shadow-sm'
-            : 'text-gray-600 hover:text-gray-900'
-        }`}
+        className={`relative px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${value === 'login'
+          ? 'bg-blue-600 text-white shadow-sm'
+          : 'text-gray-600 hover:text-gray-900'
+          }`}
       >
-        Log In
+        Đăng nhập
       </button>
       <button
         type="button"
         onClick={() => onChange('signup')}
-        className={`relative px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
-          value === 'signup'
-            ? 'bg-blue-600 text-white shadow-sm'
-            : 'text-gray-600 hover:text-gray-900'
-        }`}
+        className={`relative px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${value === 'signup'
+          ? 'bg-blue-600 text-white shadow-sm'
+          : 'text-gray-600 hover:text-gray-900'
+          }`}
       >
-        Sign Up
+        Đăng ký
       </button>
     </div>
   )
@@ -92,7 +90,7 @@ function FormInputField({
   isValid?: boolean
   noIcon?: boolean
 }) {
-  const inputType = type === 'password' 
+  const inputType = type === 'password'
     ? (showPassword ? 'text' : 'password')
     : type
 
@@ -101,11 +99,6 @@ function FormInputField({
   return (
     <div className="space-y-2">
       <div className="relative">
-        /* {hasIcon && (
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10 flex items-center">
-            {icon}
-          </div>
-        )} */
         <Input
           id={id}
           type={inputType}
@@ -114,11 +107,9 @@ function FormInputField({
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
           autoComplete={autoComplete}
-          className={`h-[56px] rounded-xl border-gray-200 bg-white text-base transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 ${
-            hasIcon ? 'pl-[60px]' : 'pl-4'
-          } ${showPasswordToggle ? 'pr-20' : isValid ? 'pr-12' : 'pr-4'} ${
-            error ? 'border-red-300 focus-visible:border-red-500 focus-visible:ring-red-500/20' : ''
-          } ${isValid ? 'border-green-300 focus-visible:border-green-500' : ''}`}
+          className={`h-[56px] rounded-xl border-gray-200 bg-white text-base transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 ${hasIcon ? 'pl-[60px]' : 'pl-4'
+            } ${showPasswordToggle ? 'pr-20' : isValid ? 'pr-12' : 'pr-4'} ${error ? 'border-red-300 focus-visible:border-red-500 focus-visible:ring-red-500/20' : ''
+            } ${isValid ? 'border-green-300 focus-visible:border-green-500' : ''}`}
         />
         {showPasswordToggle && (
           <button
@@ -140,9 +131,8 @@ function FormInputField({
         <p className="text-xs text-red-500 mt-1.5 px-1">{error}</p>
       )}
       {validationMessage && !error && (
-        <p className={`text-xs mt-1.5 px-1 flex items-center gap-1 ${
-          isValid ? 'text-green-600' : 'text-red-500'
-        }`}>
+        <p className={`text-xs mt-1.5 px-1 flex items-center gap-1 ${isValid ? 'text-green-600' : 'text-red-500'
+          }`}>
           {validationMessage}
         </p>
       )}
@@ -170,9 +160,8 @@ function PasswordStrength({ password }: { password: string }) {
   if (strength === 0) return null
 
   return (
-    <p className={`text-xs mt-1.5 px-1 flex items-center gap-1 ${
-      isWeak ? 'text-red-500' : 'text-green-600'
-    }`}>
+    <p className={`text-xs mt-1.5 px-1 flex items-center gap-1 ${isWeak ? 'text-red-500' : 'text-green-600'
+      }`}>
       {isWeak ? `${labels[strength - 1]} password` : `${labels[strength - 1]} password`}
       {!isWeak && <Check size={14} weight="bold" />}
     </p>
@@ -231,8 +220,8 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     if (mode === 'login') {
       return email.trim() && password.trim() && validateEmail(email)
     }
-    return name.trim() && email.trim() && password.trim() && confirmPassword.trim() && 
-           validateEmail(email) && password.length >= 8 && password === confirmPassword
+    return name.trim() && email.trim() && password.trim() && confirmPassword.trim() &&
+      validateEmail(email) && password.length >= 8 && password === confirmPassword
   }, [mode, name, email, password, confirmPassword])
 
   const passwordStrength = useMemo(() => {
@@ -258,14 +247,14 @@ export function LoginForm({ onLogin }: LoginFormProps) {
 
       const session = mode === 'signup'
         ? await register({
-            email: email.trim(),
-            name: name.trim(),
-            password: password.trim(),
-          })
+          email: email.trim(),
+          name: name.trim(),
+          password: password.trim(),
+        })
         : await login({
-            email: email.trim(),
-            password: password.trim(),
-          })
+          email: email.trim(),
+          password: password.trim(),
+        })
 
       toast.success(mode === 'signup' ? 'Account created successfully!' : 'Welcome back!', {
         description: `Hello, ${session.user.name}`,
@@ -295,30 +284,28 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8 safe-area-inset">
       <div className="w-full max-w-md space-y-6">
         {/* Header */}
-        <div className="text-center space-y-4">
+        <div className="text-center">
           <div className="flex justify-center">
-            <div className="p-2.5 rounded-xl bg-blue-600 shadow-lg">
-              <img
-                src={capNoelImage}
-                alt="Finance Capybara"
-                className="w-10 h-10 object-contain"
-              />
-            </div>
+            <img
+              src={capNoelImage}
+              alt="Finance Capybara"
+              className="w-20 h-20 object-contain"
+            />
           </div>
           <div className="space-y-2">
             <h1 className="text-2xl font-bold text-gray-900">
-              {mode === 'login' ? 'Welcome Back!' : 'Join Us Today!'}
+              {mode === 'login' ? 'FinCap' : 'Ê Ku'}
             </h1>
             <p className="text-sm text-gray-600">
-              {mode === 'login' 
-                ? 'Log in to your account to continue.' 
-                : 'Create your account to get started.'}
+              {mode === 'login'
+                ? 'Hân hạnh chào mày!!'
+                : 'Ngon thì để lại cho bố cái info'}
             </p>
           </div>
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 space-y-6">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 space-y-6">
           {/* Segmented Control */}
           <div className="flex justify-center">
             <SegmentedControl value={mode} onChange={handleModeChange} />
@@ -329,7 +316,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             {mode === 'signup' && (
               <FormInputField
                 id="name"
-                placeholder="Full Name"
+                placeholder="Họ tên"
                 value={name}
                 onChange={setName}
                 error={errors.name}
@@ -343,7 +330,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             <FormInputField
               id="email"
               type="email"
-              placeholder="Email or Phone"
+              placeholder="Email"
               value={email}
               onChange={setEmail}
               error={errors.email}
@@ -379,7 +366,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
               <FormInputField
                 id="confirmPassword"
                 type="password"
-                placeholder="Confirm Password"
+                placeholder="Nhập lại Password"
                 value={confirmPassword}
                 onChange={setConfirmPassword}
                 error={errors.confirmPassword}
@@ -400,7 +387,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                   type="button"
                   className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
                 >
-                  Forgot password?
+                  Quên mật khẩu rồi ?
                 </button>
               </div>
             )}
@@ -409,7 +396,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             <Button
               type="submit"
               disabled={!isFormValid || isLoading}
-              className="w-full h-14 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>
@@ -417,9 +404,9 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                   <span>Processing...</span>
                 </>
               ) : mode === 'login' ? (
-                'Log In'
+                'Đăng nhập'
               ) : (
-                'Create Account'
+                'Đăng ký'
               )}
             </Button>
           </form>
@@ -435,12 +422,12 @@ export function LoginForm({ onLogin }: LoginFormProps) {
           </div>
 
           {/* Social Sign In */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             {/* Sign in with Apple */}
             <Button
               type="button"
               variant="outline"
-              className="w-full h-14 rounded-xl border-gray-200 bg-white hover:bg-gray-50 text-gray-900 font-semibold text-base shadow-sm hover:shadow-md transition-all duration-200"
+              className="w-full h-12 rounded-xl border-gray-200 bg-white hover:bg-gray-50 text-gray-900 font-semibold text-base shadow-sm hover:shadow-md transition-all duration-200"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.93-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
@@ -452,7 +439,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             <Button
               type="button"
               variant="outline"
-              className="w-full h-14 rounded-xl border-gray-200 bg-white hover:bg-gray-50 text-gray-900 font-semibold text-base shadow-sm hover:shadow-md transition-all duration-200"
+              className="w-full h-12 rounded-xl border-gray-200 bg-white hover:bg-gray-50 text-gray-900 font-semibold text-base shadow-sm hover:shadow-md transition-all duration-200"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path

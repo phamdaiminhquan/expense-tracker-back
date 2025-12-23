@@ -17,6 +17,7 @@ export type FundDto = {
   createdAt: string // ISO 8601
   updatedAt: string // ISO 8601
   memberIds?: string[]
+  isOpenDialogCate?: boolean
   lastMessage: FundLastMessageDto | null // Message mới nhất từ BE (đã được sort)
 }
 
@@ -60,4 +61,8 @@ export interface UpdateFundPayload {
 export interface AddMemberPayload {
   userId: string
   role: 'owner' | 'member'
+}
+
+export interface CloseDialogCateDto {
+  isOpenDialogCate: boolean
 }

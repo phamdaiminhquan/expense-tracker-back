@@ -20,6 +20,7 @@ import {
   subscribeCategory,
   unsubscribeCategory,
 } from '@/apis/categories/category.api'
+import { dialogCateOpened } from '@/apis/funds/fund.api'
 import { AvailableCategoryDto } from '@/apis/categories/category.interface'
 import { toast } from 'sonner'
 import React from 'react'
@@ -53,7 +54,19 @@ export function CategorySubscriptionDialog({
   const [busyIds, setBusyIds] = useState<string[]>([])
   const [isSubscribingAll, setIsSubscribingAll] = useState(false)
 
+
   const parentList = useMemo(() => categories || EMPTY_CATEGORIES, [categories])
+
+  // Hàm gọi API tắt dialogCateOpened
+  const handleDialogCateOpened = async () => {
+    if (!fundId) return
+    try {
+      await dialogCateOpened(fundId)
+    } catch (e) {
+      // Không cần xử lý lỗi, chỉ log nếu cần
+      console.error('dialogCateOpened error', e)
+    }
+  }
 
   useEffect(() => {
     if (!open || !fundId) return
@@ -411,10 +424,23 @@ export function CategorySubscriptionDialog({
           </ScrollArea>
 
           <div className="flex flex-col sm:flex-row gap-2">
-            <Button variant="outline" onClick={onSkip} className="sm:w-1/2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                handleDialogCateOpened()
+                onSkip()
+              }}
+              className="sm:w-1/2"
+            >
               Bỏ qua
             </Button>
-            <Button onClick={() => onOpenChange(false)} className="sm:w-1/2">
+            <Button
+              onClick={() => {
+                handleDialogCateOpened()
+                onOpenChange(false)
+              }}
+              className="sm:w-1/2"
+            >
               Tiếp tục
             </Button>
           </div>

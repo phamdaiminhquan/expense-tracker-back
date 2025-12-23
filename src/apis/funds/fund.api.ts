@@ -16,6 +16,7 @@ function mapFund(dto: FundDto): Fund {
 		name: dto.name,
 		type: dto.type,
 		ownerId: dto.ownerId,
+		isOpenDialogCate: dto.isOpenDialogCate,
 		memberIds: dto.memberIds && dto.memberIds.length > 0 ? dto.memberIds : [],
 		createdAt: typeof dto.createdAt === 'string' ? Date.parse(dto.createdAt) : dto.createdAt,
 		lastMessage: dto.lastMessage ? {
@@ -81,5 +82,10 @@ export async function addFundMember(fundId: string, payload: AddMemberPayload): 
 
 export async function removeFundMember(fundId: string, userId: string): Promise<boolean> {
 	await axiosRequest.delete(`/funds/${fundId}/members/${userId}`)
+	return true
+}
+
+export async function dialogCateOpened(fundId: string): Promise<boolean> {
+	await axiosRequest.patch(`/funds/${fundId}/dialog-cate/close`, { isOpenDialogCate: false })
 	return true
 }
