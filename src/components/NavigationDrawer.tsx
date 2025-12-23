@@ -26,7 +26,7 @@ interface RecentChat {
     text: string
     timestamp: number
     processedAt?: number | null
-  }
+  } | null
 }
 
 interface NavigationDrawerProps {
