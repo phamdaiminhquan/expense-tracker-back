@@ -101,11 +101,11 @@ function FormInputField({
   return (
     <div className="space-y-2">
       <div className="relative">
-        {hasIcon && (
+        /* {hasIcon && (
           <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10 flex items-center">
             {icon}
           </div>
-        )}
+        )} */
         <Input
           id={id}
           type={inputType}
