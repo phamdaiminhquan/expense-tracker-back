@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Message, Fund, Category } from '@/lib/types'
 import { FundStatisticsDialog } from '@/components/FundStatisticsDialog'
 import { CategoryManagementDialog } from '@/components/CategoryManagementDialog'
 import { ChatMessageView } from '@/components/ChatMessageView'
 import { NavigationDrawer } from '@/components/NavigationDrawer'
 import { CreateFundDialog } from '@/components/CreateFundDialog'
+import { LoadingScreen } from '@/components/LoadingScreen'
 import React from 'react'
 
 interface MessagePageProps {
@@ -64,6 +65,25 @@ export function MessagePage({
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isCreateFundDialogOpen, setIsCreateFundDialogOpen] = useState(false)
+  const [showLoadingScreen, setShowLoadingScreen] = useState(false)
+  const hasShownInitialBanner = useRef(false)
+
+  // Hiển thị banner khi mới vào app và đang load funds
+  useEffect(() => {
+    if (hasShownInitialBanner.current) return
+    
+    // Chỉ hiển thị lần đầu khi vào app (chưa có funds và đang load)
+    const hasSeenBanner = sessionStorage.getItem('hasSeenChatBanner')
+    if (!hasSeenBanner && isLoadingFunds && funds.length === 0) {
+      hasShownInitialBanner.current = true
+      setShowLoadingScreen(true)
+      sessionStorage.setItem('hasSeenChatBanner', 'true')
+    }
+  }, [isLoadingFunds, funds.length])
+
+  const handleLoadingComplete = () => {
+    setShowLoadingScreen(false)
+  }
 
   const handleOpenCreateFund = () => {
     setIsCreateFundDialogOpen(true)
@@ -77,10 +97,21 @@ export function MessagePage({
 
   const fundCategories = fund ? categories.filter((c) => c.fundId === fund.id) : []
   const fundMessages = fund ? messages.filter((m) => m.fundId === fund.id) : []
+  
+  // Kiểm tra xem có đang load không (funds hoặc messages)
+  const isInitialLoading = isLoadingFunds && funds.length === 0
 
   return (
     <React.Fragment>
-      <NavigationDrawer
+      {showLoadingScreen && (
+        <LoadingScreen 
+          onComplete={handleLoadingComplete}
+          isLoading={isInitialLoading}
+        />
+      )}
+      
+      <div className={showLoadingScreen ? 'opacity-0 pointer-events-none' : 'opacity-100 transition-opacity duration-500 pointer-events-auto'}>
+        <NavigationDrawer
         open={isDrawerOpen}
         onOpenChange={setIsDrawerOpen}
         funds={funds}
@@ -146,6 +177,7 @@ export function MessagePage({
         currentUserId={currentUserId}
         allUsers={currentUser ? [currentUser] : []}
       />
+      </div>
     </React.Fragment>
   )
 }
