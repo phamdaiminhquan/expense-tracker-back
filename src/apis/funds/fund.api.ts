@@ -16,18 +16,17 @@ function mapFund(dto: FundDto): Fund {
 		name: dto.name,
 		type: dto.type,
 		ownerId: dto.ownerId,
-		// Ensure owner is always included as member for access control
-		memberIds: dto.memberIds && dto.memberIds.length > 0 ? dto.memberIds : [dto.ownerId],
+		memberIds: dto.memberIds && dto.memberIds.length > 0 ? dto.memberIds : [],
 		createdAt: typeof dto.createdAt === 'string' ? Date.parse(dto.createdAt) : dto.createdAt,
 		lastMessage: dto.lastMessage ? {
 			id: dto.lastMessage.id,
 			text: dto.lastMessage.message || '',
-			timestamp: typeof dto.lastMessage.createdAt === 'string' 
-				? Date.parse(dto.lastMessage.createdAt) 
+			timestamp: typeof dto.lastMessage.createdAt === 'string'
+				? Date.parse(dto.lastMessage.createdAt)
 				: dto.lastMessage.createdAt,
-			processedAt: dto.lastMessage.processedAt 
-				? (typeof dto.lastMessage.processedAt === 'string' 
-					? Date.parse(dto.lastMessage.processedAt) 
+			processedAt: dto.lastMessage.processedAt
+				? (typeof dto.lastMessage.processedAt === 'string'
+					? Date.parse(dto.lastMessage.processedAt)
 					: dto.lastMessage.processedAt)
 				: null,
 		} : undefined,

@@ -28,6 +28,9 @@ export function createFund(
 }
 
 export function canAccessFund(fund: Fund, userId: string): boolean {
+  // Owner luôn có quyền truy cập
+  if (fund.ownerId === userId) return true
+  // Check memberIds
   return fund.memberIds.includes(userId)
 }
 

@@ -60,7 +60,7 @@ function useFundState(currentUserId: string | null): FundContextValue {
       setIsLoading(false)
       setIsLoadingMore(false)
     }
-  }, [])
+  }, [currentUserId])
 
   const loadMoreFunds = useCallback(async () => {
     if (isLoadingMore || funds.length >= total) return
