@@ -82,12 +82,13 @@ export function CategoryManagementDialog({
     toast.success('Đã xóa danh mục!')
   }
 
-  const startEdit = (category: Category) => {
+    const startEdit = (category: Category) => {
     setEditingId(category.id)
     setName(category.name)
-    setDescription(category.description)
+    setDescription(category.description || '')
     setIsCreating(false)
   }
+
 
   const cancelEdit = () => {
     setEditingId(null)
@@ -192,9 +193,12 @@ export function CategoryManagementDialog({
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
                           <h3 className="font-semibold text-base">{category.name}</h3>
-                          <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2">
-                            {category.description}
-                          </p>
+                                                    {category.description && (
+                            <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2">
+                              {category.description}
+                            </p>
+                          )}
+
                           {usageCount > 0 && (
                             <p className="text-xs text-primary mt-2 font-medium">
                               Đang sử dụng: {usageCount} giao dịch

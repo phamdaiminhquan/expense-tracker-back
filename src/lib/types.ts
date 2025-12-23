@@ -35,8 +35,10 @@ export interface Message {
   spend: number | null
   earn: number | null
   message: string
-  categoryId?: string | null
+    categoryId?: string | null
+  categoryName?: string | null
   timestamp: number
+
   status?: MessageStatus
   isPendingPrompt?: boolean
   originalPrompt?: string

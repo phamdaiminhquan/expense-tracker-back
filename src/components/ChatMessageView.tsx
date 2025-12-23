@@ -17,7 +17,9 @@ import {
   CheckCircle,
   XCircle,
   ArrowRight,
+  FolderSimple,
 } from '@phosphor-icons/react'
+
 import { formatCurrency } from '@/lib/currency'
 import { EditPendingPromptDialog } from './EditPendingPromptDialog'
 import { EditMessageDialog } from './EditMessageDialog'
@@ -34,7 +36,9 @@ interface ChatMessageViewProps {
   onOpenDrawer: () => void
   onShowStatistics: () => void
   onManageCategories: () => void
+  onShowCategorySubscription: () => void
   onAddMessage: (message: Omit<Message, 'id' | 'timestamp'>) => Promise<void>
+
   onResendMessage: (message: Message) => Promise<void>
   onUpdateMessage: (message: Message) => Promise<void>
   onDeleteMessage: (id: string) => Promise<void>
@@ -55,7 +59,9 @@ export function ChatMessageView({
   onOpenDrawer,
   onShowStatistics,
   onManageCategories,
+  onShowCategorySubscription,
   onAddMessage,
+
   onResendMessage,
   onUpdateMessage,
   onDeleteMessage,
@@ -81,7 +87,7 @@ export function ChatMessageView({
     if (container.scrollTop === 0 && visibleCount < sortedMessages.length) {
       const oldScrollHeight = container.scrollHeight
       setVisibleCount((prev) => Math.min(prev + ITEMS_PER_PAGE, sortedMessages.length))
-      
+
       // Maintain scroll position after loading more items
       setTimeout(() => {
         const newScrollHeight = container.scrollHeight
@@ -148,14 +154,14 @@ export function ChatMessageView({
       {/* Premium Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/[0.01] to-background" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(120,119,198,0.05),transparent_70%)]" />
-      
+
       <header className="sticky top-0 z-20 bg-background/95 border-b border-border/40 shadow-lg">
         <div className="max-w-2xl mx-auto px-5 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4 flex-1 min-w-0">
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={onOpenDrawer}
                 className="h-11 w-11 hover:bg-muted/60 rounded-xl transition-all"
                 aria-label="Open navigation"
@@ -173,17 +179,25 @@ export function ChatMessageView({
             </div>
             {fund && (
               <div className="flex gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onShowCategorySubscription}
+                  className="h-11 w-11 hover:bg-muted/60 rounded-xl text-muted-foreground hover:text-foreground transition-all"
+                >
+                  <FolderSimple size={22} weight="bold" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={onManageCategories}
                   className="h-11 w-11 hover:bg-muted/60 rounded-xl text-muted-foreground hover:text-foreground transition-all"
                 >
                   <Tag size={22} weight="bold" />
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={onShowStatistics}
                   className="h-11 w-11 hover:bg-muted/60 rounded-xl text-muted-foreground hover:text-foreground transition-all"
                 >
@@ -191,6 +205,7 @@ export function ChatMessageView({
                 </Button>
               </div>
             )}
+
           </div>
         </div>
       </header>
@@ -202,8 +217,9 @@ export function ChatMessageView({
       >
         {/* Gradient overlay for de-emphasized background when input is focused */}
         <div className="fixed bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background/90 via-background/50 to-transparent pointer-events-none z-10" />
-        
-        <div className="max-w-2xl mx-auto px-5 py-8 space-y-4" style={{ paddingBottom: 'calc(max(1rem, env(safe-area-inset-bottom)) + 5rem)' }}>
+
+                <div className="max-w-2xl mx-auto px-5 py-6 space-y-3" style={{ paddingBottom: 'calc(max(1rem, env(safe-area-inset-bottom)) + 5rem)' }}>
+
           {visibleCount < sortedMessages.length && (
             <div className="text-center pb-3">
               <Button
@@ -274,32 +290,35 @@ export function ChatMessageView({
               return (
                 <div
                   key={message.id}
-                  className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-5 group animate-in fade-in slide-in-from-bottom-3`}
+                                    className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-4 group animate-in fade-in slide-in-from-bottom-3`}
+
                 >
-                  <div className={`max-w-[78%] space-y-1.5`}>
+                                    <div className={`max-w-[78%] space-y-1`}>
+
                     {!isCurrentUser && (
                       <p className="text-[11px] text-muted-foreground px-5 lowercase font-semibold tracking-wide">{message.userName}</p>
                     )}
                     <div className="relative">
                       <div
-                        className={`rounded-2xl px-5 py-3.5 shadow-lg ${
-                          isCurrentUser
+                                                className={`rounded-2xl px-4 py-3 shadow-lg ${isCurrentUser
+
                             ? isPending
                               ? 'bg-card/95 border border-border/60'
                               : 'bg-gradient-to-br from-primary via-primary/95 to-primary/90 text-primary-foreground shadow-xl'
                             : 'bg-card/95 border border-border/60'
-                        } transition-all duration-300 group-hover:shadow-xl group-hover:scale-[1.02]`}
+                          } transition-all duration-300 group-hover:shadow-xl group-hover:scale-[1.02]`}
                       >
-                        <div className="space-y-2.5">
-                          <p className={`text-sm leading-relaxed font-medium ${
-                            isPending ? 'text-muted-foreground italic' : isCurrentUser ? 'text-primary-foreground' : 'text-foreground'
-                          }`}>
+                                                <div className="space-y-2">
+
+                          <p className={`text-sm leading-relaxed font-medium ${isPending ? 'text-muted-foreground italic' : isCurrentUser ? 'text-primary-foreground' : 'text-foreground'
+                            }`}>
                             {message.message}
                           </p>
                           {!isPending && (
                             <React.Fragment>
                               {(message.spend !== null || message.earn !== null) && (
-                                <div className="flex items-center gap-3 pt-1.5">
+                                                                <div className="flex items-center gap-2 pt-1">
+
                                   {message.spend !== null && (
                                     <span className="font-bold text-base text-amber-500">
                                       -{formatCurrency(message.spend)}
@@ -313,16 +332,17 @@ export function ChatMessageView({
                                 </div>
                               )}
                               {message.categoryId && (
-                                <div className="flex items-center gap-2 pt-1.5">
-                                  <Tag 
-                                    size={12} 
-                                    weight="fill" 
+                                                                <div className="flex items-center gap-2 pt-1">
+
+                                  <Tag
+                                    size={12}
+                                    weight="fill"
                                     className={isCurrentUser ? 'text-primary-foreground/80' : 'text-muted-foreground'}
                                   />
-                                  <span className={`text-[11px] uppercase tracking-wider font-semibold ${
-                                    isCurrentUser ? 'text-primary-foreground/90' : 'text-muted-foreground'
-                                  }`}>
-                                    {categories.find((c) => c.id === message.categoryId)?.name || 'Không rõ'}
+                                  <span className={`text-[11px] uppercase tracking-wider font-semibold ${isCurrentUser ? 'text-primary-foreground/90' : 'text-muted-foreground'
+                                    }`}>
+                                    {message.categoryName || categories.find((c) => c.id === message.categoryId)?.name || 'Không rõ'}
+
                                   </span>
                                 </div>
                               )}
@@ -330,22 +350,22 @@ export function ChatMessageView({
                           )}
                         </div>
                       </div>
-                      
+
                       {/* FIXED: Deleting/Editing button logic (Visible on hover) */}
                       {/* Delete button only appears for non-pending messages */}
                       {!isPending && (
-                        <div 
+                        <div
                           className={`absolute bottom-0 transition-opacity ${isCurrentUser ? '-left-10' : '-right-10'} opacity-0 group-hover:opacity-100`}
                         >
-                            <Button
-                                size="icon"
-                                onClick={() => {
-                                  onDeleteMessage(message.id).catch(() => {})
-                                }}
-                                className="h-7 w-7 bg-background border border-border rounded-full text-destructive hover:text-destructive hover:bg-destructive/10 shadow-lg transition-all"
-                            >
-                                <Trash size={12} weight="bold" />
-                            </Button>
+                          <Button
+                            size="icon"
+                            onClick={() => {
+                              onDeleteMessage(message.id).catch(() => { })
+                            }}
+                            className="h-7 w-7 bg-background border border-border rounded-full text-destructive hover:text-destructive hover:bg-destructive/10 shadow-lg transition-all"
+                          >
+                            <Trash size={12} weight="bold" />
+                          </Button>
                         </div>
                       )}
                     </div>
@@ -373,7 +393,7 @@ export function ChatMessageView({
                             variant="ghost"
                             size="sm"
                             className="h-5 px-2 text-[10px] text-destructive hover:text-destructive hover:bg-destructive/10 rounded-full transition-all ml-1 font-medium"
-                            onClick={() => onResendMessage(message).catch(() => {})}
+                            onClick={() => onResendMessage(message).catch(() => { })}
                             title="Gửi lại"
                           >
                             <ArrowRight size={10} weight="bold" className="mr-0.5" />
@@ -381,7 +401,7 @@ export function ChatMessageView({
                           </Button>
                         </>
                       )}
-                      
+
                       {isPending && isCurrentUser && (
                         // Reprocess/Edit pending prompt button
                         <Button
@@ -393,7 +413,7 @@ export function ChatMessageView({
                           <ArrowClockwise size={11} weight="bold" />
                         </Button>
                       )}
-                      
+
                       {/* Edit prompt button for messages without transaction (no spend/earn) */}
                       {!isPending && isCurrentUser && message.spend === null && message.earn === null && (
                         <Button
@@ -406,7 +426,7 @@ export function ChatMessageView({
                           Xử lý lại
                         </Button>
                       )}
-                      
+
                       {/* Edit button for confirmed messages with transaction (if not pending) */}
                       {!isPending && isCurrentUser && (message.spend !== null || message.earn !== null) && (
                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -451,7 +471,7 @@ export function ChatMessageView({
                     appearance: 'none',
                   }}
                 />
-                
+
                 {/* Send Button */}
                 <button
                   type="submit"
@@ -459,18 +479,17 @@ export function ChatMessageView({
                   className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-primary/90 hover:bg-primary active:bg-primary/80 disabled:bg-muted/60 disabled:opacity-40 transition-all duration-200 hover:scale-105 active:scale-95 disabled:scale-100 shadow-sm hover:shadow-md active:shadow-sm disabled:shadow-none disabled:cursor-not-allowed group touch-manipulation"
                   aria-label="Gửi tin nhắn"
                 >
-                  <PaperPlaneRight 
-                    size={20} 
-                    weight="fill" 
-                    className="text-white transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-active:translate-x-0 group-active:translate-y-0" 
+                  <PaperPlaneRight
+                    size={20}
+                    weight="fill"
+                    className="text-white transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-active:translate-x-0 group-active:translate-y-0"
                   />
                 </button>
               </div>
-              
+
               {/* Subtle Focus Ring - appears when input has content */}
-              <div className={`absolute inset-0 rounded-[28px] sm:rounded-[32px] pointer-events-none transition-opacity duration-300 ${
-                input.trim() ? 'opacity-100' : 'opacity-0'
-              }`}>
+              <div className={`absolute inset-0 rounded-[28px] sm:rounded-[32px] pointer-events-none transition-opacity duration-300 ${input.trim() ? 'opacity-100' : 'opacity-0'
+                }`}>
                 <div className="absolute inset-0 rounded-[28px] sm:rounded-[32px] ring-1 ring-primary/15" />
               </div>
             </div>

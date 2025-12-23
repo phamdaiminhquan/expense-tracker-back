@@ -19,7 +19,8 @@ function mapMessage(dto: MessageDto): Message {
   // Use transaction values if available, otherwise fall back to message-level values
   const spendValue = transaction?.spendValue ?? dto.spendValue ?? null
   const earnValue = transaction?.earnValue ?? dto.earnValue ?? null
-  const categoryId = transaction?.categoryId ?? transaction?.category?.id ?? dto.categoryId ?? null
+    const categoryId = transaction?.categoryId ?? transaction?.category?.id ?? dto.categoryId ?? null
+  const categoryName = transaction?.category?.name ?? null
   const messageText = transaction?.content ?? dto.message ?? ''
   
   return {
@@ -31,12 +32,14 @@ function mapMessage(dto: MessageDto): Message {
     earn: earnValue,
     message: messageText,
     categoryId: categoryId,
+    categoryName: categoryName,
     timestamp: parseTimestamp(dto.createdAt || transaction?.createdAt),
     status: dto.status,
     isPendingPrompt: dto.status === 'pending',
     originalPrompt: dto.message || messageText || undefined,
     promptCreatedAt: dto.message ? parseTimestamp(dto.createdAt) : undefined,
   }
+
 }
 
 export async function listMessagesByFund(fundId: string): Promise<Message[]> {

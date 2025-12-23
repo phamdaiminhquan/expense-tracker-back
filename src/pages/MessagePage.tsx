@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { Message, Fund, Category } from '@/lib/types'
 import { FundStatisticsDialog } from '@/components/FundStatisticsDialog'
 import { CategoryManagementDialog } from '@/components/CategoryManagementDialog'
+import { CategorySubscriptionDialog } from '@/components/CategorySubscriptionDialog'
+
 import { ChatMessageView } from '@/components/ChatMessageView'
 import { NavigationDrawer } from '@/components/NavigationDrawer'
 import { CreateFundDialog } from '@/components/CreateFundDialog'
@@ -63,6 +65,9 @@ export function MessagePage({
 }: MessagePageProps) {
   const [isStatisticsDialogOpen, setIsStatisticsDialogOpen] = useState(false)
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
+  const [isCategorySubscriptionOpen, setIsCategorySubscriptionOpen] = useState(false)
+  const [isAutoCategorySubscription, setIsAutoCategorySubscription] = useState(false)
+
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isCreateFundDialogOpen, setIsCreateFundDialogOpen] = useState(false)
   const [showLoadingScreen, setShowLoadingScreen] = useState(false)
@@ -102,11 +107,28 @@ export function MessagePage({
     setIsCreateFundDialogOpen(false)
   }
 
-  const fundCategories = fund ? categories.filter((c) => c.fundId === fund.id) : []
+    const fundCategories = fund ? categories.filter((c) => c.fundId === fund.id) : []
   const fundMessages = fund ? messages.filter((m) => m.fundId === fund.id) : []
+
+  useEffect(() => {
+    if (!fund?.id) return
+    const storageKey = `fundCategorySetupSeen:${fund.id}`
+    const hasSeen = sessionStorage.getItem(storageKey)
+    if (!hasSeen) {
+      setIsAutoCategorySubscription(true)
+      setIsCategorySubscriptionOpen(true)
+    }
+  }, [fund?.id])
+
+  const markCategorySetupSeen = () => {
+    if (!fund?.id) return
+    const storageKey = `fundCategorySetupSeen:${fund.id}`
+    sessionStorage.setItem(storageKey, 'true')
+  }
   
   // Banner chỉ hiển thị khi đang load funds lần đầu
   const isInitialLoading = isLoadingFunds
+
 
   return (
     <React.Fragment>
@@ -136,7 +158,7 @@ export function MessagePage({
         resolveUserName={resolveUserName}
       />
 
-      <ChatMessageView
+            <ChatMessageView
         fund={fund}
         messages={fundMessages}
         categories={fundCategories}
@@ -145,6 +167,10 @@ export function MessagePage({
         onOpenDrawer={() => setIsDrawerOpen(true)}
         onShowStatistics={() => setIsStatisticsDialogOpen(true)}
         onManageCategories={() => setIsCategoryDialogOpen(true)}
+        onShowCategorySubscription={() => {
+          setIsAutoCategorySubscription(false)
+          setIsCategorySubscriptionOpen(true)
+        }}
         onAddMessage={onAddMessage}
         onResendMessage={onResendMessage}
         onUpdateMessage={onUpdateMessage}
@@ -155,7 +181,8 @@ export function MessagePage({
         isLoadingFunds={isLoadingFunds}
       />
 
-      {fund && (
+
+            {fund && (
         <>
           <FundStatisticsDialog
             open={isStatisticsDialogOpen}
@@ -175,8 +202,26 @@ export function MessagePage({
             onUpdateCategory={onUpdateCategory}
             onDeleteCategory={onDeleteCategory}
           />
+
+          <CategorySubscriptionDialog
+            open={isCategorySubscriptionOpen}
+            onOpenChange={(nextOpen) => {
+              setIsCategorySubscriptionOpen(nextOpen)
+              if (!nextOpen && isAutoCategorySubscription) {
+                markCategorySetupSeen()
+                setIsAutoCategorySubscription(false)
+              }
+            }}
+            fundId={fund.id}
+            onSkip={() => {
+              markCategorySetupSeen()
+              setIsAutoCategorySubscription(false)
+              setIsCategorySubscriptionOpen(false)
+            }}
+          />
         </>
       )}
+
 
       <CreateFundDialog
         open={isCreateFundDialogOpen}
