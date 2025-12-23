@@ -68,18 +68,25 @@ export function MessagePage({
   const [showLoadingScreen, setShowLoadingScreen] = useState(false)
   const hasShownInitialBanner = useRef(false)
 
-  // Hiển thị banner khi mới vào app và đang load funds
+  // Hiển thị banner khi đang load funds (lần đầu vào app)
   useEffect(() => {
     if (hasShownInitialBanner.current) return
     
-    // Chỉ hiển thị lần đầu khi vào app (chưa có funds và đang load)
+    // Chỉ hiển thị lần đầu khi vào app và đang load funds
     const hasSeenBanner = sessionStorage.getItem('hasSeenChatBanner')
-    if (!hasSeenBanner && isLoadingFunds && funds.length === 0) {
+    if (!hasSeenBanner && isLoadingFunds) {
       hasShownInitialBanner.current = true
       setShowLoadingScreen(true)
       sessionStorage.setItem('hasSeenChatBanner', 'true')
     }
-  }, [isLoadingFunds, funds.length])
+  }, [isLoadingFunds])
+
+  // Tự động ẩn banner khi load xong (không cần user action)
+  useEffect(() => {
+    if (showLoadingScreen && !isLoadingFunds) {
+      // LoadingScreen sẽ tự xử lý minimum display time và fade out
+    }
+  }, [showLoadingScreen, isLoadingFunds])
 
   const handleLoadingComplete = () => {
     setShowLoadingScreen(false)
@@ -98,8 +105,8 @@ export function MessagePage({
   const fundCategories = fund ? categories.filter((c) => c.fundId === fund.id) : []
   const fundMessages = fund ? messages.filter((m) => m.fundId === fund.id) : []
   
-  // Kiểm tra xem có đang load không (funds hoặc messages)
-  const isInitialLoading = isLoadingFunds && funds.length === 0
+  // Banner chỉ hiển thị khi đang load funds lần đầu
+  const isInitialLoading = isLoadingFunds
 
   return (
     <React.Fragment>
@@ -124,7 +131,7 @@ export function MessagePage({
         hasMore={hasMoreFunds}
         onSelectFund={onSelectFund}
         onCreateFund={handleOpenCreateFund}
-        onLoadMore={onLoadMoreFunds}
+        onLoadMore={onLoadMoreFunds || (() => {})}
         onLogout={onLogout}
         resolveUserName={resolveUserName}
       />
@@ -145,6 +152,7 @@ export function MessagePage({
         resolveUserName={resolveUserName}
         isProcessing={isProcessing}
         isLoading={isLoading}
+        isLoadingFunds={isLoadingFunds}
       />
 
       {fund && (

@@ -40,6 +40,7 @@ interface ChatMessageViewProps {
   onDeleteMessage: (id: string) => Promise<void>
   isProcessing?: boolean
   isLoading?: boolean
+  isLoadingFunds?: boolean
 }
 
 const ITEMS_PER_PAGE = 10
@@ -60,6 +61,7 @@ export function ChatMessageView({
   onDeleteMessage,
   isProcessing = false,
   isLoading = false,
+  isLoadingFunds = false,
 }: ChatMessageViewProps) {
   const [input, setInput] = useState('')
   const [editingMessage, setEditingMessage] = useState<Message | null>(null)
@@ -231,7 +233,15 @@ export function ChatMessageView({
                 </div>
               ))}
             </div>
+          ) : isLoadingFunds ? (
+            // Đang load funds - không hiển thị gì (banner đang hiển thị)
+            <div className="text-center py-24">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 mb-6 shadow-lg">
+                <NotePencil size={40} className="text-primary" weight="duotone" />
+              </div>
+            </div>
           ) : !fund ? (
+            // Đã load xong nhưng không có fund - hiển thị empty state
             <div className="text-center py-24">
               <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 mb-6 shadow-lg">
                 <NotePencil size={40} className="text-primary" weight="duotone" />
@@ -291,7 +301,7 @@ export function ChatMessageView({
                               {(message.spend !== null || message.earn !== null) && (
                                 <div className="flex items-center gap-3 pt-1.5">
                                   {message.spend !== null && (
-                                    <span className="font-bold text-base text-red-500">
+                                    <span className="font-bold text-base text-amber-500">
                                       -{formatCurrency(message.spend)}
                                     </span>
                                   )}
