@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useEffect, useState, useRef } from 'react'
-import { FundListPage } from '@/pages/FundListPage'
+import { FundListPage } from '@/pages/fund/fund.page'
 import { useAuth } from '@/hooks/useAuth'
 import { useFunds } from '@/hooks/useFunds'
 import { LoadingScreen } from '@/components/LoadingScreen'

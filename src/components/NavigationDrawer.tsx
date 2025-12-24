@@ -1,22 +1,19 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { Fund, Message } from '@/lib/types'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { 
-  MagnifyingGlass, 
-  X, 
   Plus, 
   Wallet, 
   Users, 
   SignOut,
   ChatCircle,
-  CaretRight,
-  DotsThree
 } from '@phosphor-icons/react'
-import { useDebounce } from '@/hooks/useDebounce'
+import { ButtonIconElement } from './components/elements/button/button-icon.element'
+import { StackRowAlignCenter } from './components/styles/stack.style'
+import { TextFieldSearchElement } from './components/elements/text-field/text-field-search.element'
 
 interface RecentChat {
   fundId: string
@@ -40,11 +37,14 @@ interface NavigationDrawerProps {
   isLoadingFunds?: boolean
   isLoadingMore?: boolean
   hasMore?: boolean
+  onDeleteFund: (fundId: string) => Promise<void>
   onSelectFund: (fundId: string) => void
   onCreateFund: () => void
+  onUpdateFund: (fundId: string) => void
   onLoadMore: () => void
   onLogout: () => void
   resolveUserName: (userId: string) => string
+  onSearchFunds?: (query: string) => void
 }
 
 export function NavigationDrawer({
@@ -58,24 +58,16 @@ export function NavigationDrawer({
   isLoadingFunds = false,
   isLoadingMore = false,
   hasMore = false,
+  onDeleteFund,
   onSelectFund,
   onCreateFund,
+  onUpdateFund,
   onLoadMore,
   onLogout,
   resolveUserName,
+  onSearchFunds,
 }: NavigationDrawerProps) {
-  const [searchQuery, setSearchQuery] = useState('')
-  const debouncedSearch = useDebounce(searchQuery, 200)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
-
-  // Get recent chats: Hiển thị tất cả funds (có hoặc chưa có message)
-  const recentChats = useMemo<RecentChat[]>(() => {
-    return funds.map(fund => ({
-      fundId: fund.id,
-      fundName: fund.name,
-      lastMessage: fund.lastMessage || null,
-    }))
-  }, [funds])
 
   // Scroll detection để load more khi đạt 70%
   useEffect(() => {
@@ -97,31 +89,6 @@ export function NavigationDrawer({
     return () => container.removeEventListener('scroll', handleScroll)
   }, [open, hasMore, isLoadingMore, onLoadMore])
 
-  // Filter funds and chats based on search
-  const filteredData = useMemo(() => {
-    const query = debouncedSearch.trim().toLowerCase()
-    if (!query) {
-      return {
-        funds: funds,
-        chats: recentChats,
-      }
-    }
-
-    const filteredFunds = funds.filter(fund =>
-      fund.name.toLowerCase().includes(query)
-    )
-
-    const filteredChats = recentChats.filter(chat =>
-      chat.fundName.toLowerCase().includes(query) ||
-      (chat.lastMessage && chat.lastMessage.text.toLowerCase().includes(query))
-    )
-
-    return {
-      funds: filteredFunds,
-      chats: filteredChats,
-    }
-  }, [debouncedSearch, funds, recentChats])
-
   const handleSelectFund = useCallback((fundId: string) => {
     onSelectFund(fundId)
     onOpenChange(false)
@@ -131,6 +98,11 @@ export function NavigationDrawer({
     onCreateFund()
     onOpenChange(false)
   }, [onCreateFund, onOpenChange])
+
+  const handleUpdateFund = useCallback((fundId: string) => {
+    onUpdateFund(fundId)
+    onOpenChange(false)
+  }, [onUpdateFund, onOpenChange])
 
   const getInitials = (name: string) => {
     return name.charAt(0).toUpperCase()
@@ -153,11 +125,6 @@ export function NavigationDrawer({
     }
   }
 
-  const truncateMessage = (text: string, maxLength: number = 50) => {
-    if (text.length <= maxLength) return text
-    return text.substring(0, maxLength) + '...'
-  }
-
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent 
@@ -165,33 +132,8 @@ export function NavigationDrawer({
         className="w-[85%] sm:w-[400px] p-0 flex flex-col overflow-hidden"
       >
         <SheetHeader className="px-5 pt-6 pb-4 border-b border-border/40">
-          <SheetTitle className="sr-only">Navigation</SheetTitle>
-          
           {/* Search */}
-          <div className="relative">
-            <MagnifyingGlass 
-              size={20} 
-              weight="bold" 
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-            />
-            <Input
-              type="text"
-              placeholder="Tìm kiếm quỹ và chat..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-11 pr-10 h-12 rounded-xl bg-muted/50 border-border/60 focus-visible:ring-2 focus-visible:ring-primary/30"
-            />
-            {searchQuery && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full hover:bg-muted"
-              >
-                <X size={16} weight="bold" />
-              </Button>
-            )}
-          </div>
+          <TextFieldSearchElement sx={{mt: 2}} onChange={(e) => onSearchFunds?.(e.target.value || '')} />
         </SheetHeader>
 
         {/* Scrollable Content */}
@@ -228,13 +170,12 @@ export function NavigationDrawer({
                   </div>
                 ))}
               </div>
-            ) : filteredData.funds.length === 0 ? (
+            ) : funds.length === 0 ? (
               <div className="text-center py-8 text-sm text-muted-foreground">
-                {debouncedSearch ? 'Không tìm thấy quỹ nào' : 'Chưa có quỹ nào'}
               </div>
             ) : (
               <div className="space-y-2">
-                {filteredData.funds.map((fund) => {
+                {funds.map((fund) => {
                   const isActive = fund.id === currentFundId
                   return (
                     <button
@@ -267,6 +208,10 @@ export function NavigationDrawer({
                           {fund.memberIds.length} thành viên
                         </p>
                       </div>
+                      <StackRowAlignCenter sx={{ gap: 0 }}>
+                        <ButtonIconElement icon="delete" onClick={() => onDeleteFund(fund.id)} />
+                        <ButtonIconElement onClick={() => handleUpdateFund(fund.id)} icon="edit_document" />
+                      </StackRowAlignCenter>
                       {isActive && (
                         <div className="w-2 h-2 rounded-full bg-primary shrink-0" />
                       )}
@@ -277,131 +222,6 @@ export function NavigationDrawer({
             )}
           </div>
 
-          {/* Recent Chats Section */}
-          {!debouncedSearch && recentChats.length > 0 && (
-            <div className="px-5 py-4 space-y-4 border-t border-border/40">
-              <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                Chat gần đây
-              </h2>
-              <div className="space-y-2">
-                {recentChats.map((chat) => {
-                  const isActive = chat.fundId === currentFundId
-                  const hasMessage = chat.lastMessage !== null
-                  return (
-                    <button
-                      key={chat.fundId}
-                      onClick={() => handleSelectFund(chat.fundId)}
-                      className={`w-full flex items-start gap-3 p-3 rounded-xl transition-all text-left ${
-                        isActive
-                          ? 'bg-primary/10 border border-primary/20'
-                          : 'hover:bg-muted/60'
-                      }`}
-                    >
-                      <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0 mt-0.5">
-                        <ChatCircle size={20} className="text-muted-foreground" weight="duotone" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <h3 className={`font-semibold text-sm truncate ${
-                            isActive ? 'text-primary' : 'text-foreground'
-                          }`}>
-                            {chat.fundName}
-                          </h3>
-                          {hasMessage && (
-                            <span className="text-[10px] text-muted-foreground shrink-0 ml-2">
-                              {formatDate(chat.lastMessage!.timestamp)}
-                            </span>
-                          )}
-                        </div>
-                        <p className={`text-xs line-clamp-2 ${
-                          hasMessage 
-                            ? 'text-muted-foreground' 
-                            : 'text-muted-foreground/60 italic'
-                        }`}>
-                          {hasMessage 
-                            ? truncateMessage(chat.lastMessage!.text, 60)
-                            : 'Chưa có tin nhắn nào'
-                          }
-                        </p>
-                      </div>
-                    </button>
-                  )
-                })}
-                
-                {/* Loading More Indicator */}
-                {isLoadingMore && (
-                  <div className="flex items-center justify-center py-4">
-                    <div className="flex gap-1.5">
-                      <div className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
-                      <div className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
-                      <div className="w-2 h-2 rounded-full bg-primary animate-bounce" />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Search Results - Chats */}
-          {debouncedSearch && filteredData.chats.length > 0 && (
-            <div className="px-5 py-4 space-y-4 border-t border-border/40">
-              <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                Kết quả tìm kiếm - Chat
-              </h2>
-              <div className="space-y-2">
-                {filteredData.chats.map((chat) => {
-                  const isActive = chat.fundId === currentFundId
-                  const hasMessage = chat.lastMessage !== null
-                  return (
-                    <button
-                      key={chat.fundId}
-                      onClick={() => handleSelectFund(chat.fundId)}
-                      className={`w-full flex items-start gap-3 p-3 rounded-xl transition-all text-left ${
-                        isActive
-                          ? 'bg-primary/10 border border-primary/20'
-                          : 'hover:bg-muted/60'
-                      }`}
-                    >
-                      <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0 mt-0.5">
-                        <ChatCircle size={20} className="text-muted-foreground" weight="duotone" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <h3 className={`font-semibold text-sm truncate ${
-                            isActive ? 'text-primary' : 'text-foreground'
-                          }`}>
-                            {chat.fundName}
-                          </h3>
-                          {hasMessage && (
-                            <span className="text-[10px] text-muted-foreground shrink-0 ml-2">
-                              {formatDate(chat.lastMessage!.timestamp)}
-                            </span>
-                          )}
-                        </div>
-                        <p className={`text-xs line-clamp-2 ${
-                          hasMessage 
-                            ? 'text-muted-foreground' 
-                            : 'text-muted-foreground/60 italic'
-                        }`}>
-                          {hasMessage 
-                            ? truncateMessage(chat.lastMessage!.text, 60)
-                            : 'Chưa có tin nhắn nào'
-                          }
-                        </p>
-                      </div>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* No Results */}
-          {debouncedSearch && filteredData.funds.length === 0 && filteredData.chats.length === 0 && (
-            <div className="px-5 py-12 text-center">
-              <p className="text-sm text-muted-foreground">Không tìm thấy kết quả</p>
-            </div>
-          )}
         </div>
 
         {/* Footer - Account */}

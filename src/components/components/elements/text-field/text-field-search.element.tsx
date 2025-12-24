@@ -3,7 +3,7 @@ import { TextField, debounce, BaseTextFieldProps } from '@mui/material';
 import React from 'react';
 import { IconElement } from '../icon/icon.element';
 import { StackLabel } from '../../styles/stack.style';
-import { ChangeEventCustom } from '../../../common/interfaces/change-event-custom.interface';
+import { ChangeEventCustom } from '@/common/interfaces/change-event-custom.interface';
 
 export interface TextFieldSearchElementProps extends BaseTextFieldProps {
   onChange?: (event: ChangeEventCustom<string>) => void;

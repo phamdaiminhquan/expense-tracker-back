@@ -6,9 +6,10 @@ import { CategorySubscriptionDialog } from '@/components/CategorySubscriptionDia
 
 import { ChatMessageView } from '@/components/ChatMessageView'
 import { NavigationDrawer } from '@/components/NavigationDrawer'
-import { CreateFundDialog } from '@/components/CreateFundDialog'
+import { CreateFundDialog } from '@/pages/fund/parts/fund-create/fund-create.part'
 import { LoadingScreen } from '@/components/LoadingScreen'
 import React from 'react'
+import { UpdateFundDialog } from './fund/parts/fund-update/fund-update.part'
 
 interface MessagePageProps {
   fund: Fund | null
@@ -21,6 +22,8 @@ interface MessagePageProps {
   resolveUserName: (userId: string) => string
   onSelectFund: (fundId: string) => void
   onCreateFund: (name: string, type: 'personal' | 'shared', memberIds: string[]) => Promise<void>
+  onUpdateFund: (fundId: string, name: string, type: 'personal' | 'shared') => Promise<void>
+  onDeleteFund: (fundId: string) => Promise<void>
   onLogout: () => void
   onAddMessage: (message: Omit<Message, 'id' | 'timestamp'>) => Promise<void>
   onResendMessage: (message: Message) => Promise<void>
@@ -35,6 +38,7 @@ interface MessagePageProps {
   isLoadingMoreFunds?: boolean
   hasMoreFunds?: boolean
   onLoadMoreFunds?: () => void
+  onSearchFunds?: (query: string) => void
 }
 
 export function MessagePage({
@@ -48,6 +52,8 @@ export function MessagePage({
   resolveUserName,
   onSelectFund,
   onCreateFund,
+  onUpdateFund,
+  onDeleteFund,
   onLogout,
   onAddMessage,
   onResendMessage,
@@ -62,6 +68,7 @@ export function MessagePage({
   isLoadingMoreFunds = false,
   hasMoreFunds = false,
   onLoadMoreFunds,
+  onSearchFunds,
 }: MessagePageProps) {
   const [isStatisticsDialogOpen, setIsStatisticsDialogOpen] = useState(false)
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
@@ -70,6 +77,7 @@ export function MessagePage({
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isCreateFundDialogOpen, setIsCreateFundDialogOpen] = useState(false)
+  const [isUpdateFundDialogOpen, setIsUpdateFundDialogOpen] = useState(false)
   const [showLoadingScreen, setShowLoadingScreen] = useState(false)
   const hasShownInitialBanner = useRef(false)
 
@@ -102,9 +110,18 @@ export function MessagePage({
     setIsDrawerOpen(false)
   }
 
+  const handleOpenUpdateFund = () => {
+    setIsUpdateFundDialogOpen(true)
+    setIsDrawerOpen(false)
+  }
+
   const handleCreateFundComplete = async (name: string, type: 'personal' | 'shared', memberIds: string[]) => {
     await onCreateFund(name, type, memberIds)
     setIsCreateFundDialogOpen(false)
+  }
+  const handleUpdateFundComplete = async (id: string, name: string, type: 'personal' | 'shared') => {
+    await onUpdateFund(id, name, type)
+    setIsUpdateFundDialogOpen(false)
   }
 
   const fundCategories = fund ? categories.filter((c) => c.fundId === fund.id) : []
@@ -139,6 +156,7 @@ export function MessagePage({
           onOpenChange={setIsDrawerOpen}
           funds={funds}
           messages={messages}
+          onDeleteFund={onDeleteFund}
           currentUserId={currentUserId}
           currentUserName={currentUserName}
           currentFundId={fund?.id || null}
@@ -147,9 +165,11 @@ export function MessagePage({
           hasMore={hasMoreFunds}
           onSelectFund={onSelectFund}
           onCreateFund={handleOpenCreateFund}
+          onUpdateFund={handleOpenUpdateFund}
           onLoadMore={onLoadMoreFunds || (() => { })}
           onLogout={onLogout}
           resolveUserName={resolveUserName}
+          onSearchFunds={onSearchFunds}
         />
 
         <ChatMessageView
@@ -219,6 +239,15 @@ export function MessagePage({
           open={isCreateFundDialogOpen}
           onOpenChange={setIsCreateFundDialogOpen}
           onCreateFund={handleCreateFundComplete}
+          currentUserId={currentUserId}
+          allUsers={currentUser ? [currentUser] : []}
+        />
+
+          <UpdateFundDialog
+          fund={fund!}
+          open={isUpdateFundDialogOpen}
+          onOpenChange={setIsUpdateFundDialogOpen}
+          onUpdateFund={handleUpdateFundComplete}
           currentUserId={currentUserId}
           allUsers={currentUser ? [currentUser] : []}
         />

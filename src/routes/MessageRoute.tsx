@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useFunds } from '@/hooks/useFunds'
 import { useCategories } from '@/hooks/useCategories'
@@ -8,13 +8,15 @@ import { MessagePage } from '@/pages/MessagePage'
 import { toast } from 'sonner'
 
 export function MessageRoute() {
+  // hook
   const { fundId } = useParams()
   const navigate = useNavigate()
-
   const { 
     visibleFunds, 
     enterFund, 
     createFund, 
+    updateFund,
+    deleteFund,
     fetchFunds, 
     loadMoreFunds,
     isLoading: isLoadingFunds,
@@ -33,6 +35,19 @@ export function MessageRoute() {
     isLoading,
   } = useMessages()
   const { categories, createCategory, updateCategory, deleteCategory } = useCategories()
+
+  // state
+    const [screenState, setScreenState] = useState({
+    params: {
+      page: 1,
+      take: 10,
+      search: undefined as string | undefined,
+    }
+  })
+  // function
+  useEffect(() => {
+    fetchFunds(screenState.params)
+  }, [screenState.params])
 
   // Auto-select fund đầu tiên nếu chưa có fundId
   const fund = useMemo(() => {
@@ -78,6 +93,28 @@ export function MessageRoute() {
     }
   }
 
+  const handleUpdateFundComplete = async (id: string, name: string, type: 'personal' | 'shared') => {
+    try {
+      await updateFund(id, name, type)
+      toast.success('Cập nhật quỹ thành công!', { description: name })
+    } catch (error) {
+      console.error(error)
+      toast.error('Cập nhật quỹ thất bại', { description: 'Vui lòng thử lại' })
+      throw error
+    }
+  }
+
+  const handleDeleteFundComplete = async (id: string) => {
+    try {
+      await deleteFund(id)
+      toast.success('Đã xóa quỹ thành công!')
+    } catch (error) {
+      console.error(error)
+      toast.error('Xóa quỹ thất bại', { description: 'Vui lòng thử lại' })
+      throw error
+    }
+  }
+
   return (
     <MessagePage
       fund={fund}
@@ -90,6 +127,8 @@ export function MessageRoute() {
       resolveUserName={resolveUserName}
       onSelectFund={handleSelectFund}
       onCreateFund={handleCreateFundComplete}
+      onUpdateFund={handleUpdateFundComplete}
+      onDeleteFund={handleDeleteFundComplete}
       onLogout={logout}
       onAddMessage={addMessage}
       onResendMessage={resendMessage}
@@ -104,6 +143,16 @@ export function MessageRoute() {
       isLoadingMoreFunds={isLoadingMoreFunds}
       hasMoreFunds={hasMoreFunds}
       onLoadMoreFunds={loadMoreFunds}
+      onSearchFunds={(query) => {
+        setScreenState((prev) => ({
+          ...prev,
+          params: {
+            ...prev.params,
+            search: query,
+            page: 1,
+          }
+        }))
+      }}
     />
   )
 }

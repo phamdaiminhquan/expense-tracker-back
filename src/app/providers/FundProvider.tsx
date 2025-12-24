@@ -1,8 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { Fund, FundType } from '@/lib/types'
-import { createFund as apiCreateFund, getListFunds } from '@/apis/funds/fund.api'
+import { createFund as apiCreateFund, getListFunds, updateFund as apiUpdateFund, deleteFund as apiDeleteFund } from '@/apis/funds/fund.api'
 import { canAccessFund } from '@/lib/funds'
 import { useAuth } from './AuthProvider'
+import { FundsListQuery } from '@/apis/funds/fund.interface'
 
 interface FundContextValue {
   funds: Fund[]
@@ -14,7 +15,9 @@ interface FundContextValue {
   enterFund: (fund: Fund) => void
   backToFundList: () => void
   createFund: (name: string, type: FundType, memberIds: string[]) => Promise<Fund>
-  fetchFunds: () => Promise<void>
+  updateFund: (id: string, name: string, type: FundType) => Promise<void>
+  deleteFund: (id: string) => Promise<void>
+  fetchFunds: (query: FundsListQuery) => Promise<void>
   loadMoreFunds: () => Promise<void>
   isLoading: boolean
   isCreating: boolean
@@ -115,6 +118,43 @@ function useFundState(currentUserId: string | null): FundContextValue {
     [currentUserId]
   )
 
+  const updateFund = useCallback(
+    async (id: string, name: string, type: FundType) => {
+      if (!currentUserId) throw new Error('Chưa đăng nhập')
+
+      setIsCreating(true)
+      try {
+        await apiUpdateFund(id, { name, type })
+        // Cập nhật fund trong danh sách
+        setFunds((current) => current.map((fund) => (fund.id === id ? { ...fund, name, type } : fund)))
+        return
+      } finally {
+        setIsCreating(false)
+      }
+    },
+    [currentUserId]
+  )
+
+  const deleteFund = useCallback(
+    async (id: string) => {
+      if (!currentUserId) throw new Error('Chưa đăng nhập')
+
+      setIsCreating(true)
+      try {
+        await apiDeleteFund(id) 
+        setFunds((current) => current.filter((fund) => fund.id !== id))
+        setTotal((prev) => prev - 1)
+
+        if (selectedFund?.id === id) {
+          setSelectedFund(null)
+        }
+      } finally {
+        setIsCreating(false)
+      }
+    },
+    [currentUserId, selectedFund]
+  )
+
   const visibleFunds = useMemo(() => {
     if (!currentUserId) return []
     return funds.filter((fund) => canAccessFund(fund, currentUserId))
@@ -133,6 +173,8 @@ function useFundState(currentUserId: string | null): FundContextValue {
     enterFund,
     backToFundList,
     createFund,
+    updateFund,
+    deleteFund,
     fetchFunds: () => fetchFunds(1, false),
     loadMoreFunds,
     isLoading,
