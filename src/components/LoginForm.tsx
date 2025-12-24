@@ -112,7 +112,7 @@ function FormInputField({
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
           autoComplete={autoComplete}
-          className={`h-[56px] rounded-xl border-gray-200 bg-white text-base transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 ${hasIcon ? 'pl-[60px]' : 'pl-4'
+          className={`h-[56px] rounded-xl border-gray-200 bg-white text-sm placeholder:text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 ${hasIcon ? 'pl-[60px]' : 'pl-4'
             } ${showPasswordToggle ? 'pr-20' : isValid ? 'pr-12' : 'pr-4'} ${error ? 'border-red-300 focus-visible:border-red-500 focus-visible:ring-red-500/20' : ''
             } ${isValid ? 'border-green-300 focus-visible:border-green-500' : ''}`}
         />
@@ -123,7 +123,7 @@ function FormInputField({
             className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors z-10"
             tabIndex={-1}
           >
-            {showPassword ? <VisibilityOffIcon className='cursor-pointer' /> : <VisibilityIcon className='cursor-pointer' />}
+            {showPassword ? <VisibilityIcon className='cursor-pointer' /> : <VisibilityOffIcon className='cursor-pointer' />}
           </button>
         )}
         {isValid && !showPasswordToggle && (
