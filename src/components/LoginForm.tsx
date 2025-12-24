@@ -5,8 +5,11 @@ import { Label } from '@/components/ui/label'
 import { AuthSession, login, register } from '@/lib/auth'
 import { toast } from 'sonner'
 import capNoelImage from '@/assets/image/Cap-noel.png'
-import { Eye, EyeSlash, CircleNotch, Lock, User, Envelope, Check } from '@phosphor-icons/react'
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { Eye, EyeSlash, CircleNotch, Lock, User, Envelope, Check, EyeSlashIcon, EyeIcon } from '@phosphor-icons/react'
 import React from 'react'
+import { TextFieldElement } from './components/elements/text-field/text-field.element'
 
 // Types
 type AuthMode = 'login' | 'signup'
@@ -31,30 +34,32 @@ function SegmentedControl({
   onChange: (value: AuthMode) => void
 }) {
   return (
-    <div className="inline-flex bg-gray-100 rounded-full p-1 shadow-inner">
+    <div className="relative inline-flex bg-gray-100 rounded-full p-1 shadow-inner">
+      <div
+        className={`absolute top-1 left-1 h-[calc(100%-8px)] w-1/2 rounded-full bg-blue-600 shadow-sm
+        transition-transform duration-300 ease-out
+        ${value === 'signup' ? 'translate-x-full' : 'translate-x-0'}`}
+      />
       <button
         type="button"
         onClick={() => onChange('login')}
-        className={`relative px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${value === 'login'
-          ? 'bg-blue-600 text-white shadow-sm'
-          : 'text-gray-600 hover:text-gray-900'
-          }`}
+        className={`relative z-10 px-6 py-2.5 text-sm font-semibold transition-colors duration-200 cursor-pointer
+        ${value === 'login' ? 'text-white' : 'text-gray-600 hover:text-gray-900'}`}
       >
         Đăng nhập
       </button>
       <button
         type="button"
         onClick={() => onChange('signup')}
-        className={`relative px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${value === 'signup'
-          ? 'bg-blue-600 text-white shadow-sm'
-          : 'text-gray-600 hover:text-gray-900'
-          }`}
+        className={`relative z-10 px-6 py-2.5 text-sm font-semibold transition-colors duration-200 cursor-pointer
+        ${value === 'signup' ? 'text-white' : 'text-gray-600 hover:text-gray-900'}`}
       >
         Đăng ký
       </button>
     </div>
   )
 }
+
 
 // Input Field Component with icon
 function FormInputField({
@@ -118,7 +123,7 @@ function FormInputField({
             className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors z-10"
             tabIndex={-1}
           >
-            {showPassword ? 'Hide' : 'Show'}
+            {showPassword ? <VisibilityOffIcon className='cursor-pointer' /> : <VisibilityIcon className='cursor-pointer' />}
           </button>
         )}
         {isValid && !showPasswordToggle && (
@@ -281,7 +286,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
   const confirmPasswordValid = mode === 'signup' && confirmPassword && password === confirmPassword && !errors.confirmPassword
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8 safe-area-inset">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8 safe-area-inset ">
       <div className="w-full max-w-md space-y-6">
         {/* Header */}
         <div className="text-center">
@@ -305,7 +310,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 space-y-6">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 space-y-6">
           {/* Segmented Control */}
           <div className="flex justify-center">
             <SegmentedControl value={mode} onChange={handleModeChange} />

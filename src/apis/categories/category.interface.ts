@@ -5,6 +5,7 @@ export type AvailableCategoryDto = {
   isDefault: boolean
   parentId: string | null
   isSubscribed?: boolean | null
+  image: string | null
   children?: AvailableCategoryDto[] | null
 }
 
