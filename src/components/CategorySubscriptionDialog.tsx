@@ -24,6 +24,8 @@ import { dialogCateOpened } from '@/apis/funds/fund.api'
 import { AvailableCategoryDto } from '@/apis/categories/category.interface'
 import { toast } from 'sonner'
 import React from 'react'
+import { ImageElement } from './components/elements/image/image.element'
+import { ImageSizeType } from './components/elements/image/image.enum'
 
 interface CategorySubscriptionDialogProps {
   open: boolean
@@ -273,9 +275,9 @@ export function CategorySubscriptionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[85vh] max-h-[85vh] flex flex-col overflow-hidden">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Đăng ký danh mục chi tiêu</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">Đăng ký danh mục</DialogTitle>
           <DialogDescription>
-            Chọn những danh mục bạn muốn dùng. Bạn có thể bỏ qua và đăng ký sau.
+            Đăng ký danh mục và FinCap sẽ phân loại chi tiêu giúp bạn.
           </DialogDescription>
         </DialogHeader>
 
@@ -286,7 +288,7 @@ export function CategorySubscriptionDialog({
             onClick={handleSubscribeAllCategories}
             disabled={isLoading || isSubscribingAll}
           >
-            Đăng ký toàn bộ
+            Supcrise all
           </Button>
         </div>
 
@@ -296,7 +298,7 @@ export function CategorySubscriptionDialog({
               {isLoading ? (
                 <div className="space-y-3">
                   {[1, 2, 3].map((i) => (
-                    <Card key={i} className="p-4">
+                    <Card key={i} className="p-3">
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-3">
                           <Skeleton className="h-10 w-10 rounded-xl" />
@@ -305,7 +307,7 @@ export function CategorySubscriptionDialog({
                             <Skeleton className="h-3 w-56" />
                           </div>
                         </div>
-                        <Skeleton className="h-8 w-24" />
+                        {/* <Skeleton className="h-8 w-24" /> */}
                       </div>
                     </Card>
                   ))}
@@ -323,22 +325,24 @@ export function CategorySubscriptionDialog({
                       setExpandedParents((current) => ({ ...current, [parent.id]: nextOpen }))
                     }
                   >
-                    <Card className="p-4 border-border/50 shadow-sm">
+                    <Card className="p-3 border-border/50 shadow-sm">
                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                         <div className="flex items-start gap-3 flex-1 min-w-0">
-                          <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                            <FolderSimple size={20} weight="duotone" />
+                          <div className=" rounded-xl  text-primary flex items-center justify-center shrink-0">
+                            <ImageElement
+                              url={parent.image || undefined}
+                              sizeType={ImageSizeType.SQUARE}
+                              fit="cover"
+                              isBorder
+                              height={50}
+                              width={50}
+                            />
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <p className="font-semibold text-base break-words sm:truncate">{parent.name}</p>
+                              <p className="font-semibold text-base wrap-break-word sm:truncate">{parent.name}</p>
                               {renderParentBadge(parent)}
                             </div>
-                            {parent.description && (
-                              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                                {parent.description}
-                              </p>
-                            )}
                             {hasChildren(parent) && (
                               <p className="text-xs text-muted-foreground mt-2">
                                 {getSubscribedChildren(parent).length}/{parent.children?.length || 0} danh mục con
@@ -347,19 +351,23 @@ export function CategorySubscriptionDialog({
                           </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
-                          {renderParentAction(parent)}
+                          {/* {renderParentAction(parent)} */}
                           {hasChildren(parent) && (
                             <CollapsibleTrigger asChild>
                               <Button
-                                variant="ghost"
+                                variant={"secondary"}
                                 size="icon"
                                 className="h-9 w-9"
                                 aria-label="Toggle"
                               >
                                 {expandedParents[parent.id] ? (
-                                  <CaretDown size={18} weight="bold" />
+                                  <div className="h-9 w-9 rounded-lg text-primary flex items-center justify-center shrink-0">
+                                    <CaretDown size={18} weight="bold" />
+                                  </div>
                                 ) : (
-                                  <CaretRight size={18} weight="bold" />
+                                  <div className="h-9 w-9 rounded-lg text-primary flex items-center justify-center shrink-0">
+                                    <CaretRight size={18} weight="bold" />
+                                  </div>
                                 )}
                               </Button>
                             </CollapsibleTrigger>
@@ -369,7 +377,7 @@ export function CategorySubscriptionDialog({
 
                       {hasChildren(parent) && (
                         <CollapsibleContent className="w-full">
-                          <div className="mt-4 space-y-2 border-l border-border/50 pl-4">
+                          <div className="space-y-2 border-border/50 pl-3">
                             {(parent.children || []).map((child) => {
                               const isSubscribed = Boolean(child.isSubscribed)
 
@@ -383,12 +391,12 @@ export function CategorySubscriptionDialog({
                                       <Tag size={16} weight="duotone" />
                                     </div>
                                     <div className="min-w-0">
-                                      <p className="font-semibold text-sm break-words sm:truncate">{child.name}</p>
-                                      {child.description && (
+                                      <p className="font-semibold text-sm wrap-break-word sm:truncate">{child.name}</p>
+                                      {/* {child.description && (
                                         <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                                           {child.description}
                                         </p>
-                                      )}
+                                      )} */}
                                     </div>
                                   </div>
                                   <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
