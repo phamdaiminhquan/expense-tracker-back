@@ -310,13 +310,13 @@ export function LoginForm({ onLogin }: LoginFormProps) {
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 space-y-6">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 space-y-4">
           {/* Segmented Control */}
           <div className="flex justify-center">
             <SegmentedControl value={mode} onChange={handleModeChange} />
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-3">
             {/* Sign up: Full name */}
             {mode === 'signup' && (
               <FormInputField
