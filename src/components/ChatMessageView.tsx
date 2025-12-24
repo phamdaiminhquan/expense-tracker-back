@@ -217,7 +217,7 @@ export function ChatMessageView({
         {/* Gradient overlay for de-emphasized background when input is focused */}
         <div className="fixed bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background/90 via-background/50 to-transparent pointer-events-none z-10" />
 
-        <div className="max-w-2xl mx-auto px-5 py-6 space-y-3" style={{ paddingBottom: 'calc(max(1rem, env(safe-area-inset-bottom)) + 5rem)' }}>
+        <div className="max-w-2xl mx-auto px-5 py-8 space-y-3" style={{ paddingBottom: 'calc(max(1rem, env(safe-area-inset-bottom)) + 5rem)' }}>
 
           {visibleCount < sortedMessages.length && (
             <div className="text-center pb-3">
@@ -289,7 +289,7 @@ export function ChatMessageView({
               return (
                 <div
                   key={message.id}
-                  className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-4 group animate-in fade-in slide-in-from-bottom-3`}
+                  className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-4 group animate-in fade-in slide-in-from-bottom-3 mt-20`}
 
                 >
                   <div className={`max-w-[78%] space-y-1`}>
