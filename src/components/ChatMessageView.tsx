@@ -150,12 +150,11 @@ export function ChatMessageView({
   }
 
   return (
-    <div className="h-screen flex flex-col relative overflow-hidden">
+    <div className="h-auto flex flex-col overflow-y-scroll">
       {/* Premium Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/[0.01] to-background" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(120,119,198,0.05),transparent_70%)]" />
-
-      <header className="sticky top-0 z-20 bg-background/95 border-b border-border/40 shadow-lg">
+      <header className="fixed top-0 inset-x-0 z-20 bg-background/95 border-b border-border/40 shadow-lg">
         <div className="max-w-2xl mx-auto px-5 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -213,12 +212,12 @@ export function ChatMessageView({
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto relative z-10"
+        className="flex-1 relative z-10"
       >
         {/* Gradient overlay for de-emphasized background when input is focused */}
         <div className="fixed bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background/90 via-background/50 to-transparent pointer-events-none z-10" />
 
-                <div className="max-w-2xl mx-auto px-5 py-6 space-y-3" style={{ paddingBottom: 'calc(max(1rem, env(safe-area-inset-bottom)) + 5rem)' }}>
+        <div className="max-w-2xl mx-auto px-5 py-6 space-y-3" style={{ paddingBottom: 'calc(max(1rem, env(safe-area-inset-bottom)) + 5rem)' }}>
 
           {visibleCount < sortedMessages.length && (
             <div className="text-center pb-3">
@@ -290,25 +289,25 @@ export function ChatMessageView({
               return (
                 <div
                   key={message.id}
-                                    className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-4 group animate-in fade-in slide-in-from-bottom-3`}
+                  className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-4 group animate-in fade-in slide-in-from-bottom-3`}
 
                 >
-                                    <div className={`max-w-[78%] space-y-1`}>
+                  <div className={`max-w-[78%] space-y-1`}>
 
                     {!isCurrentUser && (
                       <p className="text-[11px] text-muted-foreground px-5 lowercase font-semibold tracking-wide">{message.userName}</p>
                     )}
                     <div className="relative">
                       <div
-                                                className={`rounded-2xl px-4 py-3 shadow-lg ${isCurrentUser
+                        className={`rounded-2xl px-4 py-3 shadow-lg ${isCurrentUser
 
-                            ? isPending
-                              ? 'bg-card/95 border border-border/60'
-                              : 'bg-gradient-to-br from-primary via-primary/95 to-primary/90 text-primary-foreground shadow-xl'
-                            : 'bg-card/95 border border-border/60'
+                          ? isPending
+                            ? 'bg-card/95 border border-border/60'
+                            : 'bg-gradient-to-br from-primary via-primary/95 to-primary/90 text-primary-foreground shadow-xl'
+                          : 'bg-card/95 border border-border/60'
                           } transition-all duration-300 group-hover:shadow-xl group-hover:scale-[1.02]`}
                       >
-                                                <div className="space-y-2">
+                        <div className="space-y-2">
 
                           <p className={`text-sm leading-relaxed font-medium ${isPending ? 'text-muted-foreground italic' : isCurrentUser ? 'text-primary-foreground' : 'text-foreground'
                             }`}>
@@ -317,7 +316,7 @@ export function ChatMessageView({
                           {!isPending && (
                             <React.Fragment>
                               {(message.spend !== null || message.earn !== null) && (
-                                                                <div className="flex items-center gap-2 pt-1">
+                                <div className="flex items-center gap-2 pt-1">
 
                                   {message.spend !== null && (
                                     <span className="font-bold text-base text-amber-500">
@@ -332,7 +331,7 @@ export function ChatMessageView({
                                 </div>
                               )}
                               {message.categoryId && (
-                                                                <div className="flex items-center gap-2 pt-1">
+                                <div className="flex items-center gap-2 pt-1">
 
                                   <Tag
                                     size={12}
