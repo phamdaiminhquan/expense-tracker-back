@@ -28,5 +28,5 @@ export interface DeleteOptional {
 
 export interface ResList<T> {
   total: number;
-  list: T[];
+  data: T[];
 }

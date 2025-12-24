@@ -1,4 +1,3 @@
-import { Fund } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -6,6 +5,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Plus, Wallet, Users, CaretRight, SignOut } from '@phosphor-icons/react'
 import { useState } from 'react'
+import { Fund } from '@/apis/funds/fund.entities'
 
 interface FundListScreenProps {
   funds: Fund[]

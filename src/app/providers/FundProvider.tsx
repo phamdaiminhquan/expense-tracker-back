@@ -1,201 +1,118 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { Fund, FundType } from '@/lib/types'
-import { createFund as apiCreateFund, getListFunds, updateFund as apiUpdateFund, deleteFund as apiDeleteFund } from '@/apis/funds/fund.api'
-import { canAccessFund } from '@/lib/funds'
-import { useAuth } from './AuthProvider'
-import { FundsListQuery } from '@/apis/funds/fund.interface'
+import { useState, useCallback } from 'react';
+import useSWR from 'swr';
+import { getListFunds, createFund as apiCreateFund, getFund, updateFund as apiUpdateFund, deleteFund as apiDeleteFund } from '@/apis/funds/fund.api';
+import { GetListFundDto, CreateFundDto, UpdateFundDto } from '@/apis/funds/fund.interface';
+import { toast } from 'sonner';
 
-interface FundContextValue {
-  funds: Fund[]
-  visibleFunds: Fund[]
-  selectedFund: Fund | null
-  fundId: string | null
-  total: number
-  hasMore: boolean
-  enterFund: (fund: Fund) => void
-  backToFundList: () => void
-  createFund: (name: string, type: FundType, memberIds: string[]) => Promise<Fund>
-  updateFund: (id: string, name: string, type: FundType) => Promise<void>
-  deleteFund: (id: string) => Promise<void>
-  fetchFunds: (query: FundsListQuery) => Promise<void>
-  loadMoreFunds: () => Promise<void>
-  isLoading: boolean
-  isCreating: boolean
-  isLoadingMore: boolean
-  setFunds: React.Dispatch<React.SetStateAction<Fund[]>>
-}
+export const useFund = (params?: GetListFundDto, fundId?: string) => {
+  const [loading, setLoading] = useState(false);
 
-const FundContext = createContext<FundContextValue | null>(null)
+  // Fetch list funds
+  const {
+    data: fundResponse,
+    isLoading: isLoadingList,
+    mutate: mutateList,
+  } = useSWR(
+    params ? 'funds' + JSON.stringify(params) : null,
+    async () => await getListFunds(params!),
+    { 
+      keepPreviousData: true, 
+      revalidateOnFocus: false 
+    },
+  );
 
-function useFundState(currentUserId: string | null): FundContextValue {
-  const [funds, setFunds] = useState<Fund[]>([])
-  const [selectedFund, setSelectedFund] = useState<Fund | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isCreating, setIsCreating] = useState(false)
-  const [isLoadingMore, setIsLoadingMore] = useState(false)
-  const [total, setTotal] = useState(0)
-  const [currentPage, setCurrentPage] = useState(1)
+  const funds = fundResponse?.data || [];
+  const total = fundResponse?.total || 0;
 
-  const fetchFunds = useCallback(async (page: number = 1, append: boolean = false) => {
-    if (page === 1) {
-      setIsLoading(true)
-    } else {
-      setIsLoadingMore(true)
-    }
-    
-    try {
-      const { funds: fundsData, total: totalCount } = await getListFunds({
-        page,
-        take: 10, // Load 10 funds mỗi lần
-        orderBy: 'lastActivityTime',
-        orderType: 'DESC',
-      })
-      
-      if (append) {
-        setFunds((prev) => [...prev, ...fundsData])
-      } else {
-        setFunds(fundsData)
-      }
-      
-      setTotal(totalCount)
-      setCurrentPage(page)
-    } finally {
-      setIsLoading(false)
-      setIsLoadingMore(false)
-    }
-  }, [currentUserId])
+  const {
+    data: fund,
+    isLoading: isLoadingFund,
+    mutate: mutateFund,
+  } = useSWR(
+    fundId ? `funds/${fundId}` : null,
+    async () => await getFund(fundId!),
+    { revalidateOnFocus: false },
+  );
 
-  const loadMoreFunds = useCallback(async () => {
-    if (isLoadingMore || funds.length >= total) return
-    
-    const nextPage = currentPage + 1
-    await fetchFunds(nextPage, true)
-  }, [isLoadingMore, funds.length, total, currentPage, fetchFunds])
-
-  useEffect(() => {
-    if (!currentUserId) {
-      setFunds([])
-      setSelectedFund(null)
-      return
-    }
-
-    fetchFunds()
-  }, [currentUserId, fetchFunds])
-
-  useEffect(() => {
-    if (!selectedFund) return
-    const refreshed = funds.find((fund) => fund.id === selectedFund.id)
-    if (refreshed) {
-      setSelectedFund(refreshed)
-    } else if (funds.length > 0) {
-      setSelectedFund(null)
-    }
-  }, [funds, selectedFund])
-
-  const enterFund = useCallback((fund: Fund) => {
-    setSelectedFund(fund)
-  }, [])
-
-  const backToFundList = useCallback(() => {
-    setSelectedFund(null)
-  }, [])
-
+  // Create fund
   const createFund = useCallback(
-    async (name: string, type: FundType, memberIds: string[]) => {
-      if (!currentUserId) throw new Error('Chưa đăng nhập')
-
-      setIsCreating(true)
+    async (values: CreateFundDto) => {
+      setLoading(true);
       try {
-        const newFund = await apiCreateFund({ name, type, memberIds })
-        // Thêm vào đầu list vì fund mới sẽ có lastActivityTime mới nhất
-        setFunds((current) => [newFund, ...current])
-        setTotal((prev) => prev + 1)
-        return newFund
+        const newFund = await apiCreateFund(values);
+        toast.success('Đã tạo quỹ thành công!', { description: values.name });
+        mutateList();
+        return newFund;
+      } catch (error: any) {
+        toast.error('Tạo quỹ thất bại', { 
+          description: error?.message || 'Vui lòng thử lại' 
+        });
+        throw error;
       } finally {
-        setIsCreating(false)
+        setLoading(false);
       }
     },
-    [currentUserId]
-  )
+    [mutateList],
+  );
 
+  // Update fund
   const updateFund = useCallback(
-    async (id: string, name: string, type: FundType) => {
-      if (!currentUserId) throw new Error('Chưa đăng nhập')
-
-      setIsCreating(true)
+    async (id: string, values: UpdateFundDto) => {
+      setLoading(true);
       try {
-        await apiUpdateFund(id, { name, type })
-        // Cập nhật fund trong danh sách
-        setFunds((current) => current.map((fund) => (fund.id === id ? { ...fund, name, type } : fund)))
-        return
+        const updatedFund = await apiUpdateFund(id, values);
+        toast.success('Cập nhật quỹ thành công!', { description: values.name });
+        mutateList();
+        mutateFund();
+        return updatedFund;
+      } catch (error: any) {
+        toast.error('Cập nhật quỹ thất bại', { 
+          description: error?.message || 'Vui lòng thử lại' 
+        });
+        throw error;
       } finally {
-        setIsCreating(false)
+        setLoading(false);
       }
     },
-    [currentUserId]
-  )
+    [mutateList, mutateFund],
+  );
 
+  // Delete fund
   const deleteFund = useCallback(
     async (id: string) => {
-      if (!currentUserId) throw new Error('Chưa đăng nhập')
-
-      setIsCreating(true)
+      setLoading(true);
       try {
-        await apiDeleteFund(id) 
-        setFunds((current) => current.filter((fund) => fund.id !== id))
-        setTotal((prev) => prev - 1)
-
-        if (selectedFund?.id === id) {
-          setSelectedFund(null)
-        }
+        await apiDeleteFund(id);
+        toast.success('Đã xóa quỹ thành công!');
+        mutateList();
+        return true;
+      } catch (error: any) {
+        toast.error('Xóa quỹ thất bại', { 
+          description: error?.message || 'Vui lòng thử lại' 
+        });
+        return false;
       } finally {
-        setIsCreating(false)
+        setLoading(false);
       }
     },
-    [currentUserId, selectedFund]
-  )
-
-  const visibleFunds = useMemo(() => {
-    if (!currentUserId) return []
-    return funds.filter((fund) => canAccessFund(fund, currentUserId))
-  }, [currentUserId, funds])
-
-  const fundId = selectedFund?.id ?? null
-  const hasMore = funds.length < total
+    [mutateList],
+  );
 
   return {
-    funds,
-    visibleFunds,
-    selectedFund,
-    fundId,
-    total,
-    hasMore,
-    enterFund,
-    backToFundList,
+    fundResponse, 
+    funds,       
+    total,        
+    fund,
+    
+    isLoadingList,
+    isLoadingFund,
+    loading,
+    
     createFund,
     updateFund,
     deleteFund,
-    fetchFunds: () => fetchFunds(1, false),
-    loadMoreFunds,
-    isLoading,
-    isCreating,
-    isLoadingMore,
-    setFunds,
-  }
-}
-
-export function FundProvider({ children }: { children: React.ReactNode }) {
-  const { currentUserId } = useAuth()
-  const value = useFundState(currentUserId)
-  return <FundContext.Provider value={value}>{children}</FundContext.Provider>
-}
-
-export function useFunds(): FundContextValue {
-  const ctx = useContext(FundContext)
-  if (!ctx) {
-    throw new Error('useFunds must be used within FundProvider')
-  }
-  return ctx
-}
-
-export { FundContext }
+    
+    mutateList,
+    mutateFund,
+  };
+};

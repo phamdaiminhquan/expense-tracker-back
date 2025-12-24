@@ -1,4 +1,6 @@
+import { BaseEntity, PageOptionsDto } from '@/common/interfaces/api.interface'
 import { FundType } from '@/lib/types'
+import { Fund } from './fund.entities'
 
 export type FundLastMessageDto = {
   id: string
@@ -65,4 +67,18 @@ export interface AddMemberPayload {
 
 export interface CloseDialogCateDto {
   isOpenDialogCate: boolean
+}
+
+export interface GetListFundDto extends PageOptionsDto<Fund> {}
+
+export interface CreateFundDto {
+  name: string
+  type: FundType
+  memberIds: string[]
+}
+
+export interface UpdateFundDto {
+  name?: string
+  type?: FundType
+  description?: string | null
 }

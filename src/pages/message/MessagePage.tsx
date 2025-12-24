@@ -1,15 +1,16 @@
 import { useState, useEffect, useRef } from 'react'
-import { Message, Fund, Category } from '@/lib/types'
+import { Message,  Category } from '@/lib/types'
 import { FundStatisticsDialog } from '@/components/FundStatisticsDialog'
 // import { CategoryManagementDialog } from '@/components/CategoryManagementDialog'
 import { CategorySubscriptionDialog } from '@/components/CategorySubscriptionDialog'
 
-import { ChatMessageView } from '@/components/ChatMessageView'
+import { ChatMessageView } from '@/pages/message/parts/message-chat/message-chat.part'
 import { NavigationDrawer } from '@/components/NavigationDrawer'
 import { CreateFundDialog } from '@/pages/fund/parts/fund-create/fund-create.part'
 import { LoadingScreen } from '@/components/LoadingScreen'
 import React from 'react'
-import { UpdateFundDialog } from './fund/parts/fund-update/fund-update.part'
+import { UpdateFundDialog } from '../fund/parts/fund-update/fund-update.part'
+import { Fund } from '@/apis/funds/fund.entities'
 
 interface MessagePageProps {
   fund: Fund | null
@@ -155,9 +156,7 @@ export function MessagePage({
           open={isDrawerOpen}
           onOpenChange={setIsDrawerOpen}
           funds={funds}
-          messages={messages}
           onDeleteFund={onDeleteFund}
-          currentUserId={currentUserId}
           currentUserName={currentUserName}
           currentFundId={fund?.id || null}
           isLoadingFunds={isLoadingFunds}
@@ -168,7 +167,6 @@ export function MessagePage({
           onUpdateFund={handleOpenUpdateFund}
           onLoadMore={onLoadMoreFunds || (() => { })}
           onLogout={onLogout}
-          resolveUserName={resolveUserName}
           onSearchFunds={onSearchFunds}
         />
 
@@ -201,7 +199,7 @@ export function MessagePage({
             <FundStatisticsDialog
               open={isStatisticsDialogOpen}
               onOpenChange={setIsStatisticsDialogOpen}
-              messages={fundMessages}
+              // messages={fundMessages}
               categories={fundCategories}
               fund={fund}
               resolveUserName={resolveUserName}

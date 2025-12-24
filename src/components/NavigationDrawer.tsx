@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
-import { Fund, Message } from '@/lib/types'
+import {  Message } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -14,6 +14,7 @@ import {
 import { ButtonIconElement } from './components/elements/button/button-icon.element'
 import { StackRowAlignCenter } from './components/styles/stack.style'
 import { TextFieldSearchElement } from './components/elements/text-field/text-field-search.element'
+import { Fund } from '@/apis/funds/fund.entities'
 
 interface RecentChat {
   fundId: string
@@ -30,8 +31,6 @@ interface NavigationDrawerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   funds: Fund[]
-  messages: Message[]
-  currentUserId: string
   currentUserName: string
   currentFundId: string | null
   isLoadingFunds?: boolean
@@ -43,7 +42,6 @@ interface NavigationDrawerProps {
   onUpdateFund: (fundId: string) => void
   onLoadMore: () => void
   onLogout: () => void
-  resolveUserName: (userId: string) => string
   onSearchFunds?: (query: string) => void
 }
 
@@ -51,8 +49,6 @@ export function NavigationDrawer({
   open,
   onOpenChange,
   funds,
-  messages,
-  currentUserId,
   currentUserName,
   currentFundId,
   isLoadingFunds = false,
@@ -64,7 +60,6 @@ export function NavigationDrawer({
   onUpdateFund,
   onLoadMore,
   onLogout,
-  resolveUserName,
   onSearchFunds,
 }: NavigationDrawerProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -106,23 +101,6 @@ export function NavigationDrawer({
 
   const getInitials = (name: string) => {
     return name.charAt(0).toUpperCase()
-  }
-
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp)
-    const today = new Date()
-    const yesterday = new Date(today)
-    yesterday.setDate(yesterday.getDate() - 1)
-
-    if (date.toDateString() === today.toDateString()) {
-      return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Hôm qua'
-    } else {
-      const day = date.getDate()
-      const month = date.getMonth() + 1
-      return `${day}/${month}`
-    }
   }
 
   return (
@@ -205,7 +183,7 @@ export function NavigationDrawer({
                           {fund.name}
                         </h3>
                         <p className="text-xs text-muted-foreground">
-                          {fund.memberIds.length} thành viên
+                          22 thành viên
                         </p>
                       </div>
                       <StackRowAlignCenter sx={{ gap: 0 }}>

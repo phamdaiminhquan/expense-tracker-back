@@ -4,7 +4,6 @@ import { AppRouter } from './AppRouter.tsx'
 import { AuthProvider } from './providers/AuthProvider.tsx'
 import { CategoryProvider } from './providers/CategoryProvider.tsx'
 import { AIParserProvider } from './providers/AIParserProvider.tsx'
-import { FundProvider } from './providers/FundProvider.tsx'
 import { MessageProvider } from './providers/MessageProvider.tsx'
 import { LogoComponent } from '@/components/components/logo/logo.component.tsx'
 
@@ -13,7 +12,6 @@ function App() {
     <BrowserRouter>
       <Toaster position="top-right" />
       <AuthProvider>
-        <FundProvider>
           <CategoryProvider>
             <AIParserProvider>
               <MessageProvider>
@@ -21,7 +19,6 @@ function App() {
               </MessageProvider>
             </AIParserProvider>
           </CategoryProvider>
-        </FundProvider>
       </AuthProvider>
     </BrowserRouter>
   )

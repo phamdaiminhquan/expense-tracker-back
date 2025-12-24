@@ -12,9 +12,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Fund, FundType } from '@/lib/types'
+import {  FundType } from '@/lib/types'
 import { User } from '@/lib/auth'
 import { Users, User as UserIcon } from '@phosphor-icons/react'
+import { Fund } from '@/apis/funds/fund.entities'
 
 interface UpdateFundDialogProps {
   fund: Fund

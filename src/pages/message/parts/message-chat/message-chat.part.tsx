@@ -1,8 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { Message, Fund, Category } from '@/lib/types'
+import { Message, Category } from '@/lib/types'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import {
   List,
   ChartBar,
@@ -11,7 +9,6 @@ import {
   Trash,
   ArrowClockwise,
   NotePencil,
-  Users,
   CircleNotch,
   Tag,
   CheckCircle,
@@ -21,10 +18,11 @@ import {
 } from '@phosphor-icons/react'
 
 import { formatCurrency } from '@/lib/currency'
-import { EditPendingPromptDialog } from './EditPendingPromptDialog'
-import { EditMessageDialog } from './EditMessageDialog'
+import { EditPendingPromptDialog } from '../../../../components/EditPendingPromptDialog'
+import { EditMessageDialog } from '../../../../components/EditMessageDialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import React from 'react'
+import { Fund } from '@/apis/funds/fund.entities'
 
 interface ChatMessageViewProps {
   fund: Fund | null
@@ -146,7 +144,7 @@ export function ChatMessageView({
 
   const getMemberNames = () => {
     if (!fund) return ''
-    return fund.memberIds.map((id) => resolveUserName(id)).join(', ')
+    return fund.memberIds?.map((id) => resolveUserName(id)).join(', ')
   }
 
   return (

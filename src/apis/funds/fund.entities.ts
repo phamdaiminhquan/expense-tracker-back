@@ -1,0 +1,13 @@
+import { FundType, FundLastMessage } from '@/lib/types';
+import { BaseEntity } from '../../common/interfaces/api.interface';
+
+export interface Fund extends BaseEntity {
+   id: string
+   name: string
+   type: FundType
+   ownerId: string
+   memberIds: string[]
+   lastMessage?: FundLastMessage  
+   isOpenDialogCate?: boolean
+   description: string | null
+}
