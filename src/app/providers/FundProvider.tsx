@@ -9,7 +9,7 @@ export const useFund = (params?: GetListFundDto, fundId?: string) => {
 
   // Fetch list funds
   const {
-    data: fundResponse,
+    data: fundList,
     isLoading: isLoadingList,
     mutate: mutateList,
   } = useSWR(
@@ -20,9 +20,6 @@ export const useFund = (params?: GetListFundDto, fundId?: string) => {
       revalidateOnFocus: false 
     },
   );
-
-  const funds = fundResponse?.data || [];
-  const total = fundResponse?.total || 0;
 
   const {
     data: fund,
@@ -99,9 +96,7 @@ export const useFund = (params?: GetListFundDto, fundId?: string) => {
   );
 
   return {
-    fundResponse, 
-    funds,       
-    total,        
+    fundList,       
     fund,
     
     isLoadingList,

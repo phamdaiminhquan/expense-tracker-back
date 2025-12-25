@@ -4,8 +4,6 @@ import { AppRouter } from './AppRouter.tsx'
 import { AuthProvider } from './providers/AuthProvider.tsx'
 import { CategoryProvider } from './providers/CategoryProvider.tsx'
 import { AIParserProvider } from './providers/AIParserProvider.tsx'
-import { MessageProvider } from './providers/MessageProvider.tsx'
-import { LogoComponent } from '@/components/components/logo/logo.component.tsx'
 
 function App() {
   return (
@@ -14,9 +12,7 @@ function App() {
       <AuthProvider>
           <CategoryProvider>
             <AIParserProvider>
-              <MessageProvider>
                 <AppRouter />
-              </MessageProvider>
             </AIParserProvider>
           </CategoryProvider>
       </AuthProvider>

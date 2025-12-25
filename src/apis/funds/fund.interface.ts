@@ -75,6 +75,7 @@ export interface CreateFundDto {
   name: string
   type: FundType
   memberIds: string[]
+  description?: string | null
 }
 
 export interface UpdateFundDto {

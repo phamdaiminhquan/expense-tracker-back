@@ -1,12 +1,7 @@
 import { axiosRequest } from '@/common/config/axios.config'
 import {
 	AddMemberPayload,
-	CreateFundPayload,
-	FundDto,
 	FundMemberDto,
-	FundsListResponse,
-	FundsListQuery,
-	UpdateFundPayload,
 	GetListFundDto,
 	CreateFundDto,
 	UpdateFundDto,

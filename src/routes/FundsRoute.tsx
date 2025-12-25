@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { FundListPage } from '@/pages/fund/fund.page';
 import { useAuth } from '@/hooks/useAuth';
 import { LoadingScreen } from '@/components/LoadingScreen';
@@ -7,11 +7,12 @@ import { PAGE_TAKE_DEFAULT } from '@/common/constant/page-take.constant';
 import { useFund } from '@/app/providers/FundProvider';
 
 export function FundsRoute() {
+  // hook
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser, currentUserId, currentUserName, logout } = useAuth();
-
-  // State for pagination
+  
+  // state
   const [params] = useState({
     ...PAGE_TAKE_DEFAULT,
     page: 1,
@@ -20,7 +21,7 @@ export function FundsRoute() {
 
   // Use fund hook
   const {
-    funds,
+    fundList,
     isLoadingList: isLoading,
     loading: isCreating,
     createFund,
@@ -32,11 +33,11 @@ export function FundsRoute() {
 
   // Get visible funds (filter by access permission)
   const visibleFunds = useMemo(() => {
-    if (!funds || !currentUserId) return [];
-    return funds.filter(
+    if (!fundList?.data || !currentUserId) return [];
+    return fundList?.data.filter(
       (fund) => fund.ownerId === currentUserId || fund.memberIds.includes(currentUserId)
     );
-  }, [funds, currentUserId]);
+  }, [fundList?.data, currentUserId]);
 
   // Check if this is a fresh login (from login page)
   useEffect(() => {
@@ -47,7 +48,6 @@ export function FundsRoute() {
       hasInitialized.current = true;
       setShowLoadingScreen(true);
       sessionStorage.removeItem('justLoggedIn');
-      // SWR will auto-fetch, just need to trigger loading screen
     }
   }, [location.state]);
 
@@ -67,7 +67,7 @@ export function FundsRoute() {
   };
 
   return (
-    <>
+    <React.Fragment>
       {showLoadingScreen && (
         <LoadingScreen onComplete={handleLoadingComplete} isLoading={isLoading || isCreating} />
       )}
@@ -90,6 +90,6 @@ export function FundsRoute() {
           onLogout={logout}
         />
       </div>
-    </>
+    </React.Fragment>
   );
 }

@@ -299,12 +299,12 @@ export function LoginForm({ onLogin }: LoginFormProps) {
           </div>
           <div className="space-y-2">
             <h1 className="text-2xl font-bold text-gray-900">
-              {mode === 'login' ? 'FinCap' : 'Ê Ku'}
+              {mode === 'login' ? 'FinCap' : 'FinCap'}
             </h1>
             <p className="text-sm text-gray-600">
               {mode === 'login'
-                ? 'Hân hạnh chào mày!!'
-                : 'Ngon thì để lại cho bố cái info'}
+                ? 'Quản lý tài chính thông minh'
+                : 'Bắt đầu quản lý tài chính của bạn'}
             </p>
           </div>
         </div>
@@ -321,7 +321,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             {mode === 'signup' && (
               <FormInputField
                 id="name"
-                placeholder="Họ tên"
+                placeholder="Họ và tên"
                 value={name}
                 onChange={setName}
                 error={errors.name}
@@ -349,7 +349,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
               <FormInputField
                 id="password"
                 type="password"
-                placeholder="Password"
+                placeholder="Mật khẩu"
                 value={password}
                 onChange={setPassword}
                 error={errors.password}
@@ -371,7 +371,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
               <FormInputField
                 id="confirmPassword"
                 type="password"
-                placeholder="Nhập lại Password"
+                placeholder="Nhập lại mật khẩu"
                 value={confirmPassword}
                 onChange={setConfirmPassword}
                 error={errors.confirmPassword}
@@ -422,7 +422,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
               <div className="w-full border-t border-gray-200" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-2 text-gray-500">or</span>
+              <span className="bg-white px-2 text-gray-500">Hoặc</span>
             </div>
           </div>
 

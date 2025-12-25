@@ -2,27 +2,26 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCategories } from '@/hooks/useCategories';
 import { useAuth } from '@/hooks/useAuth';
-import { useMessages } from '@/hooks/useMessages';
-import { MessagePage } from '@/pages/message/MessagePage';
+import { MessagePage } from '@/pages/message/message.page';
 import { PAGE_TAKE_DEFAULT } from '@/common/constant/page-take.constant';
 import { useFund } from '@/app/providers/FundProvider';
+import { useMessage } from '@/app/providers/MessageProvider';
 
 export function MessageRoute() {
+  // hook
   const { fundId } = useParams();
   const navigate = useNavigate();
   const { currentUserId, currentUserName, currentUser, resolveUserName, logout } = useAuth();
 
-  // State for pagination
-  const [params, setParams] = useState({
+  // State
+  const [fundParams, setFundParams] = useState({
     ...PAGE_TAKE_DEFAULT,
     page: 1,
     take: 10,
   });
 
-  // Use fund hook
   const {
-    funds,
-    total,
+    fundList,
     fund,
     isLoadingList: isLoadingFunds,
     isLoadingFund,
@@ -30,39 +29,30 @@ export function MessageRoute() {
     createFund,
     updateFund,
     deleteFund,
-    mutateList: refetchFunds,
-  } = useFund(params, fundId);
-
-  // Use messages hook
-  const {
-    addMessage,
-    resendMessage,
-    updateMessage,
-    deleteMessage,
-    fetchMessagesByFund,
-    messages,
-    isProcessing,
-    isLoading,
-  } = useMessages();
-  // Use categories hook
-  const { categories, createCategory, updateCategory, deleteCategory } = useCategories();
+  } = useFund(fundParams, fundId);
 
   // Get visible funds (filter by access permission)
   const visibleFunds = useMemo(() => {
-    if (!funds || !currentUserId) return [];
-    return funds?.filter((f) => 
-      f.ownerId === currentUserId || f.memberIds.includes(currentUserId)
-    );
-  }, [currentUserId, funds]);
+    if (!fundList?.data || !currentUserId) return [];
+    return fundList.data.filter((f) => f.ownerId === currentUserId || f.memberIds?.includes(currentUserId));
+  }, [currentUserId, fundList?.data]);
 
   // Auto-select fund
   const selectedFund = useMemo(() => {
-    if (fundId && fund) {
-      return fund;
-    }
-    // Auto-select first fund if no fundId
+    if (fundId && fund) return fund;
     return visibleFunds.length > 0 ? visibleFunds[0] : null;
   }, [fundId, fund, visibleFunds]);
+
+  const {
+    messageList,
+    isLoadingList: isLoadingMessages,
+    loading: isProcessingMessage,
+    createMessage,
+    updateMessage,
+    deleteMessage,
+  } = useMessage(selectedFund?.id || '');
+
+  const { categories, createCategory, updateCategory, deleteCategory } = useCategories();
 
   // Auto-navigate to first fund
   useEffect(() => {
@@ -71,34 +61,23 @@ export function MessageRoute() {
     }
   }, [selectedFund, fundId, navigate]);
 
-  // Fetch messages when fund changes
-  useEffect(() => {
-    if (selectedFund) {
-      fetchMessagesByFund(selectedFund.id);
-    }
-  }, [selectedFund, fetchMessagesByFund]);
-
   // Handle select fund
   const handleSelectFund = (selectedFundId: string) => {
     navigate(`/chat/${selectedFundId}`);
   };
 
-  // Handle create fund
   const handleCreateFund = async (name: string, type: 'personal' | 'shared', memberIds: string[]) => {
     const newFund = await createFund({ name, type, memberIds });
     navigate(`/chat/${newFund.id}`);
   };
 
-  // Handle update fund
   const handleUpdateFund = async (id: string, name: string, type: 'personal' | 'shared') => {
     await updateFund(id, { name, type });
   };
 
-  // Handle delete fund
   const handleDeleteFund = async (id: string) => {
     const success = await deleteFund(id);
     if (success && fundId === id) {
-      // Navigate to first available fund after deletion
       const remainingFunds = visibleFunds.filter((f) => f.id !== id);
       if (remainingFunds.length > 0) {
         navigate(`/chat/${remainingFunds[0].id}`, { replace: true });
@@ -108,19 +87,58 @@ export function MessageRoute() {
     }
   };
 
-  // Load more funds
-  const handleLoadMoreFunds = async () => {
-    if (!total || funds.length >= total) return;
-    setParams((prev) => ({ ...prev, page: prev.page + 1 }));
+  const handleAddMessage = async (messageData: any) => {
+    if (!selectedFund) return;
+
+    const payload = {
+      message: messageData.message || null,
+      spendValue: messageData.spend || null,
+      earnValue: messageData.earn || null,
+      categoryId: messageData.categoryId || null,
+    };
+
+    await createMessage(payload);
   };
 
-  const hasMoreFunds = total ? funds.length < total : false;
+  const handleResendMessage = async (failedMessage: any) => {
+    if (!selectedFund) return;
+
+    const messageText = failedMessage.originalPrompt || failedMessage.message;
+    const payload = {
+      message: messageText,
+      spendValue: failedMessage.isPendingPrompt ? null : failedMessage.spend,
+      earnValue: failedMessage.isPendingPrompt ? null : failedMessage.earn,
+      categoryId: failedMessage.isPendingPrompt ? null : failedMessage.categoryId,
+    };
+
+    await createMessage(payload);
+  };
+
+  const handleUpdateMessage = async (updatedMessage: any) => {
+    const payload = {
+      message: updatedMessage.message,
+    };
+
+    await updateMessage(updatedMessage.id, payload);
+  };
+
+  const handleDeleteMessage = async (id: string) => {
+    await deleteMessage(id);
+  };
+
+  // Load more funds
+  const handleLoadMoreFunds = async () => {
+    if (!fundList?.data || fundList.data.length >= fundList.total) return;
+    setFundParams((prev) => ({ ...prev, page: prev.page + 1 }));
+  };
+
+  const hasMoreFunds = fundList?.total ? fundList.data.length < fundList.total : false;
 
   return (
     <MessagePage
       fund={selectedFund}
       funds={visibleFunds}
-      messages={messages}
+      messages={messageList?.data || []}
       categories={categories}
       currentUserId={currentUserId as string}
       currentUserName={currentUserName as string}
@@ -130,17 +148,17 @@ export function MessageRoute() {
       onCreateFund={handleCreateFund}
       onUpdateFund={handleUpdateFund}
       onDeleteFund={handleDeleteFund}
-        onSearchFunds={(prev) => setParams((p) => ({ ...p, search: prev, page: 1 }))}
+      onSearchFunds={(prev) => setFundParams((p) => ({ ...p, search: prev, page: 1 }))}
       onLogout={logout}
-      onAddMessage={addMessage}
-      onResendMessage={resendMessage}
-      onUpdateMessage={updateMessage}
-      onDeleteMessage={deleteMessage}
+      onAddMessage={handleAddMessage}
+      onResendMessage={handleResendMessage}
+      onUpdateMessage={handleUpdateMessage}
+      onDeleteMessage={handleDeleteMessage}
       onCreateCategory={(name, description) => createCategory(selectedFund?.id || null, name, description)}
       onUpdateCategory={updateCategory}
       onDeleteCategory={deleteCategory}
-      isProcessing={isProcessing || isFundProcessing}
-      isLoading={isLoading || isLoadingFund}
+      isProcessing={isProcessingMessage || isFundProcessing}
+      isLoading={isLoadingMessages || isLoadingFund}
       isLoadingFunds={isLoadingFunds}
       isLoadingMoreFunds={false}
       hasMoreFunds={hasMoreFunds}

@@ -1,4 +1,6 @@
+import { PageOptionsDto } from '@/common/interfaces/api.interface'
 import { MessageStatus, FundType } from '@/lib/types'
+import { Message } from './message.entities'
 
 export type CategoryParentDto = {
   id: string
@@ -64,4 +66,20 @@ export type CreateMessagePayload = {
 
 export type UpdateMessagePayload = {
   message?: string | null
+}
+
+export interface GetListMessagesDto extends PageOptionsDto<Message>  {}
+
+export interface CreateMessageDto {
+  message: string | null
+  spendValue?: number | null
+  earnValue?: number | null
+  categoryId?: string | null
+}
+
+export interface UpdateMessageDto {
+  message?: string | null
+  spendValue?: number | null
+  earnValue?: number | null
+  categoryId?: string | null
 }
