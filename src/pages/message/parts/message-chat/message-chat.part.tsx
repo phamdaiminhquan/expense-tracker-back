@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Message, Category } from '@/lib/types'
 import { Button } from '@/components/ui/button'
+import CapyInputBar from '@/components/CapyInputBar'
 import {
   List,
   ChartBar,
@@ -67,12 +68,13 @@ export function ChatMessageView({
   isLoading = false,
   isLoadingFunds = false,
 }: ChatMessageViewProps) {
-  const [input, setInput] = useState('')
+  // Đã chuyển toàn bộ input sang CapyInputBar, không cần state input riêng
   const [editingMessage, setEditingMessage] = useState<Message | null>(null)
   const [editingPendingPrompt, setEditingPendingPrompt] = useState<Message | null>(null)
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const [input, setInput] = useState('') // Add local state for input
 
   const sortedMessages = [...messages].sort((a, b) => b.timestamp - a.timestamp)
   const visibleMessages = sortedMessages.slice(0, visibleCount)
@@ -93,37 +95,6 @@ export function ChatMessageView({
       }, 0)
     }
   }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim() || !fund) return
-
-    const messageText = input.trim()
-    // Clear input immediately for better UX
-    setInput('')
-
-    try {
-      await onAddMessage({
-        userId: currentUserId,
-        userName: currentUserName,
-        fundId: fund.id,
-        spend: null,
-        earn: null,
-        message: messageText,
-        isPendingPrompt: true,
-        originalPrompt: messageText,
-        promptCreatedAt: Date.now(),
-      })
-    } catch (error) {
-      // Error toast handled upstream
-    }
-  }
-
-  useEffect(() => {
-    if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: 'smooth' })
-    }
-  }, [messages.length])
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp)
@@ -447,50 +418,36 @@ export function ChatMessageView({
         </div>
       </div>
 
-      {/* Premium iOS-style Chat Input */}
+      {/* Chat Input: dùng CapyInputBar mới */}
       <div className="fixed bottom-0 left-0 right-0 z-30 flex items-end justify-center" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
         <div className="w-full max-w-2xl px-4 sm:px-6">
-          <form onSubmit={handleSubmit} className="relative">
-            {/* Floating Card Container */}
-            <div className="relative bg-white rounded-[28px] sm:rounded-[32px] shadow-[0_4px_20px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.1)] border border-border/15">
-              <div className="flex items-center gap-3 px-4 py-3 sm:px-5 sm:py-4">
-                {/* Input Field */}
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder={fund ? "Nhập giao dịch (VD: bánh tráng trộn 35)" : "Chọn quỹ để bắt đầu"}
-                  disabled={!fund}
-                  className="flex-1 h-14 sm:h-16 px-0 text-base sm:text-[17px] bg-transparent border-0 outline-none placeholder:text-muted-foreground/60 placeholder:font-normal text-foreground focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                  style={{
-                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-                    WebkitAppearance: 'none',
-                    appearance: 'none',
-                  }}
-                />
-
-                {/* Send Button */}
-                <button
-                  type="submit"
-                  disabled={!input.trim() || !fund}
-                  className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-primary/90 hover:bg-primary active:bg-primary/80 disabled:bg-muted/60 disabled:opacity-40 transition-all duration-200 hover:scale-105 active:scale-95 disabled:scale-100 shadow-sm hover:shadow-md active:shadow-sm disabled:shadow-none disabled:cursor-not-allowed group touch-manipulation"
-                  aria-label="Gửi tin nhắn"
-                >
-                  <PaperPlaneRight
-                    size={20}
-                    weight="fill"
-                    className="text-white transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-active:translate-x-0 group-active:translate-y-0"
-                  />
-                </button>
-              </div>
-
-              {/* Subtle Focus Ring - appears when input has content */}
-              <div className={`absolute inset-0 rounded-[28px] sm:rounded-[32px] pointer-events-none transition-opacity duration-300 ${input.trim() ? 'opacity-100' : 'opacity-0'
-                }`}>
-                <div className="absolute inset-0 rounded-[28px] sm:rounded-[32px] ring-1 ring-primary/15" />
-              </div>
-            </div>
-          </form>
+          <CapyInputBar
+            inputValue={input}
+            setInputValue={setInput}
+            selectedWallet={{ name: 'Ví mặc định', icon: null, color: 'bg-gray-200 text-gray-600' }}
+            isSmartMode={true}
+            isAnalyzing={isProcessing}
+            capyMood={'sleepy'}
+            onSend={() => {
+              if (!input.trim() || !fund) return;
+              onAddMessage({
+                userId: currentUserId,
+                userName: currentUserName,
+                fundId: fund.id,
+                spend: null,
+                earn: null,
+                message: input.trim(),
+                isPendingPrompt: true,
+                originalPrompt: input.trim(),
+                promptCreatedAt: Date.now(),
+              });
+              setInput('');
+            }}
+            onFocus={() => {}}
+            onBlur={() => {}}
+            onWalletClick={() => {}}
+            onCategoryClick={() => {}}
+          />
         </div>
       </div>
 
