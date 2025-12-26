@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { FundListPage } from '@/pages/fund/fund.page';
 import { useAuth } from '@/hooks/useAuth';
+import { LoadingScreen } from '@/components/LoadingScreen';
 import { PAGE_TAKE_DEFAULT } from '@/common/constant/page-take.constant';
 import { useFund } from '@/app/providers/FundProvider';
 
@@ -67,6 +68,9 @@ export function FundsRoute() {
 
   return (
     <React.Fragment>
+      {showLoadingScreen && (
+        <LoadingScreen onComplete={handleLoadingComplete} isLoading={isLoading || isCreating} />
+      )}
       <div
         className={
           showLoadingScreen

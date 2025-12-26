@@ -1,6 +1,7 @@
 import { Navigate, useNavigate } from 'react-router-dom'
 import { LoginForm } from '@/components/LoginForm'
 import { useAuth } from '@/hooks/useAuth'
+import { LoadingScreen } from '@/components/LoadingScreen'
 import { useEffect, useState, useRef } from 'react'
 
 export function LoginRoute() {
@@ -43,6 +44,12 @@ export function LoginRoute() {
 
   return (
     <>
+      {showLoadingScreen && (
+        <LoadingScreen 
+          onComplete={handleLoadingComplete}
+          isLoading={false}
+        />
+      )}
       <div className={showLoadingScreen ? 'opacity-0 pointer-events-none' : 'opacity-100 transition-opacity duration-500 pointer-events-auto'}>
         <LoginForm onLogin={handleLogin} />
       </div>
