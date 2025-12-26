@@ -1,14 +1,14 @@
-import { createRoot } from 'react-dom/client'
-import { ErrorBoundary } from "react-error-boundary";
-import App from './app/App.tsx'
-import { ErrorFallback } from './ErrorFallback.tsx'
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { Provider } from 'react-redux'
+import { store } from './redux/store.redux'
+import App from './App' 
+import './index.css'
 
-import "./main.css"
-import "./styles/theme.css"
-import "./index.css"
-
-createRoot(document.getElementById('root')!).render(
-  <ErrorBoundary FallbackComponent={ErrorFallback}>
-    <App />
-   </ErrorBoundary>
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </React.StrictMode>
 )

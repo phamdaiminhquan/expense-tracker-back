@@ -5,8 +5,6 @@ import { GlobalSystemState } from './system.interface';
 
 export const initialStateSystem: GlobalSystemState = {
   mode: Mode.LIGHT,
-  auditLogs: undefined,
-  auditLogLoading: false,
 };
 
 export const slice = createSlice({
@@ -19,10 +17,6 @@ export const slice = createSlice({
     // ChangeMode
     builder.addCase(ACTION_SYSTEM.changeMode.fulfilled, (state, action) => {
       state.mode = action.payload;
-    });
-    builder.addCase(ACTION_SYSTEM.getListAuditLogGlobal.fulfilled, (state, action) => {
-      state.auditLogs = action.payload;
-      state.auditLogLoading = false;
     });
   },
 });

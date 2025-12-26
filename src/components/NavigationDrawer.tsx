@@ -15,6 +15,12 @@ import { ButtonIconElement } from './components/elements/button/button-icon.elem
 import { StackRowAlignCenter } from './components/styles/stack.style'
 import { TextFieldSearchElement } from './components/elements/text-field/text-field-search.element'
 import { Fund } from '@/apis/funds/fund.entities'
+import { Mode } from '@/common/enums/mode.enum'
+import { ACTION_SYSTEM } from '@/redux'
+import { IconElement } from './components/elements/icon/icon.element'
+import { useAppDispatch } from '@/redux/store.redux'
+import { useSelector } from 'react-redux'
+import { GlobalReduxState } from '@/redux/store.interface'
 
 interface RecentChat {
   fundId: string
@@ -62,6 +68,8 @@ export function NavigationDrawer({
   onLogout,
   onSearchFunds,
 }: NavigationDrawerProps) {
+  const dispatch = useAppDispatch();
+  const system = useSelector((state: GlobalReduxState) => state.system);
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   // Scroll detection để load more khi đạt 70%
@@ -217,6 +225,14 @@ export function NavigationDrawer({
               <p className="font-semibold text-sm text-foreground truncate">{currentUserName}</p>
               <p className="text-xs text-muted-foreground">Tài khoản</p>
             </div>
+             <IconElement
+              icon={system.mode === Mode.DARK ? 'brightness_6' : 'brightness_5'}
+              onClick={(e) => {
+                e.stopPropagation();
+                dispatch(ACTION_SYSTEM.changeMode(system.mode));
+              }}
+              size="medium"
+            />
             <SignOut size={20} className="text-muted-foreground shrink-0" weight="bold" />
           </button>
         </div>
