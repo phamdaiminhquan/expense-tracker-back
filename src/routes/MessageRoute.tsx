@@ -92,12 +92,9 @@ export function MessageRoute() {
 
     const payload = {
       message: messageData.message || null,
-      spendValue: messageData.spend || null,
-      earnValue: messageData.earn || null,
-      categoryId: messageData.categoryId || null,
     };
 
-    await createMessage(payload);
+    await createMessage(selectedFund.id, payload);
   };
 
   const handleResendMessage = async (failedMessage: any) => {
@@ -106,12 +103,9 @@ export function MessageRoute() {
     const messageText = failedMessage.originalPrompt || failedMessage.message;
     const payload = {
       message: messageText,
-      spendValue: failedMessage.isPendingPrompt ? null : failedMessage.spend,
-      earnValue: failedMessage.isPendingPrompt ? null : failedMessage.earn,
-      categoryId: failedMessage.isPendingPrompt ? null : failedMessage.categoryId,
     };
 
-    await createMessage(payload);
+    await createMessage(selectedFund.id, payload);
   };
 
   const handleUpdateMessage = async (updatedMessage: any) => {
@@ -133,7 +127,6 @@ export function MessageRoute() {
   };
 
   const hasMoreFunds = fundList?.total ? fundList.data.length < fundList.total : false;
-
   return (
     <MessagePage
       fund={selectedFund}

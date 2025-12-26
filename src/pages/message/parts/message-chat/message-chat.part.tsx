@@ -104,7 +104,7 @@ export function ChatMessageView({
 
     try {
       await onAddMessage({
-        userId: currentUserId,
+        createdById: currentUserId,
         userName: currentUserName,
         fundId: fund.id,
         spend: null,
@@ -146,7 +146,6 @@ export function ChatMessageView({
     if (!fund) return ''
     return fund.memberIds?.map((id) => resolveUserName(id)).join(', ')
   }
-
   return (
     <div className="h-auto flex flex-col overflow-y-scroll">
       {/* Premium Background */}
@@ -280,10 +279,11 @@ export function ChatMessageView({
           ) : (
             // Reverse the list for chat view (newest at the bottom)
             [...visibleMessages].reverse().map((message) => {
+              console.log("message", message);
               const isPending = message.isPendingPrompt === true
-              const isCurrentUser = message.userId === currentUserId
+              const isCurrentUser = message.createdById === currentUserId
               const clientStatus = message.clientStatus ?? 'sent'
-
+              console.log("currentUserId", currentUserId);
               return (
                 <div
                   key={message.id}
@@ -311,40 +311,6 @@ export function ChatMessageView({
                             }`}>
                             {message.message}
                           </p>
-                          {!isPending && (
-                            <React.Fragment>
-                              {(message.spend !== null || message.earn !== null) && (
-                                <div className="flex items-center gap-2 pt-1">
-
-                                  {message.spend !== null && (
-                                    <span className="font-bold text-base text-amber-500">
-                                      -{formatCurrency(message.spend)}
-                                    </span>
-                                  )}
-                                  {message.earn !== null && (
-                                    <span className="font-bold text-base text-green-500">
-                                      +{formatCurrency(message.earn)}
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-                              {message.categoryId && (
-                                <div className="flex items-center gap-2 pt-1">
-
-                                  <Tag
-                                    size={12}
-                                    weight="fill"
-                                    className={isCurrentUser ? 'text-primary-foreground/80' : 'text-muted-foreground'}
-                                  />
-                                  <span className={`text-[11px] uppercase tracking-wider font-semibold ${isCurrentUser ? 'text-primary-foreground/90' : 'text-muted-foreground'
-                                    }`}>
-                                    {message.categoryName || categories.find((c) => c.id === message.categoryId)?.name || 'Không rõ'}
-
-                                  </span>
-                                </div>
-                              )}
-                            </React.Fragment>
-                          )}
                         </div>
                       </div>
 
@@ -412,7 +378,7 @@ export function ChatMessageView({
                       )}
 
                       {/* Edit prompt button for messages without transaction (no spend/earn) */}
-                      {!isPending && isCurrentUser && message.spend === null && message.earn === null && (
+                      {!isPending && isCurrentUser && message.transaction === null && (
                         <Button
                           variant="ghost"
                           className="h-5 px-2 text-[10px] text-accent hover:text-accent hover:bg-accent/10 rounded-full transition-all ml-1 font-medium"

@@ -1,15 +1,13 @@
 import { axiosRequest } from '@/common/config/axios.config'
 import { Message } from '@/lib/types'
-import { CreateMessageDto,  GetListMessagesDto, UpdateMessageDto } from './message.interface'
+import { CreateMessageDto, UpdateMessageDto } from './message.interface'
 import { ResList } from '@/common/interfaces/api.interface'
 
-export const getListMessages = async (fundId: string): Promise<ResList<Message>> => {
-  const res = await axiosRequest.get(`funds/${fundId}/messages`)
-  return res.data
-}
+export const getListMessages = async (fundId: string): Promise<ResList<Message>> => 
+  await axiosRequest.get(`funds/${fundId}/messages`)
 
-export const createMessage = async (body: CreateMessageDto): Promise<Message> => {
-  const res = await axiosRequest.post('messages', body)
+export const createMessage = async (fundId: string, body: CreateMessageDto): Promise<Message> => {
+  const res = await axiosRequest.post(`funds/${fundId}/messages`, body)
   return res.data
 }
 

@@ -1,3 +1,5 @@
+import { TransactionDto } from "@/apis/messages/message.interface"
+
 export type FundType = 'personal' | 'shared'
 
 export type MessageStatus = 'pending' | 'processed' | 'failed'
@@ -30,7 +32,7 @@ export interface FundLastMessage {
 
 export interface Message {
   id: string
-  userId: string
+  createdById: string
   userName: string
   fundId: string
   spend: number | null
@@ -46,6 +48,7 @@ export interface Message {
   promptCreatedAt?: number
   clientStatus?: 'sending' | 'sent' | 'failed'
   clientTempId?: string
+  transaction?: TransactionDto
 }
 
 export interface ParsedExpense {

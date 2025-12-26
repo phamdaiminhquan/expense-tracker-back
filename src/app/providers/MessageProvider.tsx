@@ -25,7 +25,6 @@ export const useMessage = (fundId: string, messageId?: string) => {
       revalidateOnFocus: false,
     }
   );
-
   const {
     data: message,
     isLoading: isLoadingMessage,
@@ -36,10 +35,10 @@ export const useMessage = (fundId: string, messageId?: string) => {
 
   // Create message
   const createMessage = useCallback(
-    async (values: CreateMessageDto) => {
+    async (fundId: string, values: CreateMessageDto) => {
       setLoading(true);
       try {
-        const newMessage = await apiCreateMessage(values);
+        const newMessage = await apiCreateMessage(fundId, values);
         toast.success(newMessage.status === 'pending' ? 'Đã lưu ghi chú, sẽ xử lý sau' : 'Đã thêm giao dịch!');
         mutateList();
         return newMessage;

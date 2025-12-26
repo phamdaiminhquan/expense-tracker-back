@@ -127,7 +127,6 @@ export function MessagePage({
 
   const fundCategories = fund ? categories.filter((c) => c.fundId === fund.id) : []
   const fundMessages = fund ? messages.filter((m) => m.fundId === fund.id) : []
-
   useEffect(() => {
     if (!fund?.id) return
     if (fund.isOpenDialogCate) {
@@ -140,7 +139,6 @@ export function MessagePage({
 
   // Banner chỉ hiển thị khi đang load funds lần đầu
   const isInitialLoading = isLoadingFunds
-
 
   return (
     <React.Fragment>
