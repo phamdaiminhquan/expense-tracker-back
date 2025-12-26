@@ -19,16 +19,16 @@ export interface FundLastMessage {
   processedAt?: number | null
 }
 
-// export interface Fund {
-//   id: string
-//   name: string
-//   type: FundType
-//   ownerId: string
-//   memberIds: string[]
-//   createdAt: number
-//   lastMessage?: FundLastMessage  // Message mới nhất từ BE
-//   isOpenDialogCate?: boolean
-// }
+export interface Fund {
+  id: string
+  name: string
+  type: FundType
+  ownerId: string
+  memberIds: string[]
+  createdAt: number
+  lastMessage?: FundLastMessage  // Message mới nhất từ BE
+  isOpenDialogCate?: boolean
+}
 
 export interface Message {
   id: string
@@ -38,14 +38,14 @@ export interface Message {
   spend: number | null
   earn: number | null
   message: string
-    categoryId?: string | null
+  categoryId?: string | null
   categoryName?: string | null
   timestamp: number
 
   status?: MessageStatus
   isPendingPrompt?: boolean
   originalPrompt?: string
-  promptCreatedAt?: number
+  createdAt: number
   clientStatus?: 'sending' | 'sent' | 'failed'
   clientTempId?: string
   transaction?: TransactionDto

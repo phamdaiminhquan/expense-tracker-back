@@ -114,7 +114,7 @@ export function ChatMessageView({
         message: messageText,
         isPendingPrompt: true,
         originalPrompt: messageText,
-        promptCreatedAt: Date.now(),
+        createdAt: Date.now(),
       })
     } catch (error) {
       // Error toast handled upstream
@@ -306,11 +306,21 @@ export function ChatMessageView({
                           } transition-all duration-300 group-hover:shadow-xl group-hover:scale-[1.02]`}
                       >
                         <div className="space-y-2">
-
                           <p className={`text-sm leading-relaxed font-medium ${isPending ? 'text-muted-foreground italic' : isCurrentUser ? 'text-primary-foreground' : 'text-foreground'
                             }`}>
                             {message.message}
                           </p>
+                          {/* Hiển thị số tiền nếu có transaction */}
+                          {!isPending && message.transaction && (
+                            <div className="flex gap-2 items-center pt-1">
+                              {message.transaction.spendValue && message.transaction.spendValue > 0 && (
+                                <span className="text-sm font-semibold text-red-500">-{formatCurrency(message.transaction.spendValue)}</span>
+                              )}
+                              {message.transaction.earnValue && message.transaction.earnValue > 0 && (
+                                <span className="text-sm font-semibold text-green-600">+{formatCurrency(message.transaction.earnValue)}</span>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -337,7 +347,7 @@ export function ChatMessageView({
                     <div className="flex items-center gap-2 px-4">
                       <p className="text-[10px] text-muted-foreground">
                         {/* FIXED: Correctly display timestamp */}
-                        {formatDate(message.promptCreatedAt || message.timestamp)}
+                        {formatDate(message.createdAt || message.timestamp)}
                       </p>
 
                       {isCurrentUser && clientStatus === 'sending' && (
@@ -377,8 +387,8 @@ export function ChatMessageView({
                         </Button>
                       )}
 
-                      {/* Edit prompt button for messages without transaction (no spend/earn) */}
-                      {!isPending && isCurrentUser && message.transaction === null && (
+                      {/* Edit prompt button cho message chưa có transaction */}
+                      {!isPending && isCurrentUser && !message.transaction && (
                         <Button
                           variant="ghost"
                           className="h-5 px-2 text-[10px] text-accent hover:text-accent hover:bg-accent/10 rounded-full transition-all ml-1 font-medium"
@@ -390,8 +400,8 @@ export function ChatMessageView({
                         </Button>
                       )}
 
-                      {/* Edit button for confirmed messages with transaction (if not pending) */}
-                      {!isPending && isCurrentUser && (message.spend !== null || message.earn !== null) && (
+                      {/* Edit button cho message đã có transaction */}
+                      {!isPending && isCurrentUser && message.transaction && (
                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button
                             variant="ghost"
@@ -434,7 +444,7 @@ export function ChatMessageView({
                 message: input.trim(),
                 isPendingPrompt: true,
                 originalPrompt: input.trim(),
-                promptCreatedAt: Date.now(),
+                createdAt: Date.now(),
               });
               setInput('');
             }}

@@ -41,19 +41,17 @@ export type FundDto = {
 export type MessageDto = {
   id: string
   fundId: string
-  message?: string | null
-  spendValue?: number | null
-  earnValue?: number | null
-  categoryId?: string | null
-  status?: MessageStatus
+  message: string
+  status: MessageStatus
   metadata?: Record<string, unknown> | null
+  createdAt: string
+  createdById: string
+  updatedAt: string
+  updatedById?: string
+  deletedAt?: string | null
+  processedAt?: string | null
+  failureReason?: string | null
   transactionId?: string | null
-  createdAt?: string | number
-  createdById?: string | null
-  createdByName?: string | null
-  updatedAt?: string | number
-  // Relations
-  fund?: FundDto | null
   transaction?: TransactionDto | null
 }
 
