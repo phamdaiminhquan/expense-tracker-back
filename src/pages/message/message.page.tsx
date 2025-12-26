@@ -7,7 +7,6 @@ import { CategorySubscriptionDialog } from '@/components/CategorySubscriptionDia
 import { ChatMessageView } from '@/pages/message/parts/message-chat/message-chat.part'
 import { NavigationDrawer } from '@/components/NavigationDrawer'
 import { CreateFundDialog } from '@/pages/fund/parts/fund-create/fund-create.part'
-import { LoadingScreen } from '@/components/LoadingScreen'
 import React from 'react'
 import { UpdateFundDialog } from '../fund/parts/fund-update/fund-update.part'
 import { Fund } from '@/apis/funds/fund.entities'
@@ -142,13 +141,6 @@ export function MessagePage({
 
   return (
     <React.Fragment>
-      {showLoadingScreen && (
-        <LoadingScreen
-          onComplete={handleLoadingComplete}
-          isLoading={isInitialLoading}
-        />
-      )}
-
       <div className={showLoadingScreen ? 'opacity-0 pointer-events-none' : 'opacity-100 transition-opacity duration-500 pointer-events-auto'}>
         <NavigationDrawer
           open={isDrawerOpen}
