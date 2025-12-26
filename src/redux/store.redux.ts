@@ -2,7 +2,6 @@ import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, 
 import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import storage from 'redux-persist/lib/storage';
 import { initialStateSystem, reducerSystem } from './system/system.slice';
-import { initialStateAccount, reducerAccount } from './account/account.slice';
 import { useDispatch } from 'react-redux';
 import { GlobalReduxState } from './store.interface';
 
@@ -13,14 +12,12 @@ const persistConfig = {
   migrate: (state: GlobalReduxState) => {
     if (!state) return Promise.resolve(undefined);
 
-    state.account = { ...initialStateAccount, ...state.account };
     state.system = { ...initialStateSystem, ...state.system };
     return Promise.resolve(state);
   },
 };
 
 const rootReducer = combineReducers({
-  account: reducerAccount,
   system: reducerSystem,
 });
 
