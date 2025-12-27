@@ -1,5 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MoreHorizontal, Sparkles } from 'lucide-react';
+import { MoreHorizontal, Sparkles, Coffee, ShoppingBag, Car, Zap, Home, Smartphone, DollarSign, Gift, TrendingUp, Briefcase } from 'lucide-react';
+
+const CATEGORIES_UI = {
+  expense: [
+    { id: 'food', label: 'Ăn uống', icon: <Coffee size={14} /> },
+    { id: 'shopping', label: 'Mua sắm', icon: <ShoppingBag size={14} /> },
+    { id: 'transport', label: 'Di chuyển', icon: <Car size={14} /> },
+    { id: 'bill', label: 'Hóa đơn', icon: <Zap size={14} /> },
+    { id: 'house', label: 'Nhà cửa', icon: <Home size={14} /> },
+  ],
+  income: [
+    { id: 'salary', label: 'Lương', icon: <DollarSign size={14} /> },
+    { id: 'bonus', label: 'Thưởng', icon: <Gift size={14} /> },
+  ]
+};
 
 export default function CapyInputBar({
   // Data Props
@@ -19,6 +33,7 @@ export default function CapyInputBar({
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const [eyePosition, setEyePosition] = useState({ x: 0, y: 0 });
   const [isBlinking, setIsBlinking] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState('food');
 
   // --- 1. LOGIC: Tự động chớp mắt ---
   useEffect(() => {
@@ -102,49 +117,55 @@ export default function CapyInputBar({
   };
 
   return (
-    <div
-      className="z-20 w-full flex justify-center pointer-events-none fixed left-0 right-0 bottom-0"
-    >
-      <div
-        className="pointer-events-auto bg-white rounded-t-[32px] shadow-[0_-4px_30px_rgba(0,0,0,0.06)] pb-6 px-4 pt-4 border-t border-gray-50 w-full
-        sm:max-w-2xl sm:rounded-[32px] sm:shadow-xl sm:pb-4 sm:pt-4 sm:bottom-4 sm:fixed sm:left-1/2 sm:-translate-x-1/2
-        lg:max-w-3xl lg:bottom-6 lg:fixed lg:left-1/2 lg:-translate-x-1/2
-        transition-all duration-300"
-      >
+    <div className="w-full bg-white border-t border-gray-100 lg:p-4 p-2 relative">
+      <div className="w-full max-w-4xl mx-auto">
         {/* Category Toggle (Chỉ hiện khi không phải Smart Mode) */}
         {!isSmartMode && (
           <div className="absolute -top-12 left-0 right-0 h-10 px-4 flex gap-2 overflow-x-auto no-scrollbar items-center">
-            <button onClick={onCategoryClick} className="flex-shrink-0 bg-gray-100 px-3 py-1.5 rounded-full text-xs text-gray-500 hover:bg-gray-200">
+            {CATEGORIES_UI.expense.map((cat) => (
+              <button 
+                key={cat.id} 
+                onClick={() => setSelectedCategoryId(cat.id)}
+                className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm border
+                  ${selectedCategoryId === cat.id 
+                    ? 'bg-indigo-500 text-white border-indigo-500' 
+                    : 'bg-white/90 backdrop-blur text-gray-600 border-gray-100 hover:bg-gray-50'
+                  }`}
+              >
+                {cat.icon} {cat.label}
+              </button>
+            ))}
+            <button onClick={onCategoryClick} className="flex-shrink-0 bg-white/90 backdrop-blur shadow-sm border border-gray-100 px-3 py-1.5 rounded-full text-xs text-gray-500 hover:bg-gray-200">
               <MoreHorizontal size={14} />
             </button>
           </div>
         )}
 
         {/* Wallet Selector & Indicator */}
-        <div className={`flex justify-between items-center mb-3 px-1 transition-all ${isAnalyzing ? 'opacity-50 pointer-events-none' : ''}`}>
-          <button onClick={onWalletClick} className="flex items-center gap-2 px-3 py-1.5 rounded-2xl transition-colors hover:bg-gray-50 border border-transparent hover:border-gray-100 group">
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center ${selectedWallet.color}`}>
+        <div className={`flex justify-between items-center mb-2 lg:mb-3 px-1 transition-all ${isAnalyzing ? 'opacity-50 pointer-events-none' : ''}`}>
+          <button onClick={onWalletClick} className="flex items-center gap-2 px-2 py-1 lg:px-3 lg:py-1.5 rounded-2xl transition-colors hover:bg-gray-50 border border-transparent hover:border-gray-100 group">
+            <div className={`w-5 h-5 lg:w-6 lg:h-6 rounded-full flex items-center justify-center ${selectedWallet.color}`}>
               {selectedWallet.icon}
             </div>
             <div className="text-left">
               <div className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Ví nguồn</div>
-              <div className="text-xs font-bold text-gray-700">{selectedWallet.name}</div>
+              <div className="text-[11px] lg:text-xs font-bold text-gray-700">{selectedWallet.name}</div>
             </div>
           </button>
-          {isSmartMode && <div className="text-[10px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-pink-500 animate-pulse uppercase tracking-widest">Smart Extract Active</div>}
+          {isSmartMode && <div className="text-[9px] lg:text-[10px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-pink-500 animate-pulse uppercase tracking-widest">Smart Extract Active</div>}
         </div>
 
         {/* Input & Button Area */}
-        <div className="relative flex items-center gap-3">
-          <div className={`flex-1 bg-gray-50 rounded-2xl flex items-center px-4 transition-all duration-300 focus-within:bg-white focus-within:ring-2 focus-within:ring-offset-0 ${isSmartMode ? 'focus-within:ring-purple-100' : 'focus-within:ring-emerald-100'}`}>
+        <div className="relative flex items-center gap-2 lg:gap-3">
+          <div className={`flex-1 bg-gray-50 rounded-xl lg:rounded-2xl flex items-center px-3 lg:px-4 transition-all duration-300 focus-within:bg-white focus-within:ring-2 focus-within:ring-offset-0 ${isSmartMode ? 'focus-within:ring-purple-100' : 'focus-within:ring-emerald-100'}`}>
             <input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onFocus={onFocus}
               onBlur={onBlur}
               onKeyDown={handleKeyDown}
-              placeholder={isSmartMode ? "Nhập chi tiêu hoặc thu nhập..." : "Nhập số tiền..."}
-              className="w-full py-4 bg-transparent outline-none text-base font-medium text-gray-800 placeholder:text-gray-400"
+              placeholder={isSmartMode ? "Nhập chi tiêu..." : "Nhập số tiền..."}
+              className="w-full py-3 lg:py-4 bg-transparent outline-none text-sm lg:text-base font-medium text-gray-800 placeholder:text-gray-400"
               disabled={isAnalyzing}
             />
           </div>
@@ -155,7 +176,7 @@ export default function CapyInputBar({
             onClick={onSend}
             disabled={!inputValue.trim() || isAnalyzing}
             className={`
-              w-14 h-14 rounded-2xl flex-shrink-0 flex items-center justify-center transition-all active:scale-95 relative overflow-hidden shadow-lg duration-500
+              w-11 h-11 lg:w-14 lg:h-14 rounded-xl lg:rounded-2xl flex-shrink-0 flex items-center justify-center transition-all active:scale-95 relative overflow-hidden shadow-lg duration-500
               ${getThemeColor()}
               ${!inputValue.trim() ? 'opacity-80 grayscale' : ''}
             `}

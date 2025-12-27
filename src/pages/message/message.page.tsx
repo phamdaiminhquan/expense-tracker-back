@@ -10,6 +10,8 @@ import { CreateFundDialog } from '@/pages/fund/parts/fund-create/fund-create.par
 import React from 'react'
 import { UpdateFundDialog } from '../fund/parts/fund-update/fund-update.part'
 import { Fund } from '@/apis/funds/fund.entities'
+import { TrendingUp, X } from 'lucide-react'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
 
 interface MessagePageProps {
   fund: Fund | null
@@ -141,86 +143,117 @@ export function MessagePage({
 
   return (
     <React.Fragment>
-      <div className={showLoadingScreen ? 'opacity-0 pointer-events-none' : 'opacity-100 transition-opacity duration-500 pointer-events-auto'}>
-        <NavigationDrawer
-          open={isDrawerOpen}
-          onOpenChange={setIsDrawerOpen}
-          funds={funds}
-          onDeleteFund={onDeleteFund}
-          currentUserName={currentUserName}
-          currentFundId={fund?.id || null}
-          isLoadingFunds={isLoadingFunds}
-          isLoadingMore={isLoadingMoreFunds}
-          hasMore={hasMoreFunds}
-          onSelectFund={onSelectFund}
-          onCreateFund={handleOpenCreateFund}
-          onUpdateFund={handleOpenUpdateFund}
-          onLoadMore={onLoadMoreFunds || (() => { })}
-          onLogout={onLogout}
-          onSearchFunds={onSearchFunds}
-        />
-
-        <ChatMessageView
-          fund={fund}
-          messages={fundMessages}
-          categories={fundCategories}
-          currentUserId={currentUserId}
-          currentUserName={currentUserName}
-          onOpenDrawer={() => setIsDrawerOpen(true)}
-          onShowStatistics={() => setIsStatisticsDialogOpen(true)}
-          onManageCategories={() => setIsCategoryDialogOpen(true)}
-          onShowCategorySubscription={() => {
-            setIsAutoCategorySubscription(false)
-            setIsCategorySubscriptionOpen(true)
-          }}
-          onAddMessage={onAddMessage}
-          onResendMessage={onResendMessage}
-          onUpdateMessage={onUpdateMessage}
-          onDeleteMessage={onDeleteMessage}
-          resolveUserName={resolveUserName}
-          isProcessing={isProcessing}
-          isLoading={isLoading}
-          isLoadingFunds={isLoadingFunds}
-        />
-
-
-        {fund && (
-          <>
-            <FundStatisticsDialog
-              open={isStatisticsDialogOpen}
-              onOpenChange={setIsStatisticsDialogOpen}
-              // messages={fundMessages}
-              categories={fundCategories}
-              fund={fund}
-              resolveUserName={resolveUserName}
+      {/* Container: p-0 trên mobile, p-3 trên desktop */}
+      <div className={`flex h-screen overflow-hidden bg-[#F0F2F5] lg:p-3 lg:gap-3 p-0 gap-0 ${showLoadingScreen ? 'opacity-0' : 'opacity-100 transition-opacity duration-500'}`}>
+        
+        {/* CỘT 1: SIDEBAR LEFT - Chỉ hiện trên lg, giữ nguyên card style vì là desktop */}
+        <aside className="hidden lg:flex w-[350px] bg-white flex-col shrink-0 rounded-2xl shadow-sm overflow-hidden border border-gray-100">
+           <NavigationDrawer
+              open={true}
+              onOpenChange={() => {}}
+              funds={funds}
+              onDeleteFund={onDeleteFund}
+              currentUserName={currentUserName}
+              currentFundId={fund?.id || null}
+              isLoadingFunds={isLoadingFunds}
+              isLoadingMore={isLoadingMoreFunds}
+              hasMore={hasMoreFunds}
+              onSelectFund={onSelectFund}
+              onCreateFund={handleOpenCreateFund}
+              onUpdateFund={handleOpenUpdateFund}
+              onLoadMore={onLoadMoreFunds || (() => { })}
+              onLogout={onLogout}
+              onSearchFunds={onSearchFunds}
+              isPermanent={true}
             />
+        </aside>
 
-            {/* <CategoryManagementDialog
-            open={isCategoryDialogOpen}
-            onOpenChange={setIsCategoryDialogOpen}
-            categories={fundCategories}
+        {/* DRAWER CHO MOBILE/TABLET */}
+        <div className="lg:hidden">
+          <NavigationDrawer
+            open={isDrawerOpen}
+            onOpenChange={setIsDrawerOpen}
+            funds={funds}
+            onDeleteFund={onDeleteFund}
+            currentUserName={currentUserName}
+            currentFundId={fund?.id || null}
+            isLoadingFunds={isLoadingFunds}
+            isLoadingMore={isLoadingMoreFunds}
+            hasMore={hasMoreFunds}
+            onSelectFund={onSelectFund}
+            onCreateFund={handleOpenCreateFund}
+            onUpdateFund={handleOpenUpdateFund}
+            onLoadMore={onLoadMoreFunds || (() => { })}
+            onLogout={onLogout}
+            onSearchFunds={onSearchFunds}
+          />
+        </div>
+
+        {/* CỘT 2: CHAT MAIN VIEW - Bo góc trên desktop, tràn viền trên mobile */}
+        <main className="flex-1 flex flex-col min-w-0 bg-white lg:rounded-2xl lg:shadow-sm lg:border lg:border-gray-100 shadow-none border-none overflow-hidden relative">
+          <ChatMessageView
+            fund={fund}
             messages={fundMessages}
-            onCreateCategory={onCreateCategory}
-            onUpdateCategory={onUpdateCategory}
-            onDeleteCategory={onDeleteCategory}
-          /> */}
+            categories={fundCategories}
+            currentUserId={currentUserId}
+            currentUserName={currentUserName}
+            onOpenDrawer={() => setIsDrawerOpen(true)}
+            onShowStatistics={() => setIsStatisticsDialogOpen(true)}
+            onManageCategories={() => setIsCategoryDialogOpen(true)}
+            onShowCategorySubscription={() => {
+              setIsAutoCategorySubscription(false)
+              setIsCategorySubscriptionOpen(true)
+            }}
+            onAddMessage={onAddMessage}
+            onResendMessage={onResendMessage}
+            onUpdateMessage={onUpdateMessage}
+            onDeleteMessage={onDeleteMessage}
+            resolveUserName={resolveUserName}
+            isProcessing={isProcessing}
+            isLoading={isLoading}
+            isLoadingFunds={isLoadingFunds}
+            onSelectFund={onSelectFund}
+            funds={funds}
+          />
+        </main>
 
-            <CategorySubscriptionDialog
-              open={isCategorySubscriptionOpen}
-              onOpenChange={(nextOpen) => {
-                setIsCategorySubscriptionOpen(nextOpen)
-                if (!nextOpen && isAutoCategorySubscription) {
-                  setIsAutoCategorySubscription(false)
-                }
-              }}
-              fundId={fund.id}
-              onSkip={() => {
-                setIsAutoCategorySubscription(false)
-                setIsCategorySubscriptionOpen(false)
-              }}
-            />
-          </>
-        )}
+        {/* CỘT 3: STATISTIC VIEW - Giữ nguyên card style trên desktop */}
+        <aside className="hidden xl:flex w-[380px] bg-white flex-col shrink-0 rounded-2xl shadow-sm overflow-hidden border border-gray-100">
+           <div className="p-8 flex flex-col h-full">
+              <h2 className="text-xl font-bold text-gray-800 mb-6 px-2">Thống kê chi tiết</h2>
+              <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 px-4">
+                 <div className="w-24 h-24 bg-indigo-50 rounded-[32px] flex items-center justify-center text-indigo-500 shadow-inner">
+                    <TrendingUp size={48} />
+                 </div>
+                 <div>
+                    <p className="font-bold text-gray-800 text-lg">Đang phát triển</p>
+                    <p className="text-sm text-gray-400 leading-relaxed">Tính năng phân tích chi tiêu thông minh bằng AI sẽ sớm có mặt để phục vụ bạn.</p>
+                 </div>
+              </div>
+           </div>
+        </aside>
+
+        {/* DRAWER CHO MOBILE/TABLET (SIDEBAR RIGHT / STATISTIC) */}
+        <Sheet open={isStatisticsDialogOpen} onOpenChange={setIsStatisticsDialogOpen}>
+          <SheetContent side="right" className="w-[85%] sm:w-[450px] p-0 border-none shadow-2xl bg-white">
+             {fund && (
+                <div className="h-full flex flex-col p-8">
+                   <div className="flex justify-between items-center mb-8">
+                      <h2 className="text-xl font-bold text-gray-800">Thống kê: {fund.name}</h2>
+                      <button onClick={() => setIsStatisticsDialogOpen(false)} className="p-2 bg-gray-50 rounded-full hover:bg-gray-100">
+                        <X size={20} className="text-gray-500" />
+                      </button>
+                   </div>
+                   <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
+                      <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center text-emerald-500">
+                         <TrendingUp size={40} />
+                      </div>
+                      <p className="text-sm text-gray-500 max-w-[200px]">Phần này sẽ hiển thị biểu đồ và phân tích giao dịch của {fund.name}.</p>
+                   </div>
+                </div>
+             )}
+          </SheetContent>
+        </Sheet>
 
 
         <CreateFundDialog

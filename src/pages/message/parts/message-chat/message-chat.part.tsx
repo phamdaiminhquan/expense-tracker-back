@@ -1,22 +1,13 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { Message, Category } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import CapyInputBar from '@/components/CapyInputBar'
 import {
-  List,
-  ChartBar,
-  PaperPlaneRight,
-  PencilSimple,
-  Trash,
-  ArrowClockwise,
-  NotePencil,
-  CircleNotch,
-  Tag,
-  CheckCircle,
-  XCircle,
-  ArrowRight,
-  FolderSimple,
-} from '@phosphor-icons/react'
+  CreditCard, Wallet, Banknote, Sparkles, MessageSquare,
+  TrendingDown, TrendingUp, Coffee, Zap, ShoppingBag,
+  DollarSign, Briefcase, Gift, Car, Home, Smartphone,
+  MoreHorizontal, Menu, Search, LogOut, X, AlertCircle, RefreshCw
+} from 'lucide-react';
 
 import { formatCurrency } from '@/lib/currency'
 import { EditPendingPromptDialog } from '../../../../components/EditPendingPromptDialog'
@@ -25,8 +16,167 @@ import { Skeleton } from '@/components/ui/skeleton'
 import React from 'react'
 import { Fund } from '@/apis/funds/fund.entities'
 
+// ==========================================
+// 1. ASSETS & THEME CONSTANTS
+// ==========================================
+
+export const THEME_COLORS = {
+  bg: "bg-[#FAFAFA]", // Màu nền tổng thể
+  text: "text-gray-800",
+  smartModeGradient: "bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500",
+  expense: {
+    text: "text-rose-500",
+    bg: "bg-rose-500",
+    shadow: "shadow-rose-200",
+    ring: "focus-within:ring-rose-100"
+  },
+  income: {
+    text: "text-emerald-600",
+    bg: "bg-emerald-500",
+    shadow: "shadow-emerald-200",
+    ring: "focus-within:ring-emerald-100"
+  }
+};
+
+const WALLETS_UI = [
+  { id: 'cash', name: 'Tiền mặt', icon: <Banknote size={18} />, color: 'bg-emerald-100 text-emerald-700' },
+  { id: 'momo', name: 'Momo', icon: <Wallet size={18} />, color: 'bg-pink-100 text-pink-700' },
+  { id: 'visa', name: 'Visa Techcom', icon: <CreditCard size={18} />, color: 'bg-blue-100 text-blue-700' },
+  { id: 'vcb', name: 'Vietcombank', icon: <CreditCard size={18} />, color: 'bg-green-100 text-green-700' },
+  { id: 'mb', name: 'MB Bank', icon: <CreditCard size={18} />, color: 'bg-blue-200 text-blue-800' },
+  { id: 'zalo', name: 'ZaloPay', icon: <Wallet size={18} />, color: 'bg-cyan-100 text-cyan-700' },
+];
+
+const CATEGORIES_UI = {
+  expense: [
+    { id: 'food', label: 'Ăn uống', icon: <Coffee size={16} /> },
+    { id: 'shopping', label: 'Mua sắm', icon: <ShoppingBag size={16} /> },
+    { id: 'transport', label: 'Di chuyển', icon: <Car size={16} /> },
+    { id: 'bill', label: 'Hóa đơn', icon: <Zap size={16} /> },
+    { id: 'house', label: 'Nhà cửa', icon: <Home size={16} /> },
+    { id: 'phone', label: 'Điện thoại', icon: <Smartphone size={16} /> },
+  ],
+  income: [
+    { id: 'salary', label: 'Lương', icon: <DollarSign size={16} /> },
+    { id: 'bonus', label: 'Thưởng', icon: <Gift size={16} /> },
+    { id: 'invest', label: 'Đầu tư', icon: <TrendingUp size={16} /> },
+    { id: 'freelance', label: 'Freelance', icon: <Briefcase size={16} /> },
+  ]
+};
+
+// ==========================================
+// 2. UI COMPONENTS
+// ==========================================
+
+export const DashboardHeaderUI = ({ totalExpense, totalIncome, onOpenSidebar, isSmartMode, onToggleSmart, fundName, onShowStatistics }: any) => {
+  return (
+    <div className="lg:pt-6 lg:pb-4 lg:px-6 pt-3 pb-2 px-4 bg-white/90 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
+      <div className="flex justify-between items-center mb-3 lg:mb-4">
+        <div className="flex items-center gap-2 lg:gap-3">
+          {/* Nút Hamburger chỉ hiện trên Mobile/Tablet (< lg) */}
+          <button onClick={onOpenSidebar} className="lg:hidden p-1.5 -ml-1 rounded-xl hover:bg-gray-100 text-gray-600 transition-colors">
+            <Menu size={20} />
+          </button>
+          <div className="flex flex-col">
+            <h2 className="text-[9px] lg:text-[10px] font-bold text-gray-400 lg:tracking-[0.2em] tracking-widest uppercase mb-0.5">{fundName || 'Tổng quan'}</h2>
+            <div className="text-xs lg:text-sm font-bold text-gray-800">Giao dịch hôm nay</div>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-2">
+           {/* Smart Mode Toggle */}
+           <button 
+             onClick={onToggleSmart}
+             className={`flex items-center gap-1.5 px-2.5 py-1 lg:px-3 lg:py-1.5 rounded-full text-[9px] lg:text-[10px] font-bold uppercase tracking-wider transition-all border 
+               ${isSmartMode ? 'bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm' : 'bg-gray-50 border-gray-200 text-gray-400'}`}
+           >
+             {isSmartMode && <Sparkles size={10} />} {isSmartMode ? "AI PRO" : "BASIC"}
+           </button>
+
+           {/* Nút Statistic chỉ hiện khi màn hình chưa đủ lớn để hiện Cột 3 (< xl) */}
+           <button 
+             onClick={onShowStatistics}
+             className="xl:hidden p-1.5 rounded-xl hover:bg-gray-100 text-gray-600 transition-colors"
+           >
+             <TrendingUp size={18} />
+           </button>
+        </div>
+      </div>
+      
+      <div className="flex gap-6 lg:gap-10 px-1">
+        <div className="transition-all duration-300">
+          <div className="text-[8px] lg:text-[9px] uppercase tracking-wider text-rose-500 font-bold mb-0.5 opacity-80">Chi tiêu</div>
+          <div className="text-lg lg:text-xl font-black text-gray-800 tracking-tight">{formatCurrency(totalExpense)}</div>
+        </div>
+        <div className="transition-all duration-300">
+          <div className="text-[8px] lg:text-[9px] uppercase tracking-wider text-emerald-600 font-bold mb-0.5 opacity-80">Thu nhập</div>
+          <div className="text-lg lg:text-xl font-black text-gray-800 tracking-tight">{formatCurrency(totalIncome)}</div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const MessageBubbleUI = ({ msg, onRetry, isCurrentUser, walletName }: any) => {
+  const walletInfo = WALLETS_UI.find(w => w.id === 'momo') || WALLETS_UI[0];
+
+  if (!isCurrentUser) {
+    return (
+      <div className={`max-w-[85%] px-4 py-3 rounded-2xl rounded-tl-sm text-sm ${msg.status === 'error' ? 'bg-orange-50 text-orange-600 border border-orange-100' : 'bg-gray-100 text-gray-600'}`}>
+        {msg.status === 'error' && <AlertCircle size={16} className="inline mr-1 -mt-0.5"/>}
+        {msg.text}
+      </div>
+    );
+  }
+
+  const isError = msg.status === 'error';
+  const isAnalyzing = msg.status === 'analyzing';
+  const isDone = msg.status === 'done';
+
+  return (
+    <div 
+      onClick={() => isError && onRetry ? onRetry(msg) : null}
+      className={`
+        relative max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm transition-all duration-500
+        rounded-tr-sm border 
+        ${isError 
+          ? 'bg-red-50 border-red-200 text-gray-800 cursor-pointer hover:bg-red-100 ring-2 ring-red-100' 
+          : 'bg-white border-gray-100 text-gray-700'
+        }
+        ${isAnalyzing ? 'ring-2 ring-indigo-100' : ''}
+    `}>
+      <div className="flex items-center gap-1.5 mb-2 opacity-80 text-[10px] font-bold uppercase tracking-wide border-b border-gray-50 pb-1">
+        <span className="text-gray-400 flex items-center gap-1">
+          {walletInfo?.icon} {walletName || walletInfo?.name}
+        </span>
+        <div className="ml-auto">
+          {isAnalyzing && <span className="text-indigo-500 flex items-center gap-1 animate-pulse"><Sparkles size={10} /> Analyzing...</span>}
+          {isDone && <span className={`flex items-center gap-1 ${msg.transType === 'expense' ? 'text-rose-500' : 'text-emerald-500'}`}>{msg.category}</span>}
+          {isError && <span className="text-red-500 flex items-center gap-1 animate-pulse font-bold"><AlertCircle size={10} /> Lỗi</span>}
+        </div>
+      </div>
+      
+      <div className="flex justify-between items-baseline gap-4">
+        <span>{msg.text}</span>
+        {isDone && msg.rawAmount > 0 && (
+          <span className={`font-bold whitespace-nowrap ${msg.transType === 'expense' ? 'text-rose-500' : 'text-emerald-500'}`}>
+            {msg.transType === 'expense' ? '-' : '+'}{formatCurrency(msg.rawAmount)}
+          </span>
+        )}
+      </div>
+
+      {isError && (
+        <div className="mt-2 pt-2 border-t border-red-100 text-[10px] font-bold text-red-500 flex items-center gap-1 justify-end">
+          <RefreshCw size={10} /> Bấm để sửa
+        </div>
+      )}
+    </div>
+  );
+};
+
 interface ChatMessageViewProps {
   fund: Fund | null
+  funds: Fund[]
   messages: Message[]
   categories: Category[]
   currentUserId: string
@@ -41,6 +191,7 @@ interface ChatMessageViewProps {
   onResendMessage: (message: Message) => Promise<void>
   onUpdateMessage: (message: Message) => Promise<void>
   onDeleteMessage: (id: string) => Promise<void>
+  onSelectFund: (fundId: string) => void
   isProcessing?: boolean
   isLoading?: boolean
   isLoadingFunds?: boolean
@@ -50,6 +201,7 @@ const ITEMS_PER_PAGE = 10
 
 export function ChatMessageView({
   fund,
+  funds,
   messages,
   categories,
   currentUserId,
@@ -64,60 +216,55 @@ export function ChatMessageView({
   onResendMessage,
   onUpdateMessage,
   onDeleteMessage,
+  onSelectFund,
   isProcessing = false,
   isLoading = false,
   isLoadingFunds = false,
 }: ChatMessageViewProps) {
-  // Đã chuyển toàn bộ input sang CapyInputBar, không cần state input riêng
   const [editingMessage, setEditingMessage] = useState<Message | null>(null)
   const [editingPendingPrompt, setEditingPendingPrompt] = useState<Message | null>(null)
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
-  const [input, setInput] = useState('') // Add local state for input
+  const [input, setInput] = useState('')
+  const [isSmartMode, setIsSmartMode] = useState(true)
+  const [showWalletSelector, setShowWalletSelector] = useState(false)
+  const [showCategorySelector, setShowCategorySelector] = useState(false)
+  const [selectedWalletId, setSelectedWalletId] = useState('momo')
+
+  const selectedWallet = WALLETS_UI.find(w => w.id === selectedWalletId) || WALLETS_UI[0]
 
   const sortedMessages = [...messages].sort((a, b) => b.timestamp - a.timestamp)
   const visibleMessages = sortedMessages.slice(0, visibleCount)
+
+  // Calculate stats
+  const { totalExpense, totalIncome } = useMemo(() => {
+    let expense = 0
+    let income = 0
+    // Lọc tin nhắn của ngày hôm nay
+    const today = new Date().toDateString()
+    messages.forEach(m => {
+      const msgDate = new Date(m.createdAt || m.timestamp).toDateString()
+      if (msgDate === today && m.transaction) {
+        expense += m.transaction.spendValue || 0
+        income += m.transaction.earnValue || 0
+      }
+    })
+    return { totalExpense: expense, totalIncome: income }
+  }, [messages])
 
   const handleScroll = () => {
     const container = scrollContainerRef.current
     if (!container) return
 
-    // Logic to load previous pages when scrolling to the top
     if (container.scrollTop === 0 && visibleCount < sortedMessages.length) {
       const oldScrollHeight = container.scrollHeight
       setVisibleCount((prev) => Math.min(prev + ITEMS_PER_PAGE, sortedMessages.length))
 
-      // Maintain scroll position after loading more items
       setTimeout(() => {
         const newScrollHeight = container.scrollHeight
         container.scrollTop = newScrollHeight - oldScrollHeight
       }, 0)
-    }
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim() || !fund) return
-
-    const messageText = input.trim()
-    // Clear input immediately for better UX
-    setInput('')
-
-    try {
-      await onAddMessage({
-        createdById: currentUserId,
-        userName: currentUserName,
-        fundId: fund.id,
-        spend: null,
-        earn: null,
-        message: messageText,
-        isPendingPrompt: true,
-        originalPrompt: messageText,
-        createdAt: Date.now(),
-      })
-    } catch (error) {
-      // Error toast handled upstream
     }
   }
 
@@ -127,334 +274,157 @@ export function ChatMessageView({
     }
   }, [messages.length])
 
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp)
-    const today = new Date()
-    const yesterday = new Date(today)
-    yesterday.setDate(yesterday.getDate() - 1)
-
-    if (date.toDateString() === today.toDateString()) {
-      return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Hôm qua'
-    } else {
-      const day = date.getDate()
-      const month = date.getMonth() + 1
-      return `${day}/${month}`
-    }
-  }
-
-  const getMemberNames = () => {
-    if (!fund) return ''
-    return fund.memberIds?.map((id) => resolveUserName(id)).join(', ')
-  }
   return (
-    <div className="h-auto flex flex-col overflow-y-scroll">
-      {/* Premium Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/[0.01] to-background" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(120,119,198,0.05),transparent_70%)]" />
-      <header className="fixed top-0 inset-x-0 z-20 bg-background/95 border-b border-border/40 shadow-lg">
-        <div className="max-w-2xl mx-auto px-5 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 flex-1 min-w-0">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onOpenDrawer}
-                className="h-11 w-11 hover:bg-muted/60 rounded-xl transition-all"
-                aria-label="Open navigation"
-              >
-                <List size={22} weight="bold" />
-              </Button>
-              <div className="flex-1 min-w-0">
-                <h1 className="font-bold text-xl truncate text-foreground">
-                  {fund ? fund.name : 'Chọn quỹ để bắt đầu'}
-                </h1>
-                <p className="text-xs text-muted-foreground truncate font-medium">
-                  {fund ? (fund.type === 'shared' ? getMemberNames() : 'AI Bot') : 'Mở menu để chọn quỹ'}
-                </p>
-              </div>
-            </div>
-            {fund && (
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onShowCategorySubscription}
-                  className="h-11 w-11 hover:bg-muted/60 rounded-xl text-muted-foreground hover:text-foreground transition-all"
-                >
-                  <FolderSimple size={22} weight="bold" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onManageCategories}
-                  className="h-11 w-11 hover:bg-muted/60 rounded-xl text-muted-foreground hover:text-foreground transition-all"
-                >
-                  <Tag size={22} weight="bold" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onShowStatistics}
-                  className="h-11 w-11 hover:bg-muted/60 rounded-xl text-muted-foreground hover:text-foreground transition-all"
-                >
-                  <ChartBar size={22} weight="bold" />
-                </Button>
-              </div>
-            )}
+    <div className={`flex flex-col h-full bg-white font-sans overflow-hidden relative`}>
+      
+      {/* 2. HEADER */}
+      <DashboardHeaderUI 
+        totalExpense={totalExpense}
+        totalIncome={totalIncome}
+        isSmartMode={isSmartMode}
+        onOpenSidebar={onOpenDrawer}
+        onToggleSmart={() => setIsSmartMode(!isSmartMode)}
+        fundName={fund?.name}
+        onShowStatistics={onShowStatistics}
+      />
 
-          </div>
-        </div>
-      </header>
-
-      <div
+      {/* 3. MESSAGE LIST */}
+      <div 
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-1 relative z-10"
+        className="flex-1 overflow-y-auto px-4 pt-4 space-y-6 scroll-smooth relative z-0 bg-[#FAFAFA]"
       >
-        {/* Gradient overlay for de-emphasized background when input is focused */}
-        <div className="fixed bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background/90 via-background/50 to-transparent pointer-events-none z-10" />
-
-        <div className="max-w-2xl mx-auto px-5 py-8 space-y-3" style={{ paddingBottom: 'calc(max(1rem, env(safe-area-inset-bottom)) + 5rem)' }}>
-
-          {visibleCount < sortedMessages.length && (
-            <div className="text-center pb-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setVisibleCount((prev) => Math.min(prev + ITEMS_PER_PAGE, sortedMessages.length))}
-                className="text-xs text-muted-foreground hover:text-foreground hover:bg-muted/60 rounded-full transition-all font-medium"
-              >
-                Tải thêm
-              </Button>
+        {isLoading ? (
+          <div className="space-y-5">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
+                <Skeleton className="h-16 w-48 rounded-2xl" />
+              </div>
+            ))}
+          </div>
+        ) : !fund ? (
+          <div className="text-center py-24">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-[32px] bg-gray-50 mb-6 shadow-inner">
+              <Search size={40} className="text-gray-300" />
             </div>
-          )}
+            <p className="text-base font-bold text-gray-800 mb-2">Chưa chọn quỹ</p>
+            <p className="text-sm text-gray-400 mb-6">Vui lòng chọn một quỹ từ menu bên trái để bắt đầu.</p>
+            <Button onClick={onOpenDrawer} variant="outline" className="rounded-xl">Mở danh sách quỹ</Button>
+          </div>
+        ) : (
+          [...visibleMessages].reverse().map((message) => {
+            const isCurrentUser = message.createdById === currentUserId
+            
+            // Map message to UI format
+            const uiMsg = {
+              id: message.id,
+              text: message.message,
+              rawAmount: message.transaction?.spendValue || message.transaction?.earnValue || 0,
+              status: message.clientStatus === 'failed' ? 'error' : (message.isPendingPrompt ? 'analyzing' : 'done'),
+              transType: (message.transaction?.spendValue || 0) > 0 ? 'expense' : 'income',
+              category: message.categoryName || 'Chưa phân loại',
+              wallet: fund?.name
+            }
 
-          {isLoading ? (
-            <div className="space-y-5">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div
-                  key={i}
-                  className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'} mb-5`}
-                >
-                  <div className="max-w-[78%] space-y-1.5">
-                    {i % 2 === 0 && (
-                      <Skeleton className="h-3 w-16 ml-5 mb-1" />
-                    )}
-                    <Skeleton className="h-20 w-48 rounded-2xl" />
-                  </div>
+            return (
+              <div 
+                key={message.id} 
+                className={`flex w-full ${isCurrentUser ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2`}
+              >
+                <MessageBubbleUI 
+                  msg={uiMsg} 
+                  isCurrentUser={isCurrentUser}
+                  walletName={fund?.name}
+                  onRetry={() => {
+                    if (uiMsg.status === 'error') {
+                      onResendMessage(message)
+                    } else {
+                      setEditingPendingPrompt(message)
+                    }
+                  }}
+                />
+              </div>
+            )
+          })
+        )}
+        <div ref={bottomRef} className="h-4" />
+      </div>
+
+      {/* 4. FOOTER & INPUT AREA */}
+      <div className="shrink-0">
+        {/* INTEGRATION ZONE: CapyInputBar */}
+        <CapyInputBar
+          inputValue={input}
+          setInputValue={setInput}
+          selectedWallet={selectedWallet}
+          isSmartMode={isSmartMode}
+          isAnalyzing={isProcessing}
+          capyMood={isProcessing ? 'excited' : 'sleepy'}
+          onSend={() => {
+            if (!input.trim() || !fund) return;
+            onAddMessage({
+              createdById: currentUserId,
+              userName: currentUserName,
+              fundId: fund.id,
+              spend: null,
+              earn: null,
+              message: input.trim(),
+              isPendingPrompt: true,
+              originalPrompt: input.trim(),
+              createdAt: Date.now(),
+            });
+            setInput('');
+          }}
+          onFocus={() => {}}
+          onBlur={() => {}}
+          onWalletClick={() => setShowWalletSelector(true)}
+          onCategoryClick={() => setShowCategorySelector(true)}
+        />
+      </div>
+
+      {/* 5. MODALS */}
+      {showWalletSelector && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+            <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setShowWalletSelector(false)} />
+            <div className="bg-white w-full max-w-md rounded-t-[32px] p-6 shadow-2xl relative z-10 animate-in slide-in-from-bottom">
+                <h3 className="font-bold mb-4">Chọn ví nguồn</h3>
+                <div className="grid grid-cols-2 gap-3 pb-4">
+                    {WALLETS_UI.map(w => (
+                        <button 
+                          key={w.id} 
+                          onClick={() => {
+                            setSelectedWalletId(w.id)
+                            setShowWalletSelector(false)
+                          }} 
+                          className={`flex gap-3 p-3 rounded-xl border text-left items-center transition-all ${selectedWalletId === w.id ? 'bg-indigo-50 border-indigo-500' : 'hover:bg-gray-50 border-gray-100'}`}
+                        >
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${w.color}`}>
+                              {w.icon}
+                            </div>
+                            <span className={`font-semibold text-sm truncate ${selectedWalletId === w.id ? 'text-indigo-900' : 'text-gray-700'}`}>{w.name}</span>
+                        </button>
+                    ))}
                 </div>
+            </div>
+        </div>
+      )}
+
+      {showCategorySelector && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setShowCategorySelector(false)} />
+          <div className="bg-white w-full max-w-md rounded-t-[32px] p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 relative z-10 max-h-[70vh] flex flex-col">
+            <h3 className="text-lg font-bold text-gray-800 mb-4 px-2">Danh mục</h3>
+            <div className="grid grid-cols-4 gap-4 overflow-y-auto pb-8">
+              {CATEGORIES_UI.expense.map((cat) => (
+                <button key={cat.id} className="flex flex-col items-center gap-2 p-2 rounded-xl hover:bg-gray-50">
+                  <div className="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center text-xl">{cat.icon}</div>
+                  <div className="text-xs text-center font-medium text-gray-600 line-clamp-1">{cat.label}</div>
+                </button>
               ))}
             </div>
-          ) : isLoadingFunds ? (
-            // Đang load funds - không hiển thị gì (banner đang hiển thị)
-            <div className="text-center py-24">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 mb-6 shadow-lg">
-                <NotePencil size={40} className="text-primary" weight="duotone" />
-              </div>
-            </div>
-          ) : !fund ? (
-            // Đã load xong nhưng không có fund - hiển thị empty state
-            <div className="text-center py-24">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 mb-6 shadow-lg">
-                <NotePencil size={40} className="text-primary" weight="duotone" />
-              </div>
-              <p className="text-base font-bold text-foreground mb-2">Chưa có quỹ nào</p>
-              <p className="text-sm text-muted-foreground mb-4">Tạo quỹ đầu tiên để bắt đầu quản lý chi tiêu</p>
-              <Button
-                variant="default"
-                onClick={onOpenDrawer}
-                className="mt-2"
-              >
-                Tạo quỹ mới
-              </Button>
-            </div>
-          ) : visibleMessages.length === 0 ? (
-            <div className="text-center py-24">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 mb-6 shadow-lg">
-                <NotePencil size={40} className="text-primary" weight="duotone" />
-              </div>
-              <p className="text-base font-bold text-foreground mb-2">Chưa có giao dịch nào</p>
-              <p className="text-sm text-muted-foreground">Nhập giao dịch đầu tiên bên dưới</p>
-            </div>
-          ) : (
-            // Reverse the list for chat view (newest at the bottom)
-            [...visibleMessages].reverse().map((message) => {
-              const isPending = message.isPendingPrompt === true
-              const isCurrentUser = message.createdById === currentUserId
-              const clientStatus = message.clientStatus ?? 'sent'
-              return (
-                <div
-                  key={message.id}
-                  className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-4 group animate-in fade-in slide-in-from-bottom-3 mt-20`}
-
-                >
-                  <div className={`max-w-[78%] space-y-1`}>
-
-                    {!isCurrentUser && (
-                      <p className="text-[11px] text-muted-foreground px-5 lowercase font-semibold tracking-wide">{message.userName}</p>
-                    )}
-                    <div className="relative">
-                      <div
-                        className={`rounded-2xl px-4 py-3 shadow-lg ${isCurrentUser
-
-                          ? isPending
-                            ? 'bg-card/95 border border-border/60'
-                            : 'bg-gradient-to-br from-primary via-primary/95 to-primary/90 text-primary-foreground shadow-xl'
-                          : 'bg-card/95 border border-border/60'
-                          } transition-all duration-300 group-hover:shadow-xl group-hover:scale-[1.02]`}
-                      >
-                        <div className="space-y-2">
-                          <p className={`text-sm leading-relaxed font-medium ${isPending ? 'text-muted-foreground italic' : isCurrentUser ? 'text-primary-foreground' : 'text-foreground'
-                            }`}>
-                            {message.message}
-                          </p>
-                          {/* Hiển thị số tiền nếu có transaction */}
-                          {!isPending && message.transaction && (
-                            <div className="flex gap-2 items-center pt-1">
-                              {message.transaction.spendValue && message.transaction.spendValue > 0 && (
-                                <span className="text-sm font-semibold text-red-500">-{formatCurrency(message.transaction.spendValue)}</span>
-                              )}
-                              {message.transaction.earnValue && message.transaction.earnValue > 0 && (
-                                <span className="text-sm font-semibold text-green-600">+{formatCurrency(message.transaction.earnValue)}</span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* FIXED: Deleting/Editing button logic (Visible on hover) */}
-                      {/* Delete button only appears for non-pending messages */}
-                      {!isPending && (
-                        <div
-                          className={`absolute bottom-0 transition-opacity ${isCurrentUser ? '-left-10' : '-right-10'} opacity-0 group-hover:opacity-100`}
-                        >
-                          <Button
-                            size="icon"
-                            onClick={() => {
-                              onDeleteMessage(message.id).catch(() => { })
-                            }}
-                            className="h-7 w-7 bg-background border border-border rounded-full text-destructive hover:text-destructive hover:bg-destructive/10 shadow-lg transition-all"
-                          >
-                            <Trash size={12} weight="bold" />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Footer: Timestamp, Reprocess/Edit/Pending status */}
-                    <div className="flex items-center gap-2 px-4">
-                      <p className="text-[10px] text-muted-foreground">
-                        {/* FIXED: Correctly display timestamp */}
-                        {formatDate(message.createdAt || message.timestamp)}
-                      </p>
-
-                      {isCurrentUser && clientStatus === 'sending' && (
-                        <CircleNotch size={12} className="text-muted-foreground animate-spin" weight="bold" />
-                      )}
-
-                      {isCurrentUser && clientStatus === 'sent' && (
-                        <CheckCircle size={12} className="text-emerald-500" weight="bold" />
-                      )}
-
-                      {isCurrentUser && clientStatus === 'failed' && (
-                        <>
-                          <XCircle size={12} className="text-destructive" weight="bold" />
-                          {/* Resend button for failed messages */}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-5 px-2 text-[10px] text-destructive hover:text-destructive hover:bg-destructive/10 rounded-full transition-all ml-1 font-medium"
-                            onClick={() => onResendMessage(message).catch(() => { })}
-                            title="Gửi lại"
-                          >
-                            <ArrowRight size={10} weight="bold" className="mr-0.5" />
-                            Gửi lại
-                          </Button>
-                        </>
-                      )}
-
-                      {isPending && isCurrentUser && (
-                        // Reprocess/Edit pending prompt button
-                        <Button
-                          variant="ghost"
-                          className="h-5 w-5 text-accent hover:text-accent hover:bg-accent/10 rounded-full p-0 transition-all"
-                          onClick={() => setEditingPendingPrompt(message)}
-                          title="Chỉnh sửa và xử lý lại"
-                        >
-                          <ArrowClockwise size={11} weight="bold" />
-                        </Button>
-                      )}
-
-                      {/* Edit prompt button cho message chưa có transaction */}
-                      {!isPending && isCurrentUser && !message.transaction && (
-                        <Button
-                          variant="ghost"
-                          className="h-5 px-2 text-[10px] text-accent hover:text-accent hover:bg-accent/10 rounded-full transition-all ml-1 font-medium"
-                          onClick={() => setEditingPendingPrompt(message)}
-                          title="Chỉnh sửa prompt và xử lý lại"
-                        >
-                          <ArrowClockwise size={10} weight="bold" className="mr-0.5" />
-                          Xử lý lại
-                        </Button>
-                      )}
-
-                      {/* Edit button cho message đã có transaction */}
-                      {!isPending && isCurrentUser && message.transaction && (
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-5 w-5 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full p-0 transition-all"
-                            onClick={() => setEditingMessage(message)}
-                          >
-                            <PencilSimple size={11} weight="bold" />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )
-            })
-          )}
-          <div ref={bottomRef} />
+          </div>
         </div>
-      </div>
-
-      {/* Chat Input: dùng CapyInputBar mới */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 flex items-end justify-center" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
-        <div className="w-full max-w-2xl px-4 sm:px-6">
-          <CapyInputBar
-            inputValue={input}
-            setInputValue={setInput}
-            selectedWallet={{ name: 'Ví mặc định', icon: null, color: 'bg-gray-200 text-gray-600' }}
-            isSmartMode={true}
-            isAnalyzing={isProcessing}
-            capyMood={'sleepy'}
-            onSend={() => {
-              if (!input.trim() || !fund) return;
-              onAddMessage({
-                createdById: currentUserId,
-                userName: currentUserName,
-                fundId: fund.id,
-                spend: null,
-                earn: null,
-                message: input.trim(),
-                isPendingPrompt: true,
-                originalPrompt: input.trim(),
-                createdAt: Date.now(),
-              });
-              setInput('');
-            }}
-            onFocus={() => {}}
-            onBlur={() => {}}
-            onWalletClick={() => {}}
-            onCategoryClick={() => {}}
-          />
-        </div>
-      </div>
+      )}
 
       <EditMessageDialog
         message={editingMessage}
