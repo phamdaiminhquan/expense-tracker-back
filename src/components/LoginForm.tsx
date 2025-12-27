@@ -85,6 +85,15 @@ function MinimalInput({
             : 'border-gray-200 focus:border-black'
         } ${rightElement ? 'pr-12' : ''} ${disabled ? 'opacity-50' : ''}`}
         placeholder={label}
+        style={
+          type === 'password' 
+            ? { 
+                // Đảm bảo password hiển thị dấu * trên iOS
+                WebkitTextSecurity: 'disc',
+                textSecurity: 'disc'
+              } 
+            : undefined
+        }
       />
       <label
         htmlFor={id}
@@ -368,6 +377,20 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     let lastPos = { x: 0, y: 0 }
     
     const handleTouchStart = (e: TouchEvent) => {
+      // QUAN TRỌNG: Bỏ qua nếu touch vào interactive elements (input, button, link)
+      // Để tránh interfere với default behavior của chúng
+      const target = e.target as HTMLElement
+      if (target && (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'BUTTON' ||
+        target.tagName === 'A' ||
+        target.closest('input') ||
+        target.closest('button') ||
+        target.closest('a')
+      )) {
+        return // Không xử lý, để browser xử lý default behavior
+      }
+      
       lastInteractionRef.current = Date.now()
       setIsMouseInView(true)
       
@@ -381,6 +404,19 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     }
 
     const handleTouchMove = (e: TouchEvent) => {
+      // Bỏ qua nếu đang touch vào interactive elements
+      const target = e.target as HTMLElement
+      if (target && (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'BUTTON' ||
+        target.tagName === 'A' ||
+        target.closest('input') ||
+        target.closest('button') ||
+        target.closest('a')
+      )) {
+        return
+      }
+      
       lastInteractionRef.current = Date.now()
       
       if (!focusedField && !showPassword && !showConfirmPassword) {
@@ -723,7 +759,13 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             </form>
 
             {/* BOTTOM: Switch to Signup */}
-            <div className="mt-auto pt-6 input-animate" style={{ animationDelay: '0.5s' }}>
+            <div 
+              className="mt-auto pt-6 pb-safe input-animate" 
+              style={{ 
+                animationDelay: '0.5s',
+                paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))'
+              }}
+            >
               <button
                 type="button"
                 onClick={() => handleModeChange('signup')}
@@ -879,7 +921,13 @@ export function LoginForm({ onLogin }: LoginFormProps) {
               </form>
 
               {/* BOTTOM: Switch to Login - Consistent position */}
-              <div className="mt-auto pt-6 input-animate" style={{ animationDelay: '0.6s' }}>
+              <div 
+                className="mt-auto pt-6 input-animate" 
+                style={{ 
+                  animationDelay: '0.6s',
+                  paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))'
+                }}
+              >
                 <button
                   type="button"
                   onClick={() => handleModeChange('login')}
@@ -899,9 +947,10 @@ export function LoginForm({ onLogin }: LoginFormProps) {
       {/* LOGIN FORM SAU KHI HẾT INTRO */}
       {!introMode && mode === 'login' && (
         <div
-          className={`flex flex-col min-h-screen pb-24 transition-all duration-500 ${
+          className={`flex flex-col min-h-screen transition-all duration-500 ${
             isAppReady ? 'opacity-100' : 'opacity-0'
           }`}
+          style={{ paddingBottom: 'max(6rem, calc(env(safe-area-inset-bottom) + 4rem))' }}
         >
           <div className="flex-1 flex flex-col px-8 py-8">
             <div className="w-full max-w-sm mx-auto flex flex-col min-h-full">
@@ -970,7 +1019,13 @@ export function LoginForm({ onLogin }: LoginFormProps) {
               </form>
 
               {/* BOTTOM: Switch to Signup - Consistent position */}
-              <div className="mt-auto pt-6 input-animate" style={{ animationDelay: '0.5s' }}>
+              <div 
+                className="mt-auto pt-6 input-animate" 
+                style={{ 
+                  animationDelay: '0.5s',
+                  paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))'
+                }}
+              >
                 <button
                   type="button"
                   onClick={() => handleModeChange('signup')}
