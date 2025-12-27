@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { Eye, EyeOff, ArrowRight, Loader2, Check } from 'lucide-react'
 import { Capybara, type CapyMood } from './capybara/CapyFace'
 import { LoadingScreen } from './capybara/LoadingScreen'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 // ==========================================
 // STYLES & ANIMATIONS
@@ -91,7 +92,7 @@ function MinimalInput({
                 // Đảm bảo password hiển thị dấu * trên iOS
                 WebkitTextSecurity: 'disc',
                 textSecurity: 'disc'
-              } 
+              } as React.CSSProperties
             : undefined
         }
       />
@@ -219,6 +220,9 @@ export function LoginForm({ onLogin }: LoginFormProps) {
   // Mouse/Touch tracking state
   const [isMouseInView, setIsMouseInView] = useState(false)
   const lastInteractionRef = useRef<number>(Date.now())
+  
+  // Detect mobile device - tắt touch tracking trên mobile để ưu tiên input focus
+  const isMobile = useIsMobile()
 
   // Refs
   const targetButtonRef = useRef<HTMLButtonElement>(null)
@@ -322,8 +326,13 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     setEyePosition({ x: rX, y: rY })
   }
 
-  // Mouse tracking for Desktop - Optimized with RAF throttling
+  // Mouse tracking for Desktop ONLY - Tắt hoàn toàn trên mobile
   useEffect(() => {
+    // Tắt hoàn toàn trên mobile để ưu tiên input focus
+    if (isMobile) {
+      return
+    }
+    
     let rafId: number | null = null
     let lastPos = { x: 0, y: 0 }
     
@@ -369,96 +378,11 @@ export function LoginForm({ onLogin }: LoginFormProps) {
         cancelAnimationFrame(rafId)
       }
     }
-  }, [focusedField, showPassword, showConfirmPassword])
+  }, [isMobile, focusedField, showPassword, showConfirmPassword])
 
-  // Touch tracking for Mobile - Optimized with RAF throttling
-  useEffect(() => {
-    let rafId: number | null = null
-    let lastPos = { x: 0, y: 0 }
-    
-    const handleTouchStart = (e: TouchEvent) => {
-      // QUAN TRỌNG: Bỏ qua nếu touch vào interactive elements (input, button, link)
-      // Để tránh interfere với default behavior của chúng
-      const target = e.target as HTMLElement
-      if (target && (
-        target.tagName === 'INPUT' ||
-        target.tagName === 'BUTTON' ||
-        target.tagName === 'A' ||
-        target.closest('input') ||
-        target.closest('button') ||
-        target.closest('a')
-      )) {
-        return // Không xử lý, để browser xử lý default behavior
-      }
-      
-      lastInteractionRef.current = Date.now()
-      setIsMouseInView(true)
-      
-      if (!focusedField && !showPassword && !showConfirmPassword) {
-        const touch = e.touches[0]
-        const pos = calculateEyePosition(touch.clientX, touch.clientY)
-        lastPos = pos
-        setEyePosition(pos)
-        setCapyMood('neutral')
-      }
-    }
-
-    const handleTouchMove = (e: TouchEvent) => {
-      // Bỏ qua nếu đang touch vào interactive elements
-      const target = e.target as HTMLElement
-      if (target && (
-        target.tagName === 'INPUT' ||
-        target.tagName === 'BUTTON' ||
-        target.tagName === 'A' ||
-        target.closest('input') ||
-        target.closest('button') ||
-        target.closest('a')
-      )) {
-        return
-      }
-      
-      lastInteractionRef.current = Date.now()
-      
-      if (!focusedField && !showPassword && !showConfirmPassword) {
-        // Throttle với requestAnimationFrame
-        if (rafId === null) {
-          rafId = requestAnimationFrame(() => {
-            const touch = e.touches[0]
-            const pos = calculateEyePosition(touch.clientX, touch.clientY)
-            // Chỉ update nếu vị trí thay đổi đáng kể
-            const deltaX = Math.abs(pos.x - lastPos.x)
-            const deltaY = Math.abs(pos.y - lastPos.y)
-            if (deltaX > 0.1 || deltaY > 0.1) {
-              lastPos = pos
-              setEyePosition(pos)
-            }
-            rafId = null
-          })
-        }
-      }
-    }
-
-    const handleTouchEnd = () => {
-      setIsMouseInView(false)
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId)
-        rafId = null
-      }
-    }
-
-    window.addEventListener('touchstart', handleTouchStart, { passive: true })
-    window.addEventListener('touchmove', handleTouchMove, { passive: true })
-    window.addEventListener('touchend', handleTouchEnd, { passive: true })
-
-    return () => {
-      window.removeEventListener('touchstart', handleTouchStart)
-      window.removeEventListener('touchmove', handleTouchMove)
-      window.removeEventListener('touchend', handleTouchEnd)
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId)
-      }
-    }
-  }, [focusedField, showPassword, showConfirmPassword])
+  // Touch tracking TẮT HOÀN TOÀN trên mobile để ưu tiên input focus
+  // Trên mobile: chỉ có random glance khi idle, không track touch
+  // Trên desktop: vẫn track mouse như bình thường
 
   // Random glancing when idle (no interaction for 2s) - Optimized
   useEffect(() => {
@@ -717,7 +641,10 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                   setEmail(e.target.value)
                   handleInputTrack(e.target.value)
                 }}
-                onFocus={() => setFocusedField('email')}
+                onFocus={() => {
+                  lastInteractionRef.current = Date.now()
+                  setFocusedField('email')
+                }}
                 onBlur={() => setFocusedField(null)}
                 delay={0.1}
                 error={errors.email}
@@ -729,8 +656,14 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                 label="Mật khẩu"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onFocus={() => setFocusedField('password')}
+                onChange={(e) => {
+                  lastInteractionRef.current = Date.now()
+                  setPassword(e.target.value)
+                }}
+                onFocus={() => {
+                  lastInteractionRef.current = Date.now()
+                  setFocusedField('password')
+                }}
                 onBlur={() => setFocusedField(null)}
                 delay={0.2}
                 error={errors.password}
@@ -818,10 +751,10 @@ export function LoginForm({ onLogin }: LoginFormProps) {
               {/* TOP: Branding & Header */}
               <div className="form-fade-in">
                 <h1 className="text-3xl font-bold tracking-tight mb-1">
-                  Kết nạp hội
+                  Đăng ký ?
                 </h1>
                 <p className="text-gray-400 text-base">
-                  Chỉ mất 2 phút, không lừa lọc.
+                  Bạn là Capybara mới à?
                 </p>
               </div>
 
@@ -844,7 +777,10 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                     setName(e.target.value)
                     handleInputTrack(e.target.value)
                   }}
-                  onFocus={() => setFocusedField('name')}
+                  onFocus={() => {
+                    lastInteractionRef.current = Date.now()
+                    setFocusedField('name')
+                  }}
                   onBlur={() => setFocusedField(null)}
                   delay={0.1}
                   error={errors.name}
@@ -860,7 +796,10 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                     setEmail(e.target.value)
                     handleInputTrack(e.target.value)
                   }}
-                  onFocus={() => setFocusedField('email')}
+                  onFocus={() => {
+                  lastInteractionRef.current = Date.now()
+                  setFocusedField('email')
+                }}
                   onBlur={() => setFocusedField(null)}
                   delay={0.2}
                   error={errors.email}
@@ -873,8 +812,14 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                   label="Mật khẩu (ít nhất 8 ký tự)"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onFocus={() => setFocusedField('password')}
+                  onChange={(e) => {
+                  lastInteractionRef.current = Date.now()
+                  setPassword(e.target.value)
+                }}
+                  onFocus={() => {
+                  lastInteractionRef.current = Date.now()
+                  setFocusedField('password')
+                }}
                   onBlur={() => setFocusedField(null)}
                   delay={0.3}
                   error={errors.password}
@@ -890,8 +835,14 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                   label="Nhập lại mật khẩu"
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  onFocus={() => setFocusedField('confirmPassword')}
+                  onChange={(e) => {
+                    lastInteractionRef.current = Date.now()
+                    setConfirmPassword(e.target.value)
+                  }}
+                  onFocus={() => {
+                    lastInteractionRef.current = Date.now()
+                    setFocusedField('confirmPassword')
+                  }}
                   onBlur={() => setFocusedField(null)}
                   delay={0.4}
                   error={errors.confirmPassword}
@@ -975,7 +926,10 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                     setEmail(e.target.value)
                     handleInputTrack(e.target.value)
                   }}
-                  onFocus={() => setFocusedField('email')}
+                  onFocus={() => {
+                  lastInteractionRef.current = Date.now()
+                  setFocusedField('email')
+                }}
                   onBlur={() => setFocusedField(null)}
                   delay={0.1}
                   error={errors.email}
@@ -988,8 +942,14 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                   label="Mật khẩu"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onFocus={() => setFocusedField('password')}
+                  onChange={(e) => {
+                  lastInteractionRef.current = Date.now()
+                  setPassword(e.target.value)
+                }}
+                  onFocus={() => {
+                  lastInteractionRef.current = Date.now()
+                  setFocusedField('password')
+                }}
                   onBlur={() => setFocusedField(null)}
                   delay={0.2}
                   error={errors.password}
