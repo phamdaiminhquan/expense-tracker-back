@@ -99,7 +99,8 @@ export function MessagePage({
   // Tự động ẩn banner khi load xong (không cần user action)
   useEffect(() => {
     if (showLoadingScreen && !isLoadingFunds) {
-      // LoadingScreen sẽ tự xử lý minimum display time và fade out
+      // Set showLoadingScreen = false để hiển thị nội dung
+      setShowLoadingScreen(false)
     }
   }, [showLoadingScreen, isLoadingFunds])
 
@@ -144,7 +145,7 @@ export function MessagePage({
   return (
     <React.Fragment>
       {/* Container: p-0 trên mobile, p-3 trên desktop */}
-      <div className={`flex h-screen overflow-hidden bg-[#F0F2F5] lg:p-3 lg:gap-3 p-0 gap-0 ${showLoadingScreen ? 'opacity-0' : 'opacity-100 transition-opacity duration-500'}`}>
+      <div className={`flex h-[100dvh] lg:h-screen overflow-hidden bg-[#F0F2F5] lg:p-3 lg:gap-3 p-0 gap-0 ${showLoadingScreen ? 'opacity-0' : 'opacity-100 transition-opacity duration-500'}`}>
         
         {/* CỘT 1: SIDEBAR LEFT - Chỉ hiện trên lg, giữ nguyên card style vì là desktop */}
         <aside className="hidden lg:flex w-[350px] bg-white flex-col shrink-0 rounded-2xl shadow-sm overflow-hidden border border-gray-100">
@@ -190,7 +191,7 @@ export function MessagePage({
         </div>
 
         {/* CỘT 2: CHAT MAIN VIEW - Bo góc trên desktop, tràn viền trên mobile */}
-        <main className="flex-1 flex flex-col min-w-0 bg-white lg:rounded-2xl lg:shadow-sm lg:border lg:border-gray-100 shadow-none border-none overflow-hidden relative">
+        <main className="flex-1 flex flex-col min-w-0 min-h-0 bg-white lg:rounded-2xl lg:shadow-sm lg:border lg:border-gray-100 shadow-none border-none overflow-hidden relative">
           <ChatMessageView
             fund={fund}
             messages={fundMessages}

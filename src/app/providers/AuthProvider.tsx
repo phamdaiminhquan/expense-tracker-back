@@ -15,6 +15,7 @@ interface AuthContextValue {
   currentUserName: string | null
   isAuthed: boolean
   isRefreshing: boolean
+  isInitializing: boolean
   login: (next: AuthSession) => void
   logout: () => void
   attemptRefresh: () => Promise<void>
@@ -24,8 +25,14 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 function useAuthState(): AuthContextValue {
-  const [session, setSession] = useState<AuthSession | null>(() => loadAuthSession())
+  // Load session sync từ localStorage (chỉ 1 lần)
+  const [session, setSession] = useState<AuthSession | null>(() => {
+    return loadAuthSession()
+  })
   const [isRefreshing, setIsRefreshing] = useState(false)
+  // isInitializing chỉ = true nếu cần refresh token lúc khởi động
+  // Nếu không có session hoặc session còn valid → không cần init
+  const [isInitializing, setIsInitializing] = useState(false)
 
   const login = useCallback((next: AuthSession) => {
     setSession(next)
@@ -53,11 +60,44 @@ function useAuthState(): AuthContextValue {
     }
   }, [logout, session])
 
+  // Init auth state một lần khi mount - chỉ refresh token nếu cần
   useEffect(() => {
-    attemptRefresh()
-    const id = setInterval(attemptRefresh, 60_000)
+    const initAuth = async () => {
+      // Load session từ localStorage (đã được load trong useState initializer)
+      const currentSession = loadAuthSession()
+      
+      // Chỉ refresh nếu session tồn tại VÀ cần refresh
+      if (currentSession && shouldRefreshSession(currentSession)) {
+        setIsInitializing(true)
+        setIsRefreshing(true)
+        try {
+          const refreshed = await refreshToken({ refreshToken: currentSession.refreshToken })
+          setSession(refreshed)
+          saveAuthSession(refreshed)
+        } catch (error) {
+          console.error('Refresh token failed during init', error)
+          // Không logout ngay, giữ session cũ
+        } finally {
+          setIsRefreshing(false)
+          setIsInitializing(false)
+        }
+      }
+      // Nếu không cần refresh, không cần làm gì - session đã sẵn sàng
+    }
+    
+    initAuth()
+  }, []) // Chỉ chạy một lần khi mount
+  
+  // Refresh token định kỳ (sau khi đã init xong)
+  useEffect(() => {
+    if (isInitializing) return // Chờ init xong
+    
+    const id = setInterval(() => {
+      attemptRefresh()
+    }, 60_000)
+    
     return () => clearInterval(id)
-  }, [attemptRefresh])
+  }, [attemptRefresh, isInitializing])
 
   const currentUser = session?.user ?? null
   const currentUserId = currentUser?.id ?? null
@@ -80,6 +120,7 @@ function useAuthState(): AuthContextValue {
     currentUserName,
     isAuthed,
     isRefreshing,
+    isInitializing,
     login,
     logout,
     attemptRefresh,

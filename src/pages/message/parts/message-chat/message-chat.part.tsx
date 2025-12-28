@@ -70,7 +70,7 @@ const CATEGORIES_UI = {
 
 export const DashboardHeaderUI = ({ totalExpense, totalIncome, onOpenSidebar, isSmartMode, onToggleSmart, fundName, onShowStatistics }: any) => {
   return (
-    <div className="lg:pt-6 lg:pb-4 lg:px-6 pt-3 pb-2 px-4 bg-white/90 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
+    <div className="lg:pt-6 lg:pb-4 lg:px-6 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2 px-4 bg-white/90 backdrop-blur-md border-b border-gray-100 z-20 shrink-0">
       <div className="flex justify-between items-center mb-3 lg:mb-4">
         <div className="flex items-center gap-2 lg:gap-3">
           {/* Nút Hamburger chỉ hiện trên Mobile/Tablet (< lg) */}
@@ -275,9 +275,9 @@ export function ChatMessageView({
   }, [messages.length])
 
   return (
-    <div className={`flex flex-col h-full bg-white font-sans overflow-hidden relative`}>
+    <div className={`flex flex-col h-[100dvh] lg:h-full bg-white font-sans overflow-hidden relative`}>
       
-      {/* 2. HEADER */}
+      {/* 2. HEADER - Fixed at top */}
       <DashboardHeaderUI 
         totalExpense={totalExpense}
         totalIncome={totalIncome}
@@ -288,11 +288,11 @@ export function ChatMessageView({
         onShowStatistics={onShowStatistics}
       />
 
-      {/* 3. MESSAGE LIST */}
+      {/* 3. MESSAGE LIST - Scrollable with safe areas */}
       <div 
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto px-4 pt-4 space-y-6 scroll-smooth relative z-0 bg-[#FAFAFA]"
+        className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-6 scroll-smooth relative z-0 bg-[#FAFAFA] min-h-0"
       >
         {isLoading ? (
           <div className="space-y-5">
@@ -347,11 +347,11 @@ export function ChatMessageView({
             )
           })
         )}
-        <div ref={bottomRef} className="h-4" />
+        <div ref={bottomRef} className="h-1" />
       </div>
 
-      {/* 4. FOOTER & INPUT AREA */}
-      <div className="shrink-0">
+      {/* 4. FOOTER & INPUT AREA - Fixed at bottom */}
+      <div className="shrink-0 z-20 bg-white">
         {/* INTEGRATION ZONE: CapyInputBar */}
         <CapyInputBar
           inputValue={input}

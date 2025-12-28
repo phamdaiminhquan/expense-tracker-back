@@ -6,12 +6,14 @@ import { MessagePage } from '@/pages/message/message.page';
 import { PAGE_TAKE_DEFAULT } from '@/common/constant/page-take.constant';
 import { useFund } from '@/app/providers/FundProvider';
 import { useMessage } from '@/app/providers/MessageProvider';
+import { useAppReady } from '@/contexts/AppReadyContext';
 
 export function MessageRoute() {
   // hook
   const { fundId } = useParams();
   const navigate = useNavigate();
   const { currentUserId, currentUserName, currentUser, resolveUserName, logout } = useAuth();
+  const { setAppReady } = useAppReady();
 
   // State
   const [fundParams, setFundParams] = useState({
@@ -53,6 +55,14 @@ export function MessageRoute() {
   } = useMessage(selectedFund?.id || '');
 
   const { categories, createCategory, updateCategory, deleteCategory } = useCategories();
+
+  // Signal app ready khi đã có data (hoặc đã load xong dù empty)
+  useEffect(() => {
+    // Ready khi: đã load xong funds (không còn loading)
+    if (!isLoadingFunds) {
+      setAppReady();
+    }
+  }, [isLoadingFunds, setAppReady]);
 
   // Auto-navigate to first fund
   useEffect(() => {

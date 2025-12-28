@@ -158,10 +158,18 @@ export function NavigationDrawer({
             funds.map((fund) => {
               const isActive = fund.id === currentFundId
               return (
-                <button
+                <div
                   key={fund.id}
                   onClick={() => handleSelectFund(fund.id)}
-                  className={`w-full group flex items-center gap-3 p-3 rounded-2xl transition-all text-left border ${
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      handleSelectFund(fund.id)
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  className={`w-full group flex items-center gap-3 p-3 rounded-2xl transition-all text-left border cursor-pointer ${
                     isActive
                       ? 'bg-indigo-50 border-indigo-100'
                       : 'hover:bg-gray-50 border-transparent'
@@ -183,20 +191,30 @@ export function NavigationDrawer({
                   </div>
 
                   <div className={`flex gap-1 transition-opacity ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                    <button 
-                      onClick={(e) => handleUpdateFund(e, fund.id)}
-                      className="p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-indigo-600 transition-colors"
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Ngăn event bubble lên button cha
+                        handleUpdateFund(e, fund.id);
+                      }}
+                      className="h-7 w-7 p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-indigo-600 transition-colors"
                     >
                       <Pencil size={14} />
-                    </button>
-                    <button 
-                      onClick={(e) => handleDeleteFund(e, fund.id)}
-                      className="p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-rose-500 transition-colors"
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Ngăn event bubble lên button cha
+                        handleDeleteFund(e, fund.id);
+                      }}
+                      className="h-7 w-7 p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-rose-500 transition-colors"
                     >
                       <Trash size={14} />
-                    </button>
+                    </Button>
                   </div>
-                </button>
+                </div>
               )
             })
           )}

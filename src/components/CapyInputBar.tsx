@@ -117,7 +117,7 @@ export default function CapyInputBar({
   };
 
   return (
-    <div className="w-full bg-white border-t border-gray-100 lg:p-4 p-2 relative">
+    <div className="w-full bg-white border-t border-gray-100 lg:p-4 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] relative">
       <div className="w-full max-w-4xl mx-auto">
         {/* Category Toggle (Chỉ hiện khi không phải Smart Mode) */}
         {!isSmartMode && (

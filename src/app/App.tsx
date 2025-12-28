@@ -10,32 +10,11 @@ import { GlobalReduxState } from '@/redux/store.interface.ts'
 import { useSelector } from 'react-redux'
 import '@/assets/css/App.css';
 
-import React, { useState, useEffect } from 'react';
-import LoadingScreenZen from '@/components/LoadingScreenZen';
-import { useFund } from './providers/FundProvider';
-import { useMessage } from './providers/MessageProvider';
-
 function App() {
   const system = useSelector((state: GlobalReduxState) => state.system);
   const theme = createAppTheme(system.mode);
-  // Lấy trạng thái loading từ fund/message
-  const { isLoadingList: isLoadingFundList } = useFund();
-  const { isLoadingList: isLoadingMessageList } = useMessage('');
 
-  // State để đảm bảo loading screen hiển thị tối thiểu 1s
-  const [minLoading, setMinLoading] = useState(true);
-  useEffect(() => {
-    const timer = setTimeout(() => setMinLoading(false), 1000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Chỉ đóng loading khi cả minLoading=false và fund/message đã load xong
-  const isAppLoading = minLoading || isLoadingFundList || isLoadingMessageList;
-
-  if (isAppLoading) {
-    return <LoadingScreenZen isLoading={true} />;
-  }
-
+  // PersistGate trong main.tsx đã xử lý loading, không cần loading ở đây
   return (
     <BrowserRouter
       future={{
