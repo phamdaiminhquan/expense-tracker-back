@@ -191,7 +191,7 @@ export const MessageBubbleUI = ({ msg, onRetry, onEditPrompt, isCurrentUser, wal
           {/* STATE: ERROR */}
           {isError && (
             <span className="text-[10px] font-bold text-red-500 flex items-center gap-1 animate-pulse">
-              <AlertCircle size={12} /> {isNetworkError ? 'Lỗi mạng' : 'Lỗi xử lý'}
+              <AlertCircle size={12} /> {isNetworkError ? 'Lỗi mạng' : 'Capy đang bối rối...'}
             </span>
           )}
         </div>
@@ -212,7 +212,7 @@ export const MessageBubbleUI = ({ msg, onRetry, onEditPrompt, isCurrentUser, wal
       {/* --- FOOTER: ACTION RETRY/EDIT (CHỈ HIỆN KHI LỖI) --- */}
       {isError && (
         <div className="mt-2 pt-2 border-t border-red-200/50 text-[10px] font-bold text-red-600 flex items-center gap-1 justify-end">
-          <RefreshCw size={10} /> {isNetworkError ? 'Bấm để thử lại' : 'Bấm để sửa prompt'}
+          <RefreshCw size={10} /> {isNetworkError ? 'Bấm để thử lại' : 'Sửa prompt'}
         </div>
       )}
     </div>
@@ -243,6 +243,20 @@ interface ChatMessageViewProps {
 }
 
 const ITEMS_PER_PAGE = 10
+
+// ==========================================
+// 3. OPTIMISTIC MESSAGE TYPE
+// ==========================================
+
+type OptimisticMessageStatus = 'analyzing' | 'done' | 'network_error' | 'ai_error';
+
+interface OptimisticMessage {
+  id: string;
+  text: string;
+  status: OptimisticMessageStatus;
+  createdAt: number;
+  originalPrompt: string;
+}
 
 export function ChatMessageView({
   fund,
@@ -277,6 +291,11 @@ export function ChatMessageView({
   const [showCategorySelector, setShowCategorySelector] = useState(false)
   const [selectedWalletId, setSelectedWalletId] = useState('momo')
 
+  // ==========================================
+  // OPTIMISTIC UI STATE - Hiện tin nhắn ngay lập tức
+  // ==========================================
+  const [optimisticMessages, setOptimisticMessages] = useState<OptimisticMessage[]>([])
+
   const selectedWallet = WALLETS_UI.find(w => w.id === selectedWalletId) || WALLETS_UI[0]
 
   const sortedMessages = [...messages].sort((a, b) => b.timestamp - a.timestamp)
@@ -298,6 +317,91 @@ export function ChatMessageView({
     return { totalExpense: expense, totalIncome: income }
   }, [messages])
 
+  // ==========================================
+  // OPTIMISTIC UI: Xóa optimistic message khi có message thật từ server
+  // ==========================================
+  useEffect(() => {
+    if (messages.length === 0) return;
+    
+    // Lọc bỏ optimistic messages đã được server xác nhận
+    setOptimisticMessages(prev => {
+      const serverMessageTexts = new Set(messages.map(m => m.message.trim().toLowerCase()));
+      return prev.filter(opt => {
+        // Giữ lại nếu đang analyzing hoặc network_error
+        if (opt.status === 'network_error') return true;
+        // Xóa nếu đã có message tương ứng từ server
+        return !serverMessageTexts.has(opt.text.trim().toLowerCase());
+      });
+    });
+  }, [messages])
+
+  // ==========================================
+  // OPTIMISTIC SEND HANDLER - Core Logic
+  // ==========================================
+  const handleOptimisticSend = async (retryMessage?: OptimisticMessage) => {
+    const textToSend = retryMessage?.text || input.trim();
+    if (!textToSend || !fund) return;
+
+    const tempId = retryMessage?.id || `optimistic-${Date.now()}`;
+    
+    // 1. OPTIMISTIC UPDATE: Hiển thị message ngay lập tức với status 'analyzing'
+    const optimisticMsg: OptimisticMessage = {
+      id: tempId,
+      text: textToSend,
+      status: 'analyzing',
+      createdAt: retryMessage?.createdAt || Date.now(),
+      originalPrompt: textToSend,
+    };
+
+    if (retryMessage) {
+      // Nếu là retry, update status của message cũ
+      setOptimisticMessages(prev => 
+        prev.map(m => m.id === retryMessage.id ? optimisticMsg : m)
+      );
+    } else {
+      // Nếu là tin mới, thêm vào list
+      setOptimisticMessages(prev => [...prev, optimisticMsg]);
+      setInput(''); // Clear input ngay lập tức
+    }
+
+    // 2. BACKGROUND API CALL
+    try {
+      await onAddMessage({
+        createdById: currentUserId,
+        userName: currentUserName,
+        fundId: fund.id,
+        spend: null,
+        earn: null,
+        message: textToSend,
+        isPendingPrompt: true,
+        originalPrompt: textToSend,
+        createdAt: optimisticMsg.createdAt,
+      });
+      
+      // 3. SUCCESS: Xóa optimistic message (server sẽ trả về message thật)
+      // useEffect ở trên sẽ tự động xóa khi nhận được message từ server
+      
+    } catch (error) {
+      // 4. NETWORK ERROR: Update status để hiện nút "Thử lại"
+      setOptimisticMessages(prev => 
+        prev.map(m => m.id === tempId ? { ...m, status: 'network_error' as OptimisticMessageStatus } : m)
+      );
+    }
+  };
+
+  // Retry handler cho optimistic messages bị lỗi mạng
+  const handleOptimisticRetry = (msg: OptimisticMessage) => {
+    handleOptimisticSend(msg);
+  };
+
+  // Edit prompt handler cho optimistic messages
+  const handleOptimisticEditPrompt = (msg: OptimisticMessage) => {
+    // Xóa optimistic message và mở dialog edit
+    setOptimisticMessages(prev => prev.filter(m => m.id !== msg.id));
+    // Đặt lại input để user có thể sửa
+    setInput(msg.text);
+  };
+
   const handleScroll = () => {
     const container = scrollContainerRef.current
     if (!container) return
@@ -313,11 +417,12 @@ export function ChatMessageView({
     }
   }
 
+  // Auto scroll khi có message mới (bao gồm cả optimistic messages)
   useEffect(() => {
     if (bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth' })
     }
-  }, [messages.length])
+  }, [messages.length, optimisticMessages.length])
 
   return (
     <div className={`flex flex-col h-[100dvh] lg:h-full bg-white font-sans overflow-hidden relative`}>
@@ -357,84 +462,112 @@ export function ChatMessageView({
             <Button onClick={onOpenDrawer} variant="outline" className="rounded-xl">Mở danh sách quỹ</Button>
           </div>
         ) : (
-          [...visibleMessages].reverse().map((message) => {
-            const isCurrentUser = message.createdById === currentUserId
-            
-            // Xác định trạng thái message:
-            // - 'network_error': clientStatus === 'failed' (lỗi mạng khi gửi)
-            // - 'ai_error': isPendingPrompt === true và đã qua xử lý nhưng AI không extract được
-            // - 'analyzing': isPendingPrompt === true và đang đợi AI xử lý
-            // - 'done': đã có transaction thành công
-            const getMessageStatus = () => {
-              if (message.clientStatus === 'failed') return 'network_error';
-              if (message.isPendingPrompt) {
-                // Nếu là pendingPrompt và có error flag từ AI
-                if (message.aiError) return 'ai_error';
-                return 'analyzing';
+          <>
+            {/* REAL MESSAGES từ Server */}
+            {[...visibleMessages].reverse().map((message) => {
+              const isCurrentUser = message.createdById === currentUserId
+              
+              // Xác định trạng thái message:
+              // - 'network_error': clientStatus === 'failed' (lỗi mạng khi gửi)
+              // - 'ai_error': AI không thể parse được transaction (transaction === null và đã xử lý xong)
+              // - 'analyzing': isPendingPrompt === true và đang đợi AI xử lý
+              // - 'done': đã có transaction thành công
+              const getMessageStatus = () => {
+                // 1. Lỗi mạng khi gửi
+                if (message.clientStatus === 'failed') return 'network_error';
+                
+                // 2. Đang chờ AI xử lý
+                if (message.isPendingPrompt) {
+                  // Nếu có flag aiError từ backend
+                  if (message.aiError) return 'ai_error';
+                  return 'analyzing';
+                }
+                
+                // 3. Đã xử lý xong nhưng KHÔNG có transaction → AI FAIL
+                // (AI không thể extract được số tiền/loại giao dịch từ prompt)
+                if (!message.transaction) {
+                  return 'ai_error';
+                }
+                
+                // 4. Có transaction → thành công
+                return 'done';
+              };
+
+              const uiMsg = {
+                id: message.id,
+                text: message.message,
+                rawAmount: message.transaction?.spendValue || message.transaction?.earnValue || 0,
+                status: getMessageStatus(),
+                transType: (message.transaction?.spendValue || 0) > 0 ? 'expense' : 'income',
+                category: message.categoryName || 'Chưa phân loại',
+                wallet: fund?.name
               }
-              return 'done';
-            };
 
-            const uiMsg = {
-              id: message.id,
-              text: message.message,
-              rawAmount: message.transaction?.spendValue || message.transaction?.earnValue || 0,
-              status: getMessageStatus(),
-              transType: (message.transaction?.spendValue || 0) > 0 ? 'expense' : 'income',
-              category: message.categoryName || 'Chưa phân loại',
-              wallet: fund?.name
-            }
+              return (
+                <div 
+                  key={message.id} 
+                  className={`flex w-full ${isCurrentUser ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-4 duration-500`}
+                >
+                  <MessageBubbleUI 
+                    msg={uiMsg} 
+                    isCurrentUser={isCurrentUser}
+                    walletName={fund?.name}
+                    onRetry={() => {
+                      // Lỗi mạng → gửi lại trực tiếp
+                      onResendMessage(message)
+                    }}
+                    onEditPrompt={() => {
+                      // AI không parse được → mở dialog chỉnh sửa prompt
+                      setEditingPendingPrompt(message)
+                    }}
+                  />
+                </div>
+              )
+            })}
 
-            return (
-              <div 
-                key={message.id} 
-                className={`flex w-full ${isCurrentUser ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-4 duration-500`}
-              >
-                <MessageBubbleUI 
-                  msg={uiMsg} 
-                  isCurrentUser={isCurrentUser}
-                  walletName={fund?.name}
-                  onRetry={() => {
-                    // Lỗi mạng → gửi lại trực tiếp
-                    onResendMessage(message)
-                  }}
-                  onEditPrompt={() => {
-                    // AI không parse được → mở dialog chỉnh sửa prompt
-                    setEditingPendingPrompt(message)
-                  }}
-                />
-              </div>
-            )
-          })
+            {/* OPTIMISTIC MESSAGES - Hiển thị ngay khi gửi */}
+            {optimisticMessages.map((optMsg) => {
+              const uiMsg = {
+                id: optMsg.id,
+                text: optMsg.text,
+                rawAmount: 0,
+                status: optMsg.status,
+                transType: 'expense' as const,
+                category: '',
+                wallet: fund?.name
+              }
+
+              return (
+                <div 
+                  key={optMsg.id} 
+                  className="flex w-full justify-end animate-in fade-in slide-in-from-bottom-4 duration-300"
+                >
+                  <MessageBubbleUI 
+                    msg={uiMsg} 
+                    isCurrentUser={true}
+                    walletName={fund?.name}
+                    onRetry={() => handleOptimisticRetry(optMsg)}
+                    onEditPrompt={() => handleOptimisticEditPrompt(optMsg)}
+                  />
+                </div>
+              )
+            })}
+          </>
         )}
         <div ref={bottomRef} className="h-1" />
       </div>
 
       {/* 4. FOOTER & INPUT AREA - Fixed at bottom */}
       <div className="shrink-0 z-20 bg-white">
-        {/* INTEGRATION ZONE: CapyInputBar */}
+        {/* INTEGRATION ZONE: CapyInputBar với Optimistic UI */}
         <CapyInputBar
           inputValue={input}
           setInputValue={setInput}
           selectedWallet={selectedWallet}
           isSmartMode={isSmartMode}
-          isAnalyzing={isProcessing}
-          capyMood={isProcessing ? 'excited' : 'sleepy'}
-          onSend={() => {
-            if (!input.trim() || !fund) return;
-            onAddMessage({
-              createdById: currentUserId,
-              userName: currentUserName,
-              fundId: fund.id,
-              spend: null,
-              earn: null,
-              message: input.trim(),
-              isPendingPrompt: true,
-              originalPrompt: input.trim(),
-              createdAt: Date.now(),
-            });
-            setInput('');
-          }}
+          isAnalyzing={isProcessing || optimisticMessages.some(m => m.status === 'analyzing')}
+          capyMood={isProcessing || optimisticMessages.some(m => m.status === 'analyzing') ? 'excited' : 'sleepy'}
+          onSend={() => handleOptimisticSend()}
           onFocus={() => {}}
           onBlur={() => {}}
           onWalletClick={() => setShowWalletSelector(true)}
