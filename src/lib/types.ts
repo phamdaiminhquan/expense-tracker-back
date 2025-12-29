@@ -49,6 +49,8 @@ export interface Message {
   clientStatus?: 'sending' | 'sent' | 'failed'
   clientTempId?: string
   transaction?: TransactionDto
+  aiError?: boolean  // true khi AI không thể parse được transaction từ prompt
+  promptCreatedAt?: number  // thời điểm tạo ghi chú ban đầu
 }
 
 export interface ParsedExpense {

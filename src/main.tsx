@@ -5,11 +5,10 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { store, persistor } from './redux/store.redux'
 import AppLoader from './AppLoader'
 import './index.css'
-import LoadingScreenZen from '@/components/LoadingScreenZen'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <Provider store={store}>
-    <PersistGate loading={<LoadingScreenZen isLoading={true} />} persistor={persistor}>
+    <PersistGate loading={null} persistor={persistor}>
       <AppLoader />
     </PersistGate>
   </Provider>

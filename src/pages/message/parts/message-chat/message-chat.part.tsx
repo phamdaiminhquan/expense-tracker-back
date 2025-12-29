@@ -2,11 +2,13 @@ import { useState, useRef, useEffect, useMemo } from 'react'
 import { Message, Category } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import CapyInputBar from '@/components/CapyInputBar'
+import { RainbowSpinner } from '@/components/ui/rainbow-spinner'
 import {
   CreditCard, Wallet, Banknote, Sparkles, MessageSquare,
   TrendingDown, TrendingUp, Coffee, Zap, ShoppingBag,
   DollarSign, Briefcase, Gift, Car, Home, Smartphone,
-  MoreHorizontal, Menu, Search, LogOut, X, AlertCircle, RefreshCw
+  MoreHorizontal, Menu, Search, LogOut, X, AlertCircle, RefreshCw,
+  CheckCircle2
 } from 'lucide-react';
 
 import { formatCurrency } from '@/lib/currency'
@@ -117,7 +119,7 @@ export const DashboardHeaderUI = ({ totalExpense, totalIncome, onOpenSidebar, is
   );
 };
 
-export const MessageBubbleUI = ({ msg, onRetry, isCurrentUser, walletName }: any) => {
+export const MessageBubbleUI = ({ msg, onRetry, onEditPrompt, isCurrentUser, walletName }: any) => {
   const walletInfo = WALLETS_UI.find(w => w.id === 'momo') || WALLETS_UI[0];
 
   if (!isCurrentUser) {
@@ -129,45 +131,88 @@ export const MessageBubbleUI = ({ msg, onRetry, isCurrentUser, walletName }: any
     );
   }
 
-  const isError = msg.status === 'error';
+  const isNetworkError = msg.status === 'network_error';
+  const isAIError = msg.status === 'ai_error';
+  const isError = isNetworkError || isAIError || msg.status === 'error';
   const isAnalyzing = msg.status === 'analyzing';
   const isDone = msg.status === 'done';
 
+  // Handle click: network error → retry, AI error → edit prompt
+  const handleClick = () => {
+    if (!isError) return;
+    if (isNetworkError && onRetry) {
+      onRetry(msg);
+    } else if ((isAIError || msg.status === 'error') && onEditPrompt) {
+      onEditPrompt(msg);
+    }
+  };
+
   return (
     <div 
-      onClick={() => isError && onRetry ? onRetry(msg) : null}
+      onClick={handleClick}
       className={`
-        relative max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm transition-all duration-500
-        rounded-tr-sm border 
-        ${isError 
-          ? 'bg-red-50 border-red-200 text-gray-800 cursor-pointer hover:bg-red-100 ring-2 ring-red-100' 
-          : 'bg-white border-gray-100 text-gray-700'
-        }
-        ${isAnalyzing ? 'ring-2 ring-indigo-100' : ''}
-    `}>
-      <div className="flex items-center gap-1.5 mb-2 opacity-80 text-[10px] font-bold uppercase tracking-wide border-b border-gray-50 pb-1">
-        <span className="text-gray-400 flex items-center gap-1">
+        relative max-w-[85%] min-w-[200px] px-4 py-3 rounded-2xl text-sm shadow-sm transition-all duration-500 border group
+        rounded-tr-sm
+        ${isAnalyzing ? 'bg-white border-indigo-100 ring-2 ring-indigo-50/50' : ''}
+        ${isDone 
+          ? (msg.transType === 'expense' 
+              ? 'bg-white border-rose-100 text-gray-700 hover:shadow-rose-100/50' 
+              : 'bg-white border-emerald-100 text-gray-700 hover:shadow-emerald-100/50') 
+          : ''}
+        ${isError ? 'bg-red-50 border-red-200 text-gray-800 hover:bg-red-100/50 cursor-pointer' : ''}
+      `}
+    >
+      {/* --- HEADER: TRẠNG THÁI AI --- */}
+      <div className="flex items-center justify-between mb-2 pb-2 border-b border-dashed border-gray-100 gap-4">
+        {/* Left: Wallet Icon & Name */}
+        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1">
           {walletInfo?.icon} {walletName || walletInfo?.name}
         </span>
-        <div className="ml-auto">
-          {isAnalyzing && <span className="text-indigo-500 flex items-center gap-1 animate-pulse"><Sparkles size={10} /> Analyzing...</span>}
-          {isDone && <span className={`flex items-center gap-1 ${msg.transType === 'expense' ? 'text-rose-500' : 'text-emerald-500'}`}>{msg.category}</span>}
-          {isError && <span className="text-red-500 flex items-center gap-1 animate-pulse font-bold"><AlertCircle size={10} /> Lỗi</span>}
+
+        {/* Right: Status Indicator */}
+        <div className="flex items-center">
+          {/* STATE: LOADING với RainbowSpinner */}
+          {isAnalyzing && (
+            <div className="flex items-center gap-2 animate-pulse">
+              <span className="text-[10px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-pink-500">
+                AI Phân tích...
+              </span>
+              <RainbowSpinner size="w-3 h-3" />
+            </div>
+          )}
+
+          {/* STATE: SUCCESS với CheckCircle2 */}
+          {isDone && (
+            <span className={`text-[10px] font-bold flex items-center gap-1.5 animate-in zoom-in duration-300 ${msg.transType === 'expense' ? 'text-rose-500' : 'text-emerald-500'}`}>
+              {msg.category} <CheckCircle2 size={12} />
+            </span>
+          )}
+
+          {/* STATE: ERROR */}
+          {isError && (
+            <span className="text-[10px] font-bold text-red-500 flex items-center gap-1 animate-pulse">
+              <AlertCircle size={12} /> {isNetworkError ? 'Lỗi mạng' : 'Lỗi xử lý'}
+            </span>
+          )}
         </div>
       </div>
-      
-      <div className="flex justify-between items-baseline gap-4">
-        <span>{msg.text}</span>
+
+      {/* --- BODY: NỘI DUNG CHAT & SỐ TIỀN --- */}
+      <div className="flex justify-between items-end gap-6">
+        <span className="text-gray-700 leading-relaxed">{msg.text}</span>
+        
+        {/* Chỉ hiện số tiền khi đã done */}
         {isDone && msg.rawAmount > 0 && (
-          <span className={`font-bold whitespace-nowrap ${msg.transType === 'expense' ? 'text-rose-500' : 'text-emerald-500'}`}>
+          <span className={`font-bold text-base whitespace-nowrap tracking-tight ${msg.transType === 'expense' ? 'text-rose-600' : 'text-emerald-600'}`}>
             {msg.transType === 'expense' ? '-' : '+'}{formatCurrency(msg.rawAmount)}
           </span>
         )}
       </div>
 
+      {/* --- FOOTER: ACTION RETRY/EDIT (CHỈ HIỆN KHI LỖI) --- */}
       {isError && (
-        <div className="mt-2 pt-2 border-t border-red-100 text-[10px] font-bold text-red-500 flex items-center gap-1 justify-end">
-          <RefreshCw size={10} /> Bấm để sửa
+        <div className="mt-2 pt-2 border-t border-red-200/50 text-[10px] font-bold text-red-600 flex items-center gap-1 justify-end">
+          <RefreshCw size={10} /> {isNetworkError ? 'Bấm để thử lại' : 'Bấm để sửa prompt'}
         </div>
       )}
     </div>
@@ -315,12 +360,26 @@ export function ChatMessageView({
           [...visibleMessages].reverse().map((message) => {
             const isCurrentUser = message.createdById === currentUserId
             
-            // Map message to UI format
+            // Xác định trạng thái message:
+            // - 'network_error': clientStatus === 'failed' (lỗi mạng khi gửi)
+            // - 'ai_error': isPendingPrompt === true và đã qua xử lý nhưng AI không extract được
+            // - 'analyzing': isPendingPrompt === true và đang đợi AI xử lý
+            // - 'done': đã có transaction thành công
+            const getMessageStatus = () => {
+              if (message.clientStatus === 'failed') return 'network_error';
+              if (message.isPendingPrompt) {
+                // Nếu là pendingPrompt và có error flag từ AI
+                if (message.aiError) return 'ai_error';
+                return 'analyzing';
+              }
+              return 'done';
+            };
+
             const uiMsg = {
               id: message.id,
               text: message.message,
               rawAmount: message.transaction?.spendValue || message.transaction?.earnValue || 0,
-              status: message.clientStatus === 'failed' ? 'error' : (message.isPendingPrompt ? 'analyzing' : 'done'),
+              status: getMessageStatus(),
               transType: (message.transaction?.spendValue || 0) > 0 ? 'expense' : 'income',
               category: message.categoryName || 'Chưa phân loại',
               wallet: fund?.name
@@ -329,18 +388,19 @@ export function ChatMessageView({
             return (
               <div 
                 key={message.id} 
-                className={`flex w-full ${isCurrentUser ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2`}
+                className={`flex w-full ${isCurrentUser ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-4 duration-500`}
               >
                 <MessageBubbleUI 
                   msg={uiMsg} 
                   isCurrentUser={isCurrentUser}
                   walletName={fund?.name}
                   onRetry={() => {
-                    if (uiMsg.status === 'error') {
-                      onResendMessage(message)
-                    } else {
-                      setEditingPendingPrompt(message)
-                    }
+                    // Lỗi mạng → gửi lại trực tiếp
+                    onResendMessage(message)
+                  }}
+                  onEditPrompt={() => {
+                    // AI không parse được → mở dialog chỉnh sửa prompt
+                    setEditingPendingPrompt(message)
                   }}
                 />
               </div>
