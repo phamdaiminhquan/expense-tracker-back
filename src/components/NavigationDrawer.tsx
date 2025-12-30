@@ -1,8 +1,7 @@
-import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
-import { Button } from '@/components/ui/button'
+import {  useEffect, useCallback, useRef, useMemo } from 'react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Sheet, SheetContent, SheetHeader } from '@/components/ui/sheet'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { 
   Plus, 
   Wallet, 
@@ -19,6 +18,8 @@ import { ACTION_SYSTEM } from '@/redux'
 import { useAppDispatch } from '@/redux/store.redux'
 import { useSelector } from 'react-redux'
 import { GlobalReduxState } from '@/redux/store.interface'
+import {  debounce } from '@mui/material'
+import { Button } from './ui/button'
 
 interface NavigationDrawerProps {
   open: boolean
@@ -104,6 +105,10 @@ export function NavigationDrawer({
     return name.charAt(0).toUpperCase()
   }
 
+  const debounceSearch = useMemo(() => debounce((value: string) => {
+    onSearchFunds?.(value)
+  } , 500), [onSearchFunds]);
+
   const SidebarContent = (
     <div className="w-full h-full p-0 flex flex-col overflow-hidden bg-white">
         {/* Sidebar Header (Menu Title & Search) */}
@@ -116,11 +121,10 @@ export function NavigationDrawer({
                </button>
              )}
            </div>
-           
-           <div className="relative">
+           <div className="relative mt-2">
              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
              <input 
-               onChange={(e) => onSearchFunds?.(e.target.value)}
+               onChange={(e) => debounceSearch?.(e.target.value)}
                placeholder="Tìm kiếm quỹ..." 
                className="w-full pl-10 pr-4 py-3 bg-gray-50 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-100 transition-all border-none" 
              />

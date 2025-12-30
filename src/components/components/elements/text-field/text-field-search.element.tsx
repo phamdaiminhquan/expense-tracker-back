@@ -7,6 +7,7 @@ import { ChangeEventCustom } from '@/common/interfaces/change-event-custom.inter
 
 export interface TextFieldSearchElementProps extends BaseTextFieldProps {
   onChange?: (event: ChangeEventCustom<string>) => void;
+  placeholder?: any;
 }
 
 export const TextFieldSearchElement: React.FC<TextFieldSearchElementProps> = ({
@@ -24,10 +25,7 @@ export const TextFieldSearchElement: React.FC<TextFieldSearchElementProps> = ({
     <TextField
       InputLabelProps={{ shrink: true, sx: { display: 'flex' } }}
       label={
-        <StackLabel>
-          <IconElement icon="search" sx={{ fontSize: STYLE.TEXT_FIELD.FONT_SIZE_LABEL }} />
-          Tìm kiếm
-        </StackLabel>
+        null
       }
       {...rest}
       placeholder={placeholder}
