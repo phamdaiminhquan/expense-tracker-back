@@ -286,13 +286,13 @@ export const MessageBubbleUI = ({
           {/* STATE: SUCCESS với CheckCircle2 */}
           {isDone && (
             <span
-              className={`text-[10px] font-bold flex items-center gap-1.5 animate-in zoom-in duration-300 ${
+              className={`text-[10px] uppercase font-bold flex items-center gap-1.5 animate-in zoom-in duration-300 ${
                 msg.transType === "expense"
                   ? "text-rose-500"
                   : "text-emerald-500"
               }`}
             >
-              {msg.category} <CheckCircle2 size={12} />
+              {msg.category}
             </span>
           )}
 
@@ -653,7 +653,8 @@ export function ChatMessageView({
                   (message.transaction?.spendValue || 0) > 0
                     ? "expense"
                     : "income",
-                category: message.categoryName || "Chưa phân loại",
+                category:
+                  message.transaction?.category?.name || "Chưa phân loại",
                 wallet: fund?.name,
               };
 
