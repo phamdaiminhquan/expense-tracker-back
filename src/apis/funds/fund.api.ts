@@ -5,6 +5,7 @@ import {
 	GetListFundDto,
 	CreateFundDto,
 	UpdateFundDto,
+	GetListFundMemberDto,
 } from './fund.interface'
 import { ResList } from '@/common/interfaces/api.interface'
 import { Fund } from './fund.entities';
@@ -32,8 +33,8 @@ export const updateFund = async (id: string, body: UpdateFundDto): Promise<Fund>
 export const deleteFund = async (id: string): Promise<void> =>
 	await axiosRequest.delete(`funds/${id}`);
 
-export async function getFundMembers(fundId: string): Promise<FundMemberDto[]> {
-	const res = await axiosRequest.get<FundMemberDto[]>(`/funds/${fundId}/members`)
+export async function getFundMembers(fundId: string, params: GetListFundMemberDto): Promise<FundMemberDto[]> {
+	const res = await axiosRequest.get<FundMemberDto[]>(`/funds/${fundId}/members`, { params })
 	return res.data || []
 }
 
