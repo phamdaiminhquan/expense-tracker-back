@@ -11,6 +11,9 @@ import { UpdateFundDialog } from "../fund/parts/fund-update/fund-update.part";
 import { Fund } from "@/apis/funds/fund.entities";
 import ChartContent from "../statistic/parts/statistic-chart/statistic-chart.part";
 import { StatisticPage } from "../statistic/statistic.page";
+import { useFundMembers } from '@/hooks/useFundMembers';
+
+import { FundMemberListDialog } from "@/components/MemberListDialog";
 
 interface MessagePageProps {
   fund: Fund | null;
@@ -96,6 +99,21 @@ export function MessagePage({
   const [showLoadingScreen, setShowLoadingScreen] = useState(false);
   const hasShownInitialBanner = useRef(false);
 
+  const [selectedFundId, setSelectedFundId] = useState<string | null>(null);
+  const [isMemberDialogOpen, setIsMemberDialogOpen] = useState(false);
+  const [memberPage, setMemberPage] = useState(1);
+  const pageSize = 20;
+
+  // Sử dụng custom hook để lấy danh sách member, phân trang, mời/xóa member
+  const {
+    members,
+    isLoading: isLoadingMembers,
+    loading: isProcessingMember,
+    inviteMember,
+    removeMember,
+    mutate: mutateMembers,
+  } = useFundMembers(selectedFundId || '', { page: memberPage, take: pageSize });
+
   // Hiển thị banner khi đang load funds (lần đầu vào app)
   useEffect(() => {
     if (hasShownInitialBanner.current) return;
@@ -160,19 +178,42 @@ export function MessagePage({
     }
   }, [fund?.id, fund?.isOpenDialogCate]);
 
-  // Banner chỉ hiển thị khi đang load funds lần đầu
-  const isInitialLoading = isLoadingFunds;
-  console.log("fund", fund);
+
+  // Hàm mở dialog member khi chọn icon xem thành viên
+  const handleViewFundMembers = (fundId: string) => {
+    setSelectedFundId(fundId);
+    setIsMemberDialogOpen(true);
+  };
+
+  const handleCloseMemberDialog = () => {
+    setIsMemberDialogOpen(false);
+    setSelectedFundId(null);
+  };
+
+  const selectedFund = funds.find((f) => f.id === selectedFundId);
+
+  // Định nghĩa hàm wrapper để truyền đúng props cho dialog
+  const handleInviteMember = async (payload: any) => {
+    try {
+      await inviteMember(payload);
+    } catch { }
+  };
+  const handleRemoveMember = async (memberId: string) => {
+    try {
+      await removeMember(memberId);
+    } catch { }
+  };
+
   return (
     <React.Fragment>
       {/* Container: p-0 trên mobile, p-3 trên desktop */}
       <div className={`flex h-[100dvh] lg:h-screen overflow-hidden bg-[#F0F2F5] lg:p-3 lg:gap-3 p-0 gap-0 ${showLoadingScreen ? 'opacity-0' : 'opacity-100 transition-opacity duration-500'}`}>
-        
+
         {/* CỘT 1: SIDEBAR LEFT - Chỉ hiện trên lg, giữ nguyên card style vì là desktop */}
         <aside className="hidden lg:flex w-[350px] bg-white flex-col shrink-0 rounded-2xl shadow-sm overflow-hidden border border-gray-100">
           <NavigationDrawer
             open={true}
-            onOpenChange={() => {}}
+            onOpenChange={() => { }}
             funds={funds}
             onDeleteFund={onDeleteFund}
             currentUserName={currentUserName}
@@ -183,10 +224,11 @@ export function MessagePage({
             onSelectFund={onSelectFund}
             onCreateFund={handleOpenCreateFund}
             onUpdateFund={handleOpenUpdateFund}
-            onLoadMore={onLoadMoreFunds || (() => {})}
+            onLoadMore={onLoadMoreFunds || (() => { })}
             onLogout={onLogout}
             onSearchFunds={onSearchFunds}
             isPermanent={true}
+            onViewFundMembers={handleViewFundMembers}
           />
         </aside>
 
@@ -205,9 +247,10 @@ export function MessagePage({
             onSelectFund={onSelectFund}
             onCreateFund={handleOpenCreateFund}
             onUpdateFund={handleOpenUpdateFund}
-            onLoadMore={onLoadMoreFunds || (() => {})}
+            onLoadMore={onLoadMoreFunds || (() => { })}
             onLogout={onLogout}
             onSearchFunds={onSearchFunds}
+            onViewFundMembers={handleViewFundMembers}
           />
         </div>
 
@@ -277,6 +320,18 @@ export function MessagePage({
           onUpdateFund={handleUpdateFundComplete}
           currentUserId={currentUserId}
           allUsers={currentUser ? [currentUser] : []}
+        />
+
+        <FundMemberListDialog
+          isOpen={isMemberDialogOpen}
+          onClose={handleCloseMemberDialog}
+          fund={selectedFund || { id: '', name: '', type: 'shared' }}
+          members={members}
+          isLoading={isLoadingMembers || isProcessingMember}
+          onRefresh={() => mutateMembers()}
+          // onInviteMember={handleInviteMember}
+          onRemoveMember={handleRemoveMember}
+          currentUserId={currentUserId}
         />
       </div>
     </React.Fragment>
