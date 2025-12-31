@@ -1,18 +1,26 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useCategories } from '@/hooks/useCategories';
-import { useAuth } from '@/hooks/useAuth';
-import { MessagePage } from '@/pages/message/message.page';
-import { PAGE_TAKE_DEFAULT } from '@/common/constant/page-take.constant';
-import { useFund } from '@/app/providers/FundProvider';
-import { useMessage } from '@/app/providers/MessageProvider';
-import { useAppReady } from '@/contexts/AppReadyContext';
+import { useEffect, useMemo, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useCategories } from "@/hooks/useCategories";
+import { useAuth } from "@/hooks/useAuth";
+import { MessagePage } from "@/pages/message/message.page";
+import { PAGE_TAKE_DEFAULT } from "@/common/constant/page-take.constant";
+import { useFund } from "@/app/providers/FundProvider";
+import { useMessage } from "@/app/providers/MessageProvider";
+import { useAppReady } from "@/contexts/AppReadyContext";
+import { getFundSearchNumberId } from "@/apis/funds/fund.api";
+import { toast } from "sonner";
 
 export function MessageRoute() {
   // hook
   const { fundId } = useParams();
   const navigate = useNavigate();
-  const { currentUserId, currentUserName, currentUser, resolveUserName, logout } = useAuth();
+  const {
+    currentUserId,
+    currentUserName,
+    currentUser,
+    resolveUserName,
+    logout,
+  } = useAuth();
   const { setAppReady } = useAppReady();
 
   // State
@@ -36,7 +44,9 @@ export function MessageRoute() {
   // Get visible funds (filter by access permission)
   const visibleFunds = useMemo(() => {
     if (!fundList?.data || !currentUserId) return [];
-    return fundList.data.filter((f) => f.ownerId === currentUserId || f.memberIds?.includes(currentUserId));
+    return fundList.data.filter(
+      (f) => f.ownerId === currentUserId || f.memberIds?.includes(currentUserId)
+    );
   }, [currentUserId, fundList?.data]);
 
   // Auto-select fund
@@ -52,9 +62,10 @@ export function MessageRoute() {
     createMessage,
     updateMessage,
     deleteMessage,
-  } = useMessage(selectedFund?.id || '');
+  } = useMessage(selectedFund?.id || "");
 
-  const { categories, createCategory, updateCategory, deleteCategory } = useCategories();
+  const { categories, createCategory, updateCategory, deleteCategory } =
+    useCategories();
 
   // Signal app ready khi đã có data (hoặc đã load xong dù empty)
   useEffect(() => {
@@ -76,12 +87,20 @@ export function MessageRoute() {
     navigate(`/chat/${selectedFundId}`);
   };
 
-  const handleCreateFund = async (name: string, type: 'personal' | 'shared', memberIds: string[]) => {
+  const handleCreateFund = async (
+    name: string,
+    type: "personal" | "shared",
+    memberIds: string[]
+  ) => {
     const newFund = await createFund({ name, type, memberIds });
     navigate(`/chat/${newFund.id}`);
   };
 
-  const handleUpdateFund = async (id: string, name: string, type: 'personal' | 'shared') => {
+  const handleUpdateFund = async (
+    id: string,
+    name: string,
+    type: "personal" | "shared"
+  ) => {
     await updateFund(id, { name, type });
   };
 
@@ -92,7 +111,7 @@ export function MessageRoute() {
       if (remainingFunds.length > 0) {
         navigate(`/chat/${remainingFunds[0].id}`, { replace: true });
       } else {
-        navigate('/chat', { replace: true });
+        navigate("/chat", { replace: true });
       }
     }
   };
@@ -136,7 +155,9 @@ export function MessageRoute() {
     setFundParams((prev) => ({ ...prev, page: prev.page + 1 }));
   };
 
-  const hasMoreFunds = fundList?.total ? fundList.data.length < fundList.total : false;
+  const hasMoreFunds = fundList?.total
+    ? fundList.data.length < fundList.total
+    : false;
   return (
     <MessagePage
       fund={selectedFund}
@@ -151,13 +172,23 @@ export function MessageRoute() {
       onCreateFund={handleCreateFund}
       onUpdateFund={handleUpdateFund}
       onDeleteFund={handleDeleteFund}
-      onSearchFunds={(prev) => setFundParams((p) => ({ ...p, search: prev, page: 1 }))}
+      // onSearchFunds={(prev) => setFundParams((p) => ({ ...p, search: prev, page: 1 }))}
+      onSearchFunds={async (numberId) => {
+        if (!numberId) return;
+        try {
+          await getFundSearchNumberId(numberId);
+        } catch (error) {
+          toast.error("Không tìm thấy quỹ");
+        }
+      }}
       onLogout={logout}
       onAddMessage={handleAddMessage}
       onResendMessage={handleResendMessage}
       onUpdateMessage={handleUpdateMessage}
       onDeleteMessage={handleDeleteMessage}
-      onCreateCategory={(name, description) => createCategory(selectedFund?.id || null, name, description)}
+      onCreateCategory={(name, description) =>
+        createCategory(selectedFund?.id || null, name, description)
+      }
       onUpdateCategory={updateCategory}
       onDeleteCategory={deleteCategory}
       isProcessing={isProcessingMessage || isFundProcessing}
