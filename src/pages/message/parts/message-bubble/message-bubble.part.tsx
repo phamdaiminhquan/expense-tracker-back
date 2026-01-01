@@ -12,7 +12,7 @@ interface Props {
   walletName?: string;
 }
 
-const MessageBubbleUI: React.FC<Props> = ({
+const MessageBubblePart: React.FC<Props> = ({
   msg,
   onRetry,
   onEditPrompt,
@@ -139,4 +139,4 @@ const MessageBubbleUI: React.FC<Props> = ({
   );
 };
 
-export default MessageBubbleUI;
+export default MessageBubblePart;

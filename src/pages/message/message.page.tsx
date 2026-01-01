@@ -3,15 +3,15 @@ import { Message, Category } from "@/lib/types";
 import { FundStatisticsDialog } from "@/components/FundStatisticsDialog";
 // import { CategoryManagementDialog } from '@/components/CategoryManagementDialog'
 import { CategorySubscriptionDialog } from "@/components/CategorySubscriptionDialog";
-import { ChatMessageView } from "@/pages/message/parts/message-chat/message-chat.part";
+import { MessageChatPart } from "@/pages/message/parts/message-chat/message-chat.part";
 import { NavigationDrawer } from "@/components/NavigationDrawer";
-import { CreateFundDialog } from "@/pages/fund/parts/fund-create/fund-create.part";
+import { FundCreatePart } from "@/pages/fund/parts/fund-create/fund-create.part";
 import React from "react";
-import { UpdateFundDialog } from "../fund/parts/fund-update/fund-update.part";
+import { FundUpdatePart } from "../fund/parts/fund-update/fund-update.part";
 import { Fund } from "@/apis/funds/fund.entities";
 import ChartContent from "../statistic/parts/statistic-chart/statistic-chart.part";
 import { StatisticPage } from "../statistic/statistic.page";
-import { useFundMembers } from '@/hooks/useFundMembers';
+import { useFundMembers } from "@/hooks/useFundMembers";
 
 import { FundMemberListDialog } from "@/components/MemberListDialog";
 
@@ -112,7 +112,10 @@ export function MessagePage({
     inviteMember,
     removeMember,
     mutate: mutateMembers,
-  } = useFundMembers(selectedFundId || '', { page: memberPage, take: pageSize });
+  } = useFundMembers(selectedFundId || "", {
+    page: memberPage,
+    take: pageSize,
+  });
 
   // Hiển thị banner khi đang load funds (lần đầu vào app)
   useEffect(() => {
@@ -131,7 +134,7 @@ export function MessagePage({
   useEffect(() => {
     if (showLoadingScreen && !isLoadingFunds) {
       // Set showLoadingScreen = false để hiển thị nội dung
-      setShowLoadingScreen(false)
+      setShowLoadingScreen(false);
     }
   }, [showLoadingScreen, isLoadingFunds]);
 
@@ -178,7 +181,6 @@ export function MessagePage({
     }
   }, [fund?.id, fund?.isOpenDialogCate]);
 
-
   // Hàm mở dialog member khi chọn icon xem thành viên
   const handleViewFundMembers = (fundId: string) => {
     setSelectedFundId(fundId);
@@ -196,24 +198,29 @@ export function MessagePage({
   const handleInviteMember = async (payload: any) => {
     try {
       await inviteMember(payload);
-    } catch { }
+    } catch {}
   };
   const handleRemoveMember = async (memberId: string) => {
     try {
       await removeMember(memberId);
-    } catch { }
+    } catch {}
   };
 
   return (
     <React.Fragment>
       {/* Container: p-0 trên mobile, p-3 trên desktop */}
-      <div className={`flex h-[100dvh] lg:h-screen overflow-hidden bg-[#F0F2F5] lg:p-3 lg:gap-3 p-0 gap-0 ${showLoadingScreen ? 'opacity-0' : 'opacity-100 transition-opacity duration-500'}`}>
-
+      <div
+        className={`flex h-[100dvh] lg:h-screen overflow-hidden bg-[#F0F2F5] lg:p-3 lg:gap-3 p-0 gap-0 ${
+          showLoadingScreen
+            ? "opacity-0"
+            : "opacity-100 transition-opacity duration-500"
+        }`}
+      >
         {/* CỘT 1: SIDEBAR LEFT - Chỉ hiện trên lg, giữ nguyên card style vì là desktop */}
         <aside className="hidden lg:flex w-[350px] bg-white flex-col shrink-0 rounded-2xl shadow-sm overflow-hidden border border-gray-100">
           <NavigationDrawer
             open={true}
-            onOpenChange={() => { }}
+            onOpenChange={() => {}}
             funds={funds}
             onDeleteFund={onDeleteFund}
             currentUserName={currentUserName}
@@ -224,7 +231,7 @@ export function MessagePage({
             onSelectFund={onSelectFund}
             onCreateFund={handleOpenCreateFund}
             onUpdateFund={handleOpenUpdateFund}
-            onLoadMore={onLoadMoreFunds || (() => { })}
+            onLoadMore={onLoadMoreFunds || (() => {})}
             onLogout={onLogout}
             onSearchFunds={onSearchFunds}
             isPermanent={true}
@@ -247,7 +254,7 @@ export function MessagePage({
             onSelectFund={onSelectFund}
             onCreateFund={handleOpenCreateFund}
             onUpdateFund={handleOpenUpdateFund}
-            onLoadMore={onLoadMoreFunds || (() => { })}
+            onLoadMore={onLoadMoreFunds || (() => {})}
             onLogout={onLogout}
             onSearchFunds={onSearchFunds}
             onViewFundMembers={handleViewFundMembers}
@@ -256,7 +263,7 @@ export function MessagePage({
 
         {/* CỘT 2: CHAT MAIN VIEW - Bo góc trên desktop, tràn viền trên mobile */}
         <main className="flex-1 flex flex-col min-w-0 min-h-0 bg-white lg:rounded-2xl lg:shadow-sm lg:border lg:border-gray-100 shadow-none border-none overflow-hidden relative">
-          <ChatMessageView
+          <MessageChatPart
             fund={fund}
             messages={fundMessages}
             categories={fundCategories}
@@ -305,7 +312,7 @@ export function MessagePage({
           totalIncome={0}
         />
 
-        <CreateFundDialog
+        <FundCreatePart
           open={isCreateFundDialogOpen}
           onOpenChange={setIsCreateFundDialogOpen}
           onCreateFund={handleCreateFundComplete}
@@ -313,7 +320,7 @@ export function MessagePage({
           allUsers={currentUser ? [currentUser] : []}
         />
 
-        <UpdateFundDialog
+        <FundUpdatePart
           fund={fund!}
           open={isUpdateFundDialogOpen}
           onOpenChange={setIsUpdateFundDialogOpen}
@@ -325,7 +332,7 @@ export function MessagePage({
         <FundMemberListDialog
           isOpen={isMemberDialogOpen}
           onClose={handleCloseMemberDialog}
-          fund={selectedFund || { id: '', name: '', type: 'shared' }}
+          fund={selectedFund || { id: "", name: "", type: "shared" }}
           members={members}
           isLoading={isLoadingMembers || isProcessingMember}
           onRefresh={() => mutateMembers()}

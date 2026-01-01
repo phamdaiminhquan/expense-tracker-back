@@ -12,7 +12,7 @@ interface Props {
   onShowStatistics: () => void;
 }
 
-const DashboardHeaderUI: React.FC<Props> = ({
+const MessageHeaderPart: React.FC<Props> = ({
   totalExpense,
   totalIncome,
   onOpenSidebar,
@@ -86,4 +86,4 @@ const DashboardHeaderUI: React.FC<Props> = ({
   );
 };
 
-export default DashboardHeaderUI;
+export default MessageHeaderPart;

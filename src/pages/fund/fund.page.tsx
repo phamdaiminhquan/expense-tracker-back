@@ -1,23 +1,27 @@
-import React, { useMemo, useState } from 'react'
-import { FundListScreen } from '@/pages/fund/parts/fund-list/fund-list.part'
-import { CreateFundDialog } from '@/pages/fund/parts/fund-create/fund-create.part'
-import { User } from '@/lib/auth'
-import { toast } from 'sonner'
-import { Fund } from '@/apis/funds/fund.entities'
+import React, { useMemo, useState } from "react";
+import { FundListPart } from "@/pages/fund/parts/fund-list/fund-list.part";
+import { FundCreatePart } from "@/pages/fund/parts/fund-create/fund-create.part";
+import { User } from "@/lib/auth";
+import { toast } from "sonner";
+import { Fund } from "@/apis/funds/fund.entities";
 
 interface FundListPageProps {
-  currentUserId: string
-  currentUserName: string
-  currentUser: User | null
-  funds: Fund[]
-  isLoadingFunds?: boolean
-  onRefreshFunds?: () => void
-  onSelectFund: (fund: Fund) => void
-  onCreateFund: (name: string, type: 'personal' | 'shared', memberIds: string[]) => Promise<void>
-  onLogout: () => void
+  currentUserId: string;
+  currentUserName: string;
+  currentUser: User | null;
+  funds: Fund[];
+  isLoadingFunds?: boolean;
+  onRefreshFunds?: () => void;
+  onSelectFund: (fund: Fund) => void;
+  onCreateFund: (
+    name: string,
+    type: "personal" | "shared",
+    memberIds: string[]
+  ) => Promise<void>;
+  onLogout: () => void;
 }
 
-export function FundListPage({
+export function FundPage({
   currentUserId,
   currentUserName,
   currentUser,
@@ -28,33 +32,34 @@ export function FundListPage({
   onCreateFund,
   onLogout,
 }: FundListPageProps) {
-  const [isCreateFundDialogOpen, setIsCreateFundDialogOpen] = useState(false)
+  const [isCreateFundDialogOpen, setIsCreateFundDialogOpen] = useState(false);
 
-  const visibleFunds = useMemo(
-    () => funds,
-    [funds]
-  )
+  const visibleFunds = useMemo(() => funds, [funds]);
 
-  const handleCreateFund = async (name: string, type: 'personal' | 'shared', memberIds: string[]) => {
+  const handleCreateFund = async (
+    name: string,
+    type: "personal" | "shared",
+    memberIds: string[]
+  ) => {
     try {
-      await onCreateFund(name, type, memberIds)
-      toast.success('Đã tạo quỹ thành công!', { description: name })
+      await onCreateFund(name, type, memberIds);
+      toast.success("Đã tạo quỹ thành công!", { description: name });
     } catch (error) {
-      console.error(error)
-      toast.error('Tạo quỹ thất bại', { description: 'Vui lòng thử lại' })
+      console.error(error);
+      toast.error("Tạo quỹ thất bại", { description: "Vui lòng thử lại" });
     }
-  }
+  };
 
   const handleSelectFund = (fundId: string) => {
-    const found = funds.find((f) => f.id === fundId)
+    const found = funds.find((f) => f.id === fundId);
     if (found) {
-      onSelectFund(found)
+      onSelectFund(found);
     }
-  }
+  };
 
   return (
     <React.Fragment>
-      <FundListScreen
+      <FundListPart
         funds={visibleFunds}
         currentUserId={currentUserId}
         currentUserName={currentUserName}
@@ -65,7 +70,7 @@ export function FundListPage({
         onRefresh={onRefreshFunds}
       />
 
-      <CreateFundDialog
+      <FundCreatePart
         open={isCreateFundDialogOpen}
         onOpenChange={setIsCreateFundDialogOpen}
         onCreateFund={handleCreateFund}
@@ -73,5 +78,5 @@ export function FundListPage({
         allUsers={currentUser ? [currentUser] : []}
       />
     </React.Fragment>
-  )
+  );
 }

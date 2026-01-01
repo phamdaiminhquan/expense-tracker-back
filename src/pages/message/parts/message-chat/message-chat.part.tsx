@@ -8,9 +8,9 @@ import { EditMessageDialog } from "../../../../components/EditMessageDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Fund } from "@/apis/funds/fund.entities";
 import { CATEGORIES_UI, OptimisticMessageStatus } from "../../message.constant";
-import DashboardHeaderUI from "../../components/DashboardHeaderUI";
-import MessageBubbleUI from "../../components/MessageBubbleUI";
-import WalletSelectorModal from "../../components/WalletSelectorModal";
+import MessageHeaderPart from "../message-header/message-header.part";
+import MessageBubblePart from "../message-bubble/message-bubble.part";
+import WalletSelectorModal from "../../wallet/WalletSelectorModal";
 import useSWR from "swr";
 import { getListWallets } from "@/apis/wallets/wallet.api";
 
@@ -38,11 +38,6 @@ interface ChatMessageViewProps {
 }
 
 const ITEMS_PER_PAGE = 10;
-
-// ==========================================
-// 3. OPTIMISTIC MESSAGE TYPE
-// ==========================================
-
 interface OptimisticMessage {
   id: string;
   text: string;
@@ -51,7 +46,7 @@ interface OptimisticMessage {
   originalPrompt: string;
 }
 
-export function ChatMessageView({
+export function MessageChatPart({
   fund,
   funds,
   messages,
@@ -247,7 +242,7 @@ export function ChatMessageView({
       className={`flex flex-col h-[100dvh] lg:h-full bg-white font-sans overflow-hidden relative`}
     >
       {/* 2. HEADER - Fixed at top */}
-      <DashboardHeaderUI
+      <MessageHeaderPart
         totalExpense={totalExpense}
         totalIncome={totalIncome}
         isSmartMode={isSmartMode}
@@ -351,7 +346,7 @@ export function ChatMessageView({
                     isCurrentUser ? "justify-end" : "justify-start"
                   } animate-in fade-in slide-in-from-bottom-4 duration-500`}
                 >
-                  <MessageBubbleUI
+                  <MessageBubblePart
                     msg={uiMsg}
                     isCurrentUser={isCurrentUser}
                     walletName={fund?.name}
@@ -385,7 +380,7 @@ export function ChatMessageView({
                   key={optMsg.id}
                   className="flex w-full justify-end animate-in fade-in slide-in-from-bottom-4 duration-300"
                 >
-                  <MessageBubbleUI
+                  <MessageBubblePart
                     msg={uiMsg}
                     isCurrentUser={true}
                     walletName={fund?.name}

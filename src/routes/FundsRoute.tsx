@@ -1,16 +1,16 @@
-import { useNavigate, useLocation } from 'react-router-dom';
-import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { FundListPage } from '@/pages/fund/fund.page';
-import { useAuth } from '@/hooks/useAuth';
-import { PAGE_TAKE_DEFAULT } from '@/common/constant/page-take.constant';
-import { useFund } from '@/app/providers/FundProvider';
+import { useNavigate, useLocation } from "react-router-dom";
+import React, { useEffect, useState, useRef, useMemo } from "react";
+import { FundPage } from "@/pages/fund/fund.page";
+import { useAuth } from "@/hooks/useAuth";
+import { PAGE_TAKE_DEFAULT } from "@/common/constant/page-take.constant";
+import { useFund } from "@/app/providers/FundProvider";
 
 export function FundsRoute() {
   // hook
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser, currentUserId, currentUserName, logout } = useAuth();
-  
+
   // state
   const [params] = useState({
     ...PAGE_TAKE_DEFAULT,
@@ -34,7 +34,8 @@ export function FundsRoute() {
   const visibleFunds = useMemo(() => {
     if (!fundList?.data || !currentUserId) return [];
     return fundList?.data.filter(
-      (fund) => fund.ownerId === currentUserId || fund.memberIds.includes(currentUserId)
+      (fund) =>
+        fund.ownerId === currentUserId || fund.memberIds.includes(currentUserId)
     );
   }, [fundList?.data, currentUserId]);
 
@@ -42,11 +43,13 @@ export function FundsRoute() {
   useEffect(() => {
     if (hasInitialized.current) return;
 
-    const isFromLogin = location.state?.fromLogin === true || sessionStorage.getItem('justLoggedIn') === 'true';
+    const isFromLogin =
+      location.state?.fromLogin === true ||
+      sessionStorage.getItem("justLoggedIn") === "true";
     if (isFromLogin) {
       hasInitialized.current = true;
       setShowLoadingScreen(true);
-      sessionStorage.removeItem('justLoggedIn');
+      sessionStorage.removeItem("justLoggedIn");
     }
   }, [location.state]);
 
@@ -60,7 +63,11 @@ export function FundsRoute() {
   };
 
   // Handle create fund
-  const handleCreateFund = async (name: string, type: 'personal' | 'shared', memberIds: string[]) => {
+  const handleCreateFund = async (
+    name: string,
+    type: "personal" | "shared",
+    memberIds: string[]
+  ) => {
     const newFund = await createFund({ name, type, memberIds });
     navigate(`/funds/${newFund.id}`);
   };
@@ -70,11 +77,11 @@ export function FundsRoute() {
       <div
         className={
           showLoadingScreen
-            ? 'opacity-0 pointer-events-none'
-            : 'opacity-100 transition-opacity duration-500 pointer-events-auto'
+            ? "opacity-0 pointer-events-none"
+            : "opacity-100 transition-opacity duration-500 pointer-events-auto"
         }
       >
-        <FundListPage
+        <FundPage
           currentUser={currentUser}
           currentUserId={currentUserId as string}
           currentUserName={currentUserName as string}
