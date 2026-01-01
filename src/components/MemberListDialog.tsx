@@ -118,7 +118,7 @@ export function FundMemberListDialog({
                                 <Users className="h-5 w-5 text-gray-600" />
                                 Thành viên quỹ
                             </DialogTitle>
-                            <DialogDescription className="mt-1 text-base">
+                            <DialogDescription className="mt-1 text-base text-left">
                                 {fund.name} • {fund.type === 'shared' ? 'Quỹ chung' : 'Quỹ cá nhân'}
                             </DialogDescription>
                         </div>
@@ -183,7 +183,7 @@ export function FundMemberListDialog({
                                 return (
                                     <div
                                         key={member.id}
-                                        className={`flex items-center gap-3 p-3 rounded-lg ${isCurrentUser ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                                        className={`flex max-sm:flex-col sm:items-center gap-3 p-3 rounded-lg ${isCurrentUser ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
                                     >
                                         <Avatar className="h-9 w-9">
                                             <AvatarFallback className={

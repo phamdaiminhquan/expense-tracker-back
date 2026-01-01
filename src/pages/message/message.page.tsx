@@ -76,30 +76,34 @@ export function MessagePage({
   onLoadMoreFunds,
   onSearchFunds,
 }: MessagePageProps) {
-  const [isStatisticsDialogOpen, setIsStatisticsDialogOpen] = useState(false);
-  const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
-  const [isCategorySubscriptionOpen, setIsCategorySubscriptionOpen] =
-    useState(false);
-  const [isAutoCategorySubscription, setIsAutoCategorySubscription] =
-    useState(false);
+  // const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
+  // const [isCategorySubscriptionOpen, setIsCategorySubscriptionOpen] =
+  //   useState(false);
+  // const [isAutoCategorySubscription, setIsAutoCategorySubscription] =
+  //   useState(false);
 
+  // state
+  const [isStatisticsDialogOpen, setIsStatisticsDialogOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isCreateFundDialogOpen, setIsCreateFundDialogOpen] = useState(false);
   const [isUpdateFundDialogOpen, setIsUpdateFundDialogOpen] = useState(false);
   const [showLoadingScreen, setShowLoadingScreen] = useState(false);
-  const hasShownInitialBanner = useRef(false);
-
   const [selectedFundId, setSelectedFundId] = useState<string | null>(null);
   const [isMemberDialogOpen, setIsMemberDialogOpen] = useState(false);
   const [memberPage, setMemberPage] = useState(1);
   const pageSize = 20;
+  const selectedFund = funds.find((f) => f.id === selectedFundId);
+  const fundCategories = fund
+    ? categories.filter((c) => c.fundId === fund.id)
+    : [];
+  const fundMessages = fund ? messages.filter((m) => m.fundId === fund.id) : [];
 
-  // Sử dụng custom hook để lấy danh sách member, phân trang, mời/xóa member
+  // hook
+  const hasShownInitialBanner = useRef(false);
   const {
     members,
     isLoading: isLoadingMembers,
     loading: isProcessingMember,
-    inviteMember,
     removeMember,
     mutate: mutateMembers,
   } = useFundMembers(selectedFundId || "", {
@@ -107,6 +111,7 @@ export function MessagePage({
     take: pageSize,
   });
 
+  // function
   // Hiển thị banner khi đang load funds (lần đầu vào app)
   useEffect(() => {
     if (hasShownInitialBanner.current) return;
@@ -127,10 +132,6 @@ export function MessagePage({
       setShowLoadingScreen(false);
     }
   }, [showLoadingScreen, isLoadingFunds]);
-
-  const handleLoadingComplete = () => {
-    setShowLoadingScreen(false);
-  };
 
   const handleOpenCreateFund = () => {
     setIsCreateFundDialogOpen(true);
@@ -159,10 +160,6 @@ export function MessagePage({
     setIsUpdateFundDialogOpen(false);
   };
 
-  const fundCategories = fund
-    ? categories.filter((c) => c.fundId === fund.id)
-    : [];
-  const fundMessages = fund ? messages.filter((m) => m.fundId === fund.id) : [];
   // useEffect(() => {
   //   if (!fund?.id) return;
   //   if (fund.isOpenDialogCate) {
@@ -182,14 +179,6 @@ export function MessagePage({
     setSelectedFundId(null);
   };
 
-  const selectedFund = funds.find((f) => f.id === selectedFundId);
-
-  // Định nghĩa hàm wrapper để truyền đúng props cho dialog
-  const handleInviteMember = async (payload: any) => {
-    try {
-      await inviteMember(payload);
-    } catch {}
-  };
   const handleRemoveMember = async (memberId: string) => {
     try {
       await removeMember(memberId);
