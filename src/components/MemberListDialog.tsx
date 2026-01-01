@@ -114,7 +114,7 @@ export function FundMemberListDialog({
                 <DialogHeader className="px-7 pt-7 pb-3 border-b">
                     <div className="flex items-center justify-between">
                         <div className="flex-1">
-                            <DialogTitle className="text-xl font-semibold flex items-center gap-2">
+                            <DialogTitle className="text-xl font-semibold flex items-center gap-2 text-black">
                                 <Users className="h-5 w-5 text-gray-600" />
                                 Thành viên quỹ
                             </DialogTitle>
@@ -132,7 +132,7 @@ export function FundMemberListDialog({
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="Tìm kiếm thành viên theo tên, email..."
-                        className="w-full px-4 py-2 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-indigo-100 outline-none bg-white"
+                        className="w-full px-4 py-2 rounded-lg border border-gray-200 text-sm text-black bg-white"
                     />
                     {fund.type === 'shared' && onInviteMember && (
                         <Button
@@ -197,7 +197,7 @@ export function FundMemberListDialog({
 
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2">
-                                                <span className="font-medium text-sm truncate">
+                                                <span className="font-medium text-sm truncate text-black">
                                                     {userInfo.name}
                                                     {isCurrentUser && (
                                                         <span className="ml-1.5 text-xs text-blue-600">(Bạn)</span>

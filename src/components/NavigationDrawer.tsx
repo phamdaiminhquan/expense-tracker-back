@@ -137,7 +137,7 @@ export function NavigationDrawer({
           <input
             onChange={(e) => debounceSearch?.(e.target.value)}
             placeholder="Tìm kiếm quỹ..."
-            className="w-full pl-10 pr-4 py-3 bg-gray-50 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-100 transition-all border-none"
+            className="text-black w-full pl-10 pr-4 py-3 bg-gray-50 rounded-2xl text-sm transition-all border-none"
           />
         </div>
       </div>
