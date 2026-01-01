@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useCategories } from "@/hooks/useCategories";
-import { useAuth } from "@/hooks/useAuth";
+import { useCategories } from "@/hooks/use-categories.hook";
+import { useAuth } from "@/hooks/use-auth.hook";
 import { MessagePage } from "@/pages/message/message.page";
 import { PAGE_TAKE_DEFAULT } from "@/common/constant/page-take.constant";
 import { useFund } from "@/app/providers/FundProvider";
 import { useMessage } from "@/app/providers/MessageProvider";
-import { useAppReady } from "@/contexts/AppReadyContext";
+import { useAppReady } from "@/contexts/app-ready.context";
 import { getFundSearchNumberId } from "@/apis/funds/fund.api";
 import { toast } from "sonner";
 

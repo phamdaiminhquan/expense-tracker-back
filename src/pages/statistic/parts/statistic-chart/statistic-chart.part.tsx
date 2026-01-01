@@ -6,8 +6,8 @@ import {
   BarChart3,
 } from "lucide-react";
 import { ResponsiveContainer } from "recharts";
-import PieChartComponent from "../../../../components/components/charts/pie-chart.component";
-import BarChartComponent from "../../../../components/components/charts/bar-chart.component";
+import PieChartComponent from "../../../../components/components-mui/charts/pie-chart.component";
+import BarChartComponent from "../../../../components/components-mui/charts/bar-chart.component";
 
 interface Props {
   messages: any[];

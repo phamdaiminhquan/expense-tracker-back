@@ -1,17 +1,17 @@
-import { Routes, Route, Navigate, useParams } from 'react-router-dom'
-import { LoginRoute } from '@/routes/LoginRoute'
-import { RequireAuth } from '@/routes/RequireAuth'
-import { useAuth } from '@/hooks/useAuth'
-import { MessageRoute } from '@/routes/MessageRoute'
+import { Routes, Route, Navigate, useParams } from "react-router-dom";
+import { LoginRoute } from "@/routes/login.route";
+import { RequireAuth } from "@/routes/require-auth.route";
+import { useAuth } from "@/hooks/use-auth.hook";
+import { MessageRoute } from "@/routes/message.route";
 
 // Redirect component for legacy /funds/:fundId route
 function LegacyFundRedirect() {
-  const { fundId } = useParams()
-  return <Navigate to={`/chat/${fundId}`} replace />
+  const { fundId } = useParams();
+  return <Navigate to={`/chat/${fundId}`} replace />;
 }
 
 export function AppRouter() {
-  const { isAuthed } = useAuth()
+  const { isAuthed } = useAuth();
 
   return (
     <Routes>
@@ -55,7 +55,10 @@ export function AppRouter() {
         }
       />
 
-      <Route path="*" element={<Navigate to={isAuthed ? '/chat' : '/login'} replace />} />
+      <Route
+        path="*"
+        element={<Navigate to={isAuthed ? "/chat" : "/login"} replace />}
+      />
     </Routes>
-  )
+  );
 }

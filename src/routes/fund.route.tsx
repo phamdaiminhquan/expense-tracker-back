@@ -1,7 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { FundPage } from "@/pages/fund/fund.page";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/use-auth.hook";
 import { PAGE_TAKE_DEFAULT } from "@/common/constant/page-take.constant";
 import { useFund } from "@/app/providers/FundProvider";
 

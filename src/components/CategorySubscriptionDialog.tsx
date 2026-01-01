@@ -1,47 +1,60 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { CaretDown, CaretRight, FolderSimple, Tag } from '@phosphor-icons/react'
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  CaretDown,
+  CaretRight,
+  FolderSimple,
+  Tag,
+} from "@phosphor-icons/react";
 import {
   listAvailableCategories,
   subscribeAllCategories,
   subscribeAllChildrenOfParent,
   subscribeCategory,
   unsubscribeCategory,
-} from '@/apis/categories/category.api'
-import { dialogCateOpened } from '@/apis/funds/fund.api'
-import { AvailableCategoryDto } from '@/apis/categories/category.interface'
-import { toast } from 'sonner'
-import React from 'react'
-import { ImageElement } from './components/elements/image/image.element'
-import { ImageSizeType } from './components/elements/image/image.enum'
+} from "@/apis/categories/category.api";
+import { dialogCateOpened } from "@/apis/funds/fund.api";
+import { AvailableCategoryDto } from "@/apis/categories/category.interface";
+import { toast } from "sonner";
+import React from "react";
+import { ImageElement } from "./components-mui/elements/image/image.element";
+import { ImageSizeType } from "./components-mui/elements/image/image.enum";
 
 interface CategorySubscriptionDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  fundId: string | null
-  onSkip: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  fundId: string | null;
+  onSkip: () => void;
 }
 
-const EMPTY_CATEGORIES: AvailableCategoryDto[] = []
+const EMPTY_CATEGORIES: AvailableCategoryDto[] = [];
 
 function hasChildren(category: AvailableCategoryDto): boolean {
-  return (category.children || []).length > 0
+  return (category.children || []).length > 0;
 }
 
-function getSubscribedChildren(category: AvailableCategoryDto): AvailableCategoryDto[] {
-  return (category.children || []).filter((child) => Boolean(child.isSubscribed))
+function getSubscribedChildren(
+  category: AvailableCategoryDto
+): AvailableCategoryDto[] {
+  return (category.children || []).filter((child) =>
+    Boolean(child.isSubscribed)
+  );
 }
 
 export function CategorySubscriptionDialog({
@@ -50,200 +63,232 @@ export function CategorySubscriptionDialog({
   fundId,
   onSkip,
 }: CategorySubscriptionDialogProps) {
-  const [categories, setCategories] = useState<AvailableCategoryDto[]>(EMPTY_CATEGORIES)
-  const [expandedParents, setExpandedParents] = useState<Record<string, boolean>>({})
-  const [isLoading, setIsLoading] = useState(false)
-  const [busyIds, setBusyIds] = useState<string[]>([])
-  const [isSubscribingAll, setIsSubscribingAll] = useState(false)
+  const [categories, setCategories] =
+    useState<AvailableCategoryDto[]>(EMPTY_CATEGORIES);
+  const [expandedParents, setExpandedParents] = useState<
+    Record<string, boolean>
+  >({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [busyIds, setBusyIds] = useState<string[]>([]);
+  const [isSubscribingAll, setIsSubscribingAll] = useState(false);
 
-
-  const parentList = useMemo(() => categories || EMPTY_CATEGORIES, [categories])
+  const parentList = useMemo(
+    () => categories || EMPTY_CATEGORIES,
+    [categories]
+  );
 
   // Hàm gọi API tắt dialogCateOpened
   const handleDialogCateOpened = async () => {
-    if (!fundId) return
+    if (!fundId) return;
     try {
-      await dialogCateOpened(fundId)
+      await dialogCateOpened(fundId);
     } catch (e) {
       // Không cần xử lý lỗi, chỉ log nếu cần
-      console.error('dialogCateOpened error', e)
+      console.error("dialogCateOpened error", e);
     }
-  }
+  };
 
   useEffect(() => {
-    if (!open || !fundId) return
+    if (!open || !fundId) return;
 
-    let isActive = true
-    setIsLoading(true)
+    let isActive = true;
+    setIsLoading(true);
 
     listAvailableCategories(fundId)
       .then((data) => {
-        if (!isActive) return
-        const next = data || EMPTY_CATEGORIES
-        setCategories(next)
-        setExpandedParents(Object.fromEntries(next.map((item) => [item.id, false])))
+        if (!isActive) return;
+        const next = data || EMPTY_CATEGORIES;
+        setCategories(next);
+        setExpandedParents(
+          Object.fromEntries(next.map((item) => [item.id, false]))
+        );
       })
       .catch((error) => {
-        console.error(error)
-        if (!isActive) return
-        toast.error('Không tải được danh mục', { description: 'Vui lòng thử lại' })
+        console.error(error);
+        if (!isActive) return;
+        toast.error("Không tải được danh mục", {
+          description: "Vui lòng thử lại",
+        });
       })
       .finally(() => {
-        if (!isActive) return
-        setIsLoading(false)
-      })
+        if (!isActive) return;
+        setIsLoading(false);
+      });
 
     return () => {
-      isActive = false
-    }
-  }, [open, fundId])
+      isActive = false;
+    };
+  }, [open, fundId]);
 
-  const isBusy = (id: string) => busyIds.includes(id)
+  const isBusy = (id: string) => busyIds.includes(id);
 
   const markBusy = (ids: string[]) => {
-    setBusyIds((prev) => Array.from(new Set([...prev, ...ids])))
-  }
+    setBusyIds((prev) => Array.from(new Set([...prev, ...ids])));
+  };
 
   const unmarkBusy = (ids: string[]) => {
-    setBusyIds((prev) => prev.filter((id) => !ids.includes(id)))
-  }
+    setBusyIds((prev) => prev.filter((id) => !ids.includes(id)));
+  };
 
-  const updateChildSubscription = (parentId: string, childId: string, subscribed: boolean) => {
+  const updateChildSubscription = (
+    parentId: string,
+    childId: string,
+    subscribed: boolean
+  ) => {
     setCategories((current) =>
       current.map((parent) => {
-        if (parent.id !== parentId) return parent
+        if (parent.id !== parentId) return parent;
         const children = (parent.children || []).map((child) =>
           child.id === childId ? { ...child, isSubscribed: subscribed } : child
-        )
-        return { ...parent, children }
+        );
+        return { ...parent, children };
       })
-    )
-  }
+    );
+  };
 
-  const updateChildrenSubscription = (parentId: string, subscribed: boolean) => {
+  const updateChildrenSubscription = (
+    parentId: string,
+    subscribed: boolean
+  ) => {
     setCategories((current) =>
       current.map((parent) => {
-        if (parent.id !== parentId) return parent
-        const children = (parent.children || []).map((child) => ({ ...child, isSubscribed: subscribed }))
-        return { ...parent, children }
+        if (parent.id !== parentId) return parent;
+        const children = (parent.children || []).map((child) => ({
+          ...child,
+          isSubscribed: subscribed,
+        }));
+        return { ...parent, children };
       })
-    )
-  }
+    );
+  };
 
   const handleSubscribeChild = async (parentId: string, childId: string) => {
-    if (!fundId) return
-    markBusy([childId])
-    updateChildSubscription(parentId, childId, true)
+    if (!fundId) return;
+    markBusy([childId]);
+    updateChildSubscription(parentId, childId, true);
     try {
-      await subscribeCategory(fundId, childId)
-      toast.success('Đã đăng ký danh mục')
+      await subscribeCategory(fundId, childId);
+      toast.success("Đã đăng ký danh mục");
     } catch (error) {
-      console.error(error)
-      updateChildSubscription(parentId, childId, false)
-      toast.error('Đăng ký thất bại', { description: 'Vui lòng thử lại' })
+      console.error(error);
+      updateChildSubscription(parentId, childId, false);
+      toast.error("Đăng ký thất bại", { description: "Vui lòng thử lại" });
     } finally {
-      unmarkBusy([childId])
+      unmarkBusy([childId]);
     }
-  }
+  };
 
   const handleUnsubscribeChild = async (parentId: string, childId: string) => {
-    if (!fundId) return
-    markBusy([childId])
-    updateChildSubscription(parentId, childId, false)
+    if (!fundId) return;
+    markBusy([childId]);
+    updateChildSubscription(parentId, childId, false);
     try {
-      await unsubscribeCategory(fundId, childId)
-      toast.success('Đã hủy đăng ký')
+      await unsubscribeCategory(fundId, childId);
+      toast.success("Đã hủy đăng ký");
     } catch (error) {
-      console.error(error)
-      updateChildSubscription(parentId, childId, true)
-      toast.error('Hủy đăng ký thất bại', { description: 'Vui lòng thử lại' })
+      console.error(error);
+      updateChildSubscription(parentId, childId, true);
+      toast.error("Hủy đăng ký thất bại", { description: "Vui lòng thử lại" });
     } finally {
-      unmarkBusy([childId])
+      unmarkBusy([childId]);
     }
-  }
+  };
 
   const handleSubscribeAllCategories = async () => {
-    if (!fundId) return
-    const previous = categories
-    setIsSubscribingAll(true)
+    if (!fundId) return;
+    const previous = categories;
+    setIsSubscribingAll(true);
     setCategories((current) =>
       current.map((parent) => ({
         ...parent,
-        children: (parent.children || []).map((child) => ({ ...child, isSubscribed: true })),
+        children: (parent.children || []).map((child) => ({
+          ...child,
+          isSubscribed: true,
+        })),
       }))
-    )
+    );
 
     try {
-      await subscribeAllCategories(fundId)
-      toast.success('Đã đăng ký toàn bộ danh mục')
+      await subscribeAllCategories(fundId);
+      toast.success("Đã đăng ký toàn bộ danh mục");
     } catch (error) {
-      console.error(error)
-      setCategories(previous)
-      toast.error('Đăng ký toàn bộ thất bại', { description: 'Vui lòng thử lại' })
+      console.error(error);
+      setCategories(previous);
+      toast.error("Đăng ký toàn bộ thất bại", {
+        description: "Vui lòng thử lại",
+      });
     } finally {
-      setIsSubscribingAll(false)
+      setIsSubscribingAll(false);
     }
-  }
+  };
 
   const handleSubscribeParent = async (parent: AvailableCategoryDto) => {
-    if (!fundId) return
+    if (!fundId) return;
     if (!hasChildren(parent)) {
-      toast.error('Danh mục này chưa có danh mục con')
-      return
+      toast.error("Danh mục này chưa có danh mục con");
+      return;
     }
 
-    markBusy([parent.id])
+    markBusy([parent.id]);
     try {
-      await subscribeAllChildrenOfParent(fundId, parent.id)
-      updateChildrenSubscription(parent.id, true)
-      toast.success('Đã đăng ký danh mục con')
+      await subscribeAllChildrenOfParent(fundId, parent.id);
+      updateChildrenSubscription(parent.id, true);
+      toast.success("Đã đăng ký danh mục con");
     } catch (error) {
-      console.error(error)
-      toast.error('Đăng ký thất bại', { description: 'Vui lòng thử lại' })
+      console.error(error);
+      toast.error("Đăng ký thất bại", { description: "Vui lòng thử lại" });
     } finally {
-      unmarkBusy([parent.id])
+      unmarkBusy([parent.id]);
     }
-  }
+  };
 
   const handleUnsubscribeParent = async (parent: AvailableCategoryDto) => {
-    if (!fundId) return
-    const subscribedChildren = getSubscribedChildren(parent)
-    if (subscribedChildren.length === 0) return
+    if (!fundId) return;
+    const subscribedChildren = getSubscribedChildren(parent);
+    if (subscribedChildren.length === 0) return;
 
-    const childIds = subscribedChildren.map((child) => child.id)
-    markBusy([parent.id, ...childIds])
+    const childIds = subscribedChildren.map((child) => child.id);
+    markBusy([parent.id, ...childIds]);
 
     try {
-      await Promise.all(childIds.map((childId) => unsubscribeCategory(fundId, childId)))
-      updateChildrenSubscription(parent.id, false)
-      toast.success('Đã hủy đăng ký danh mục')
+      await Promise.all(
+        childIds.map((childId) => unsubscribeCategory(fundId, childId))
+      );
+      updateChildrenSubscription(parent.id, false);
+      toast.success("Đã hủy đăng ký danh mục");
     } catch (error) {
-      console.error(error)
-      toast.error('Hủy đăng ký thất bại', { description: 'Vui lòng thử lại' })
+      console.error(error);
+      toast.error("Hủy đăng ký thất bại", { description: "Vui lòng thử lại" });
     } finally {
-      unmarkBusy([parent.id, ...childIds])
+      unmarkBusy([parent.id, ...childIds]);
     }
-  }
+  };
 
   const renderParentBadge = (parent: AvailableCategoryDto) => {
-    if (!hasChildren(parent)) return null
-    const subscribedCount = getSubscribedChildren(parent).length
-    const total = parent.children?.length || 0
-    if (subscribedCount === 0) return null
+    if (!hasChildren(parent)) return null;
+    const subscribedCount = getSubscribedChildren(parent).length;
+    const total = parent.children?.length || 0;
+    if (subscribedCount === 0) return null;
 
     if (subscribedCount === total) {
-      return <Badge className="bg-emerald-500/15 text-emerald-700">Đã đăng ký</Badge>
+      return (
+        <Badge className="bg-emerald-500/15 text-emerald-700">Đã đăng ký</Badge>
+      );
     }
 
-    return <Badge variant="secondary">{subscribedCount}/{total} đã đăng ký</Badge>
-  }
+    return (
+      <Badge variant="secondary">
+        {subscribedCount}/{total} đã đăng ký
+      </Badge>
+    );
+  };
 
   const renderParentAction = (parent: AvailableCategoryDto) => {
-    const total = parent.children?.length || 0
-    const subscribedCount = getSubscribedChildren(parent).length
-    const allSubscribed = total > 0 && subscribedCount === total
+    const total = parent.children?.length || 0;
+    const subscribedCount = getSubscribedChildren(parent).length;
+    const allSubscribed = total > 0 && subscribedCount === total;
 
-    if (total === 0) return null
+    if (total === 0) return null;
 
     if (allSubscribed) {
       return (
@@ -256,7 +301,7 @@ export function CategorySubscriptionDialog({
         >
           Hủy đăng ký
         </Button>
-      )
+      );
     }
 
     return (
@@ -268,14 +313,16 @@ export function CategorySubscriptionDialog({
       >
         Đăng ký tất cả
       </Button>
-    )
-  }
+    );
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[85vh] max-h-[85vh] flex flex-col overflow-hidden">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Đăng ký danh mục</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">
+            Đăng ký danh mục
+          </DialogTitle>
           <DialogDescription>
             Đăng ký danh mục và FinCap sẽ phân loại chi tiêu giúp bạn.
           </DialogDescription>
@@ -293,7 +340,10 @@ export function CategorySubscriptionDialog({
         </div>
 
         <div className="flex-1 overflow-hidden min-h-0 flex flex-col gap-4">
-          <ScrollArea className="flex-1 min-h-0 h-full overflow-x-hidden" style={{ scrollbarGutter: 'stable' }}>
+          <ScrollArea
+            className="flex-1 min-h-0 h-full overflow-x-hidden"
+            style={{ scrollbarGutter: "stable" }}
+          >
             <div className="space-y-4 pr-2 sm:pr-4 w-full max-w-full">
               {isLoading ? (
                 <div className="space-y-3">
@@ -314,7 +364,9 @@ export function CategorySubscriptionDialog({
                 </div>
               ) : parentList.length === 0 ? (
                 <Card className="p-12 text-center border-dashed border-2 bg-muted/20">
-                  <p className="text-muted-foreground text-sm">Chưa có danh mục nào</p>
+                  <p className="text-muted-foreground text-sm">
+                    Chưa có danh mục nào
+                  </p>
                 </Card>
               ) : (
                 parentList.map((parent) => (
@@ -322,7 +374,10 @@ export function CategorySubscriptionDialog({
                     key={parent.id}
                     open={expandedParents[parent.id]}
                     onOpenChange={(nextOpen) =>
-                      setExpandedParents((current) => ({ ...current, [parent.id]: nextOpen }))
+                      setExpandedParents((current) => ({
+                        ...current,
+                        [parent.id]: nextOpen,
+                      }))
                     }
                   >
                     <Card className="p-3 border-border/50 shadow-sm">
@@ -340,12 +395,15 @@ export function CategorySubscriptionDialog({
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <p className="font-semibold text-base wrap-break-word sm:truncate">{parent.name}</p>
+                              <p className="font-semibold text-base wrap-break-word sm:truncate">
+                                {parent.name}
+                              </p>
                               {renderParentBadge(parent)}
                             </div>
                             {hasChildren(parent) && (
                               <p className="text-xs text-muted-foreground mt-2">
-                                {getSubscribedChildren(parent).length}/{parent.children?.length || 0} danh mục con
+                                {getSubscribedChildren(parent).length}/
+                                {parent.children?.length || 0} danh mục con
                               </p>
                             )}
                           </div>
@@ -379,7 +437,7 @@ export function CategorySubscriptionDialog({
                         <CollapsibleContent className="w-full">
                           <div className="space-y-2 border-border/50 pl-3">
                             {(parent.children || []).map((child) => {
-                              const isSubscribed = Boolean(child.isSubscribed)
+                              const isSubscribed = Boolean(child.isSubscribed);
 
                               return (
                                 <div
@@ -391,7 +449,9 @@ export function CategorySubscriptionDialog({
                                       <Tag size={16} weight="duotone" />
                                     </div>
                                     <div className="min-w-0">
-                                      <p className="font-semibold text-sm wrap-break-word sm:truncate">{child.name}</p>
+                                      <p className="font-semibold text-sm wrap-break-word sm:truncate">
+                                        {child.name}
+                                      </p>
                                       {/* {child.description && (
                                         <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                                           {child.description}
@@ -404,22 +464,34 @@ export function CategorySubscriptionDialog({
                                       size="sm"
                                       className={
                                         isSubscribed
-                                          ? 'w-full sm:min-w-[120px] sm:w-auto border-muted-foreground/40 text-muted-foreground hover:text-foreground hover:border-muted-foreground/70'
-                                          : 'w-full sm:min-w-[120px] sm:w-auto'
+                                          ? "w-full sm:min-w-[120px] sm:w-auto border-muted-foreground/40 text-muted-foreground hover:text-foreground hover:border-muted-foreground/70"
+                                          : "w-full sm:min-w-[120px] sm:w-auto"
                                       }
-                                      variant={isSubscribed ? 'outline' : 'default'}
+                                      variant={
+                                        isSubscribed ? "outline" : "default"
+                                      }
                                       onClick={() =>
                                         isSubscribed
-                                          ? handleUnsubscribeChild(parent.id, child.id)
-                                          : handleSubscribeChild(parent.id, child.id)
+                                          ? handleUnsubscribeChild(
+                                              parent.id,
+                                              child.id
+                                            )
+                                          : handleSubscribeChild(
+                                              parent.id,
+                                              child.id
+                                            )
                                       }
-                                      disabled={isLoading || isSubscribingAll || isBusy(child.id)}
+                                      disabled={
+                                        isLoading ||
+                                        isSubscribingAll ||
+                                        isBusy(child.id)
+                                      }
                                     >
-                                      {isSubscribed ? 'Hủy đăng ký' : 'Đăng ký'}
+                                      {isSubscribed ? "Hủy đăng ký" : "Đăng ký"}
                                     </Button>
                                   </div>
                                 </div>
-                              )
+                              );
                             })}
                           </div>
                         </CollapsibleContent>
@@ -435,8 +507,8 @@ export function CategorySubscriptionDialog({
             <Button
               variant="outline"
               onClick={() => {
-                handleDialogCateOpened()
-                onSkip()
+                handleDialogCateOpened();
+                onSkip();
               }}
               className="sm:w-1/2"
             >
@@ -444,8 +516,8 @@ export function CategorySubscriptionDialog({
             </Button>
             <Button
               onClick={() => {
-                handleDialogCateOpened()
-                onOpenChange(false)
+                handleDialogCateOpened();
+                onOpenChange(false);
               }}
               className="sm:w-1/2"
             >
@@ -455,5 +527,5 @@ export function CategorySubscriptionDialog({
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

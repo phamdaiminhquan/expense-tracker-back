@@ -1,39 +1,39 @@
 // AppLoader: Hiển thị loading screen cho đến khi app thực sự ready
-import React, { useState, useEffect, Suspense } from 'react'
-import LoadingScreenZen from '@/components/LoadingScreenZen'
-import { AppReadyProvider, useAppReady } from '@/contexts/AppReadyContext'
+import React, { useState, useEffect, Suspense } from "react";
+import LoadingScreenZen from "@/components/LoadingScreenZen";
+import { AppReadyProvider, useAppReady } from "@/contexts/app-ready.context";
 
-const App = React.lazy(() => import('./App'))
+const App = React.lazy(() => import("./App"));
 
 // Component nội bộ để lắng nghe ready state
 function AppLoaderInner() {
-  const { isAppReady } = useAppReady()
-  const [minTimeElapsed, setMinTimeElapsed] = useState(false)
-  const [maxTimeElapsed, setMaxTimeElapsed] = useState(false)
+  const { isAppReady } = useAppReady();
+  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
+  const [maxTimeElapsed, setMaxTimeElapsed] = useState(false);
 
   useEffect(() => {
     // Đảm bảo loading hiển thị tối thiểu 800ms (smooth UX)
-    const minTimer = setTimeout(() => setMinTimeElapsed(true), 800)
+    const minTimer = setTimeout(() => setMinTimeElapsed(true), 800);
     // Timeout fallback 5s - tránh loading mãi mãi nếu có lỗi
-    const maxTimer = setTimeout(() => setMaxTimeElapsed(true), 5000)
-    
+    const maxTimer = setTimeout(() => setMaxTimeElapsed(true), 5000);
+
     return () => {
-      clearTimeout(minTimer)
-      clearTimeout(maxTimer)
-    }
-  }, [])
+      clearTimeout(minTimer);
+      clearTimeout(maxTimer);
+    };
+  }, []);
 
   // Hiển thị loading nếu:
   // - Chưa đủ thời gian tối thiểu HOẶC
   // - App chưa ready (và chưa timeout)
-  const showLoading = !minTimeElapsed || (!isAppReady && !maxTimeElapsed)
+  const showLoading = !minTimeElapsed || (!isAppReady && !maxTimeElapsed);
 
   return (
     <div className="h-full w-full overflow-hidden relative">
       {/* Loading screen với fade out transition */}
       <div
         className={`fixed inset-0 z-[9999] transition-opacity duration-500 ${
-          showLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          showLoading ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       >
         <LoadingScreenZen isLoading={true} />
@@ -44,7 +44,7 @@ function AppLoaderInner() {
         <App />
       </Suspense>
     </div>
-  )
+  );
 }
 
 export default function AppLoader() {
@@ -52,5 +52,5 @@ export default function AppLoader() {
     <AppReadyProvider>
       <AppLoaderInner />
     </AppReadyProvider>
-  )
+  );
 }

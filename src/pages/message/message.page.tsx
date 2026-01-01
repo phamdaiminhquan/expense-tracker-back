@@ -11,7 +11,7 @@ import { FundUpdatePart } from "../fund/parts/fund-update/fund-update.part";
 import { Fund } from "@/apis/funds/fund.entities";
 import ChartContent from "../statistic/parts/statistic-chart/statistic-chart.part";
 import { StatisticPage } from "../statistic/statistic.page";
-import { useFundMembers } from "@/hooks/useFundMembers";
+import { useFundMembers } from "@/hooks/use-fund-members.hook";
 
 import { FundMemberListDialog } from "@/components/MemberListDialog";
 
