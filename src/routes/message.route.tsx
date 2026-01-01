@@ -186,11 +186,11 @@ export function MessageRoute() {
       onResendMessage={handleResendMessage}
       onUpdateMessage={handleUpdateMessage}
       onDeleteMessage={handleDeleteMessage}
-      onCreateCategory={(name, description) =>
-        createCategory(selectedFund?.id || null, name, description)
-      }
-      onUpdateCategory={updateCategory}
-      onDeleteCategory={deleteCategory}
+      // onCreateCategory={(name, description) =>
+      //   createCategory(selectedFund?.id || null, name, description)
+      // }
+      // onUpdateCategory={updateCategory}
+      // onDeleteCategory={deleteCategory}
       isProcessing={isProcessingMessage || isFundProcessing}
       isLoading={isLoadingMessages || isLoadingFund}
       isLoadingFunds={isLoadingFunds}

@@ -77,7 +77,7 @@ export function FundUpdatePart({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg backdrop-blur-xl bg-card/95 border-border/40 shadow-2xl">
         <DialogHeader className="space-y-2">
-          <DialogTitle className="text-3xl font-extrabold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <DialogTitle className="text-3xl font-extrabold bg-linear-to-r from-primary to-accent bg-clip-text text-transparent">
             Cập nhật quỹ
           </DialogTitle>
           <DialogDescription className="text-base text-muted-foreground font-medium">
@@ -111,7 +111,7 @@ export function FundUpdatePart({
                   htmlFor="personal"
                   className="flex-1 cursor-pointer flex items-center gap-4"
                 >
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-secondary/25 to-secondary/15 group-hover:from-secondary/35 group-hover:to-secondary/20 transition-all shadow-lg">
+                  <div className="p-3 rounded-xl bg-linear-to-br from-secondary/25 to-secondary/15 group-hover:from-secondary/35 group-hover:to-secondary/20 transition-all shadow-lg">
                     <UserIcon
                       weight="bold"
                       className="text-secondary"
@@ -132,7 +132,7 @@ export function FundUpdatePart({
                   htmlFor="shared"
                   className="flex-1 cursor-pointer flex items-center gap-4"
                 >
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-primary/25 to-primary/15 group-hover:from-primary/35 group-hover:to-primary/20 transition-all shadow-lg">
+                  <div className="p-3 rounded-xl bg-linear-to-br from-primary/25 to-primary/15 group-hover:from-primary/35 group-hover:to-primary/20 transition-all shadow-lg">
                     <Users weight="bold" className="text-primary" size={24} />
                   </div>
                   <div>
@@ -195,7 +195,7 @@ export function FundUpdatePart({
             <Button
               type="submit"
               disabled={!name.trim()}
-              className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold"
+              className="bg-linear-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold"
             >
               Cập nhật quỹ
             </Button>

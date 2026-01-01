@@ -15,7 +15,6 @@ import { Fund } from "@/apis/funds/fund.entities";
 
 interface FundListScreenProps {
   funds: Fund[];
-  currentUserId: string;
   currentUserName: string;
   onSelectFund: (fundId: string) => void;
   onCreateFund: () => void;
@@ -26,7 +25,6 @@ interface FundListScreenProps {
 
 export function FundListPart({
   funds,
-  currentUserId,
   currentUserName,
   onSelectFund,
   onCreateFund,
@@ -48,7 +46,7 @@ export function FundListPart({
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Premium Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-primary/[0.015] to-accent/[0.015]" />
+      <div className="absolute inset-0 bg-linear-to-br from-background via-primary/1.5 to-accent/1.5" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(120,119,198,0.08),transparent_50%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_70%,rgba(255,200,100,0.08),transparent_50%)]" />
 
@@ -56,8 +54,8 @@ export function FundListPart({
         <header className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-700">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
-              <Avatar className="h-14 w-14 bg-gradient-to-br from-primary/30 to-primary/15 ring-2 ring-primary/20 shadow-lg">
-                <AvatarFallback className="bg-gradient-to-br from-primary/30 to-primary/15 text-primary font-bold text-xl">
+              <Avatar className="h-14 w-14 bg-linear-to-br from-primary/30 to-primary/15 ring-2 ring-primary/20 shadow-lg">
+                <AvatarFallback className="bg-linear-to-br from-primary/30 to-primary/15 text-primary font-bold text-xl">
                   {getInitials(currentUserName)}
                 </AvatarFallback>
               </Avatar>
@@ -81,7 +79,7 @@ export function FundListPart({
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-6xl font-extrabold leading-tight bg-gradient-to-r from-primary via-primary/95 via-accent to-primary bg-clip-text text-transparent tracking-tight">
+            <h1 className="text-6xl font-extrabold leading-tight bg-linear-to-r from-primary via-primary/95 to-primary bg-clip-text text-transparent tracking-tight">
               FinCap
             </h1>
             <p className="text-sm text-muted-foreground font-medium">
@@ -103,7 +101,7 @@ export function FundListPart({
             <Button
               onClick={handleCreateFund}
               size="icon"
-              className="shrink-0 h-12 w-12 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl"
+              className="shrink-0 h-12 w-12 bg-linear-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl"
             >
               <Plus size={22} weight="bold" />
             </Button>
@@ -167,7 +165,7 @@ export function FundListPart({
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-5 flex-1">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/25 to-primary/15 flex items-center justify-center shrink-0 shadow-lg ring-2 ring-primary/15 group-hover:scale-110 group-hover:ring-primary/30 transition-all duration-300">
+                      <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-primary/25 to-primary/15 flex items-center justify-center shrink-0 shadow-lg ring-2 ring-primary/15 group-hover:scale-110 group-hover:ring-primary/30 transition-all duration-300">
                         {fund.type === "shared" ? (
                           <Users
                             size={28}

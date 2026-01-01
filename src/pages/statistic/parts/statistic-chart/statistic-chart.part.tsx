@@ -128,7 +128,7 @@ const StatisticChartPart: React.FC<Props> = ({
       </div>
 
       {/* Chart Area */}
-      <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 mb-6 relative">
+      <div className="bg-white p-6 rounded-4xl shadow-sm border border-gray-100 mb-6 relative">
         {/* Toggle Chart Type */}
         <div className="absolute top-4 right-4 bg-gray-50 p-1 rounded-lg flex gap-1 z-10">
           <button

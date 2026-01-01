@@ -41,13 +41,6 @@ interface MessagePageProps {
   onResendMessage: (message: Message) => Promise<void>;
   onUpdateMessage: (message: Message) => Promise<void>;
   onDeleteMessage: (id: string) => Promise<void>;
-  onCreateCategory: (name: string, description: string) => void;
-  onUpdateCategory: (
-    categoryId: string,
-    name: string,
-    description: string
-  ) => void;
-  onDeleteCategory: (categoryId: string) => void;
   isProcessing?: boolean;
   isLoading?: boolean;
   isLoadingFunds?: boolean;
@@ -75,9 +68,6 @@ export function MessagePage({
   onResendMessage,
   onUpdateMessage,
   onDeleteMessage,
-  onCreateCategory,
-  onUpdateCategory,
-  onDeleteCategory,
   isProcessing = false,
   isLoading = false,
   isLoadingFunds = false,
@@ -173,13 +163,13 @@ export function MessagePage({
     ? categories.filter((c) => c.fundId === fund.id)
     : [];
   const fundMessages = fund ? messages.filter((m) => m.fundId === fund.id) : [];
-  useEffect(() => {
-    if (!fund?.id) return;
-    if (fund.isOpenDialogCate) {
-      setIsAutoCategorySubscription(true);
-      setIsCategorySubscriptionOpen(true);
-    }
-  }, [fund?.id, fund?.isOpenDialogCate]);
+  // useEffect(() => {
+  //   if (!fund?.id) return;
+  //   if (fund.isOpenDialogCate) {
+  //     setIsAutoCategorySubscription(true);
+  //     setIsCategorySubscriptionOpen(true);
+  //   }
+  // }, [fund?.id, fund?.isOpenDialogCate]);
 
   // Hàm mở dialog member khi chọn icon xem thành viên
   const handleViewFundMembers = (fundId: string) => {
@@ -210,7 +200,7 @@ export function MessagePage({
     <React.Fragment>
       {/* Container: p-0 trên mobile, p-3 trên desktop */}
       <div
-        className={`flex h-[100dvh] lg:h-screen overflow-hidden bg-[#F0F2F5] lg:p-3 lg:gap-3 p-0 gap-0 ${
+        className={`flex h-dvh lg:h-screen overflow-hidden bg-[#F0F2F5] lg:p-3 lg:gap-3 p-0 gap-0 ${
           showLoadingScreen
             ? "opacity-0"
             : "opacity-100 transition-opacity duration-500"
@@ -271,21 +261,21 @@ export function MessagePage({
             currentUserName={currentUserName}
             onOpenDrawer={() => setIsDrawerOpen(true)}
             onShowStatistics={() => setIsStatisticsDialogOpen(true)}
-            onManageCategories={() => setIsCategoryDialogOpen(true)}
-            onShowCategorySubscription={() => {
-              setIsAutoCategorySubscription(false);
-              setIsCategorySubscriptionOpen(true);
-            }}
             onAddMessage={onAddMessage}
             onResendMessage={onResendMessage}
             onUpdateMessage={onUpdateMessage}
             onDeleteMessage={onDeleteMessage}
-            resolveUserName={resolveUserName}
             isProcessing={isProcessing}
             isLoading={isLoading}
-            isLoadingFunds={isLoadingFunds}
-            onSelectFund={onSelectFund}
-            funds={funds}
+            // onManageCategories={() => setIsCategoryDialogOpen(true)}
+            // onShowCategorySubscription={() => {
+            //   setIsAutoCategorySubscription(false);
+            //   setIsCategorySubscriptionOpen(true);
+            // }}
+            // resolveUserName={resolveUserName}
+            // isLoadingFunds={isLoadingFunds}
+            // onSelectFund={onSelectFund}
+            // funds={funds}
           />
         </main>
 

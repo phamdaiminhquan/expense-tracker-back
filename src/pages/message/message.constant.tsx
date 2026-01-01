@@ -153,3 +153,5 @@ export const WALLET_TEMPLATES = [
     icon: "custom",
   },
 ];
+
+export const ITEMS_PER_PAGE = 10;

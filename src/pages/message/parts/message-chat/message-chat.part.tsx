@@ -7,7 +7,11 @@ import { EditPendingPromptDialog } from "../../../../components/EditPendingPromp
 import { EditMessageDialog } from "../../../../components/EditMessageDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Fund } from "@/apis/funds/fund.entities";
-import { CATEGORIES_UI, OptimisticMessageStatus } from "../../message.constant";
+import {
+  CATEGORIES_UI,
+  ITEMS_PER_PAGE,
+  OptimisticMessageStatus,
+} from "../../message.constant";
 import MessageHeaderPart from "../message-header/message-header.part";
 import MessageBubblePart from "../message-bubble/message-bubble.part";
 import WalletSelectorModal from "../../wallet/WalletSelectorModal";
@@ -16,28 +20,20 @@ import { getListWallets } from "@/apis/wallets/wallet.api";
 
 interface ChatMessageViewProps {
   fund: Fund | null;
-  funds: Fund[];
   messages: Message[];
   categories: Category[];
   currentUserId: string;
   currentUserName: string;
-  resolveUserName: (userId: string) => string;
   onOpenDrawer: () => void;
   onShowStatistics: () => void;
-  onManageCategories: () => void;
-  onShowCategorySubscription: () => void;
   onAddMessage: (message: Omit<Message, "id" | "timestamp">) => Promise<void>;
-
   onResendMessage: (message: Message) => Promise<void>;
   onUpdateMessage: (message: Message) => Promise<void>;
   onDeleteMessage: (id: string) => Promise<void>;
-  onSelectFund: (fundId: string) => void;
   isProcessing?: boolean;
   isLoading?: boolean;
-  isLoadingFunds?: boolean;
 }
 
-const ITEMS_PER_PAGE = 10;
 interface OptimisticMessage {
   id: string;
   text: string;
@@ -48,26 +44,20 @@ interface OptimisticMessage {
 
 export function MessageChatPart({
   fund,
-  funds,
   messages,
   categories,
   currentUserId,
   currentUserName,
-  resolveUserName,
   onOpenDrawer,
   onShowStatistics,
-  onManageCategories,
-  onShowCategorySubscription,
   onAddMessage,
-
   onResendMessage,
   onUpdateMessage,
   onDeleteMessage,
-  onSelectFund,
   isProcessing = false,
   isLoading = false,
-  isLoadingFunds = false,
 }: ChatMessageViewProps) {
+  // state
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [editingPendingPrompt, setEditingPendingPrompt] =
     useState<Message | null>(null);
@@ -79,14 +69,11 @@ export function MessageChatPart({
   const [showWalletSelector, setShowWalletSelector] = useState(false);
   const [showCategorySelector, setShowCategorySelector] = useState(false);
   const [selectedWalletId, setSelectedWalletId] = useState("momo");
-
-  // ==========================================
-  // OPTIMISTIC UI STATE - Hiện tin nhắn ngay lập tức
-  // ==========================================
   const [optimisticMessages, setOptimisticMessages] = useState<
     OptimisticMessage[]
   >([]);
-  // Always fetch wallets so selectedWallet can default to first item on mount
+
+  // function
   const { data, mutate } = useSWR(
     "wallets",
     async () => await getListWallets({ page: 1, take: 10 }),
@@ -124,9 +111,7 @@ export function MessageChatPart({
     return { totalExpense: expense, totalIncome: income };
   }, [messages]);
 
-  // ==========================================
   // OPTIMISTIC UI: Xóa optimistic message khi có message thật từ server
-  // ==========================================
   useEffect(() => {
     if (messages.length === 0) return;
 
@@ -144,9 +129,7 @@ export function MessageChatPart({
     });
   }, [messages]);
 
-  // ==========================================
   // OPTIMISTIC SEND HANDLER - Core Logic
-  // ==========================================
   const handleOptimisticSend = async (retryMessage?: OptimisticMessage) => {
     const textToSend = retryMessage?.text || input.trim();
     if (!textToSend || !fund) return;
@@ -168,12 +151,10 @@ export function MessageChatPart({
         prev.map((m) => (m.id === retryMessage.id ? optimisticMsg : m))
       );
     } else {
-      // Nếu là tin mới, thêm vào list
       setOptimisticMessages((prev) => [...prev, optimisticMsg]);
-      setInput(""); // Clear input ngay lập tức
+      setInput("");
     }
 
-    // 2. BACKGROUND API CALL
     try {
       await onAddMessage({
         createdById: currentUserId,
@@ -186,11 +167,7 @@ export function MessageChatPart({
         originalPrompt: textToSend,
         createdAt: optimisticMsg.createdAt,
       });
-
-      // 3. SUCCESS: Xóa optimistic message (server sẽ trả về message thật)
-      // useEffect ở trên sẽ tự động xóa khi nhận được message từ server
     } catch (error) {
-      // 4. NETWORK ERROR: Update status để hiện nút "Thử lại"
       setOptimisticMessages((prev) =>
         prev.map((m) =>
           m.id === tempId
@@ -239,7 +216,7 @@ export function MessageChatPart({
 
   return (
     <div
-      className={`flex flex-col h-[100dvh] lg:h-full bg-white font-sans overflow-hidden relative`}
+      className={`flex flex-col h-dvh lg:h-full bg-white font-sans overflow-hidden relative`}
     >
       {/* 2. HEADER - Fixed at top */}
       <MessageHeaderPart
@@ -273,7 +250,7 @@ export function MessageChatPart({
           </div>
         ) : !fund ? (
           <div className="text-center py-24">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-[32px] bg-gray-50 mb-6 shadow-inner">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-4xl bg-gray-50 mb-6 shadow-inner">
               <Search size={40} className="text-gray-300" />
             </div>
             <p className="text-base font-bold text-gray-800 mb-2">

@@ -61,7 +61,6 @@ export function FundPage({
     <React.Fragment>
       <FundListPart
         funds={visibleFunds}
-        currentUserId={currentUserId}
         currentUserName={currentUserName}
         onSelectFund={handleSelectFund}
         onCreateFund={() => setIsCreateFundDialogOpen(true)}
