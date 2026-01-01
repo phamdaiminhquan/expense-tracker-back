@@ -1,14 +1,17 @@
-import { useState, useCallback } from 'react';
-import useSWR from 'swr';
+import { useState, useCallback } from "react";
+import useSWR from "swr";
 import {
   getListMessages,
   createMessage as apiCreateMessage,
   getMessage,
   updateMessage as apiUpdateMessage,
   deleteMessage as apiDeleteMessage,
-} from '@/apis/messages/message.api';
-import {  CreateMessageDto, UpdateMessageDto } from '@/apis/messages/message.interface';
-import { toast } from 'sonner';
+} from "@/apis/messages/message.api";
+import {
+  CreateMessageDto,
+  UpdateMessageDto,
+} from "@/apis/messages/message.interface";
+import { toast } from "sonner";
 
 export const useMessage = (fundId: string, messageId?: string) => {
   const [loading, setLoading] = useState(false);
@@ -18,7 +21,7 @@ export const useMessage = (fundId: string, messageId?: string) => {
     isLoading: isLoadingList,
     mutate: mutateList,
   } = useSWR(
-    fundId ? 'messages' + JSON.stringify(fundId) : null,
+    fundId ? "messages" + JSON.stringify(fundId) : null,
     async () => await getListMessages(fundId),
     {
       keepPreviousData: true,
@@ -29,9 +32,13 @@ export const useMessage = (fundId: string, messageId?: string) => {
     data: message,
     isLoading: isLoadingMessage,
     mutate: mutateMessage,
-  } = useSWR(messageId ? `messages/${messageId}` : null, async () => await getMessage(messageId!), {
-    revalidateOnFocus: false,
-  });
+  } = useSWR(
+    messageId ? `messages/${messageId}` : null,
+    async () => await getMessage(messageId!),
+    {
+      revalidateOnFocus: false,
+    }
+  );
 
   // Create message
   const createMessage = useCallback(
@@ -39,12 +46,16 @@ export const useMessage = (fundId: string, messageId?: string) => {
       setLoading(true);
       try {
         const newMessage = await apiCreateMessage(fundId, values);
-        toast.success(newMessage.status === 'pending' ? 'Đã lưu ghi chú, sẽ xử lý sau' : 'Đã thêm giao dịch!');
+        toast.success(
+          newMessage.status === "pending"
+            ? "Đã lưu ghi chú, sẽ xử lý sau"
+            : "Đã thêm giao dịch!"
+        );
         mutateList();
         return newMessage;
       } catch (error: any) {
-        toast.error('Có lỗi xảy ra', {
-          description: error?.message || 'Vui lòng thử lại',
+        toast.error("Có lỗi xảy ra", {
+          description: error?.message || "Vui lòng thử lại",
         });
         throw error;
       } finally {
@@ -60,13 +71,13 @@ export const useMessage = (fundId: string, messageId?: string) => {
       setLoading(true);
       try {
         const updatedMessage = await apiUpdateMessage(id, values);
-        toast.success('Cập nhật giao dịch thành công!');
+        toast.success("Cập nhật giao dịch thành công!");
         mutateList();
         mutateMessage();
         return updatedMessage;
-      } catch (error: any) {
-        toast.error('Cập nhật giao dịch thất bại', {
-          description: error?.message || 'Vui lòng thử lại',
+      } catch (error) {
+        toast.error("Cập nhật giao dịch thất bại", {
+          description: error?.message || "Vui lòng thử lại",
         });
         throw error;
       } finally {
@@ -82,12 +93,12 @@ export const useMessage = (fundId: string, messageId?: string) => {
       setLoading(true);
       try {
         await apiDeleteMessage(id);
-        toast.success('Xóa giao dịch thành công!');
+        toast.success("Xóa giao dịch thành công!");
         mutateList();
         return true;
       } catch (error: any) {
-        toast.error('Xóa giao dịch thất bại', {
-          description: error?.message || 'Vui lòng thử lại',
+        toast.error("Xóa giao dịch thất bại", {
+          description: error?.message || "Vui lòng thử lại",
         });
         return false;
       } finally {
@@ -98,7 +109,7 @@ export const useMessage = (fundId: string, messageId?: string) => {
   );
 
   return {
-    messageList, 
+    messageList,
     message,
 
     isLoadingList,

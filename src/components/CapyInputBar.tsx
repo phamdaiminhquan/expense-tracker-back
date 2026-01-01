@@ -12,6 +12,9 @@ import {
   Gift,
   TrendingUp,
   Briefcase,
+  Wallet as WalletIcon,
+  CreditCard,
+  Banknote,
 } from "lucide-react";
 
 const CATEGORIES_UI = {
@@ -178,16 +181,23 @@ export default function CapyInputBar({
             className="flex items-center gap-2 px-2 py-1 lg:px-3 lg:py-1.5 rounded-2xl transition-colors hover:bg-gray-50 border border-transparent hover:border-gray-100 group"
           >
             <div
-              className={`w-5 h-5 lg:w-6 lg:h-6 rounded-full flex items-center justify-center ${selectedWallet.color}`}
+              className={`w-5 h-5 lg:w-6 lg:h-6 rounded-full flex items-center justify-center`}
+              style={{ backgroundColor: selectedWallet?.color || "#10B981" }}
             >
-              {selectedWallet.icon}
+              {selectedWallet?.icon === "wallet" ? (
+                <WalletIcon size={14} />
+              ) : selectedWallet?.icon === "card" ? (
+                <CreditCard size={14} />
+              ) : (
+                <Banknote size={14} />
+              )}
             </div>
             <div className="text-left">
               <div className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
                 Ví nguồn
               </div>
               <div className="text-[11px] lg:text-xs font-bold text-gray-700">
-                {selectedWallet.name}
+                {selectedWallet?.name || "Chọn ví"}
               </div>
             </div>
           </button>
