@@ -85,21 +85,7 @@ export const WalletList: React.FC<WalletListProps> = ({
                 }`}
               >
                 {/* Icon ví */}
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-                  style={{
-                    backgroundColor: style?.bgLight || "#F9FAFB",
-                    color: style?.text || "#374151",
-                  }}
-                >
-                  {style?.icon === "wallet" ? (
-                    <WalletIcon size={20} />
-                  ) : style?.icon === "card" ? (
-                    <CreditCard size={20} />
-                  ) : (
-                    <Banknote size={20} />
-                  )}
-                </div>
+                <img src={style?.img} alt={w.name} className="w-10 h-10 object-contain" />
 
                 {/* Thông tin ví */}
                 <div className="flex-1 min-w-0">
@@ -122,7 +108,7 @@ export const WalletList: React.FC<WalletListProps> = ({
                       e.stopPropagation();
                       // Handle edit
                     }}
-                    className="p-2 text-gray-300 hover:text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors"
+                    className=" text-gray-300 hover:text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors"
                   >
                     <Edit3 size={16} />
                   </button>
@@ -132,13 +118,13 @@ export const WalletList: React.FC<WalletListProps> = ({
                       e.stopPropagation();
                       onDelete(w.id);
                     }}
-                    className="p-2 text-gray-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                    className=" text-gray-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
                   >
                     <Trash size={16} />
                   </button>
 
                   {isSelected && (
-                    <div className="bg-indigo-500 text-white p-1.5 rounded-full ml-1">
+                    <div className="bg-indigo-500 text-white p-1 rounded-full">
                       <Check size={14} strokeWidth={3} />
                     </div>
                   )}

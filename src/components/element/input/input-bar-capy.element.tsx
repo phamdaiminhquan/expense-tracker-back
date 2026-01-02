@@ -1,22 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   MoreHorizontal,
-  Sparkles,
   Coffee,
   ShoppingBag,
   Car,
   Zap,
   Home,
-  Smartphone,
   DollarSign,
   Gift,
-  TrendingUp,
-  Briefcase,
-  Wallet as WalletIcon,
-  CreditCard,
-  Banknote,
-  Plus,
 } from "lucide-react";
+import { WALLET_TEMPLATES } from "@/pages/message/message.constant";
 
 const CATEGORIES_UI = {
   expense: [
@@ -181,22 +174,14 @@ export default function CapyInputBar({
             onClick={onWalletClick}
             className="flex items-center gap-2 px-2 py-1 lg:px-3 lg:py-1.5 rounded-2xl transition-colors hover:bg-gray-50 border border-transparent hover:border-gray-100 group"
           >
-            <div
-              className={`w-5 h-5 lg:w-6 lg:h-6 rounded-full flex items-center justify-center`}
-              style={{ backgroundColor: selectedWallet?.color || "#F3F4F6" }}
-            >
-              {selectedWallet ? (
-                selectedWallet.icon === "wallet" ? (
-                  <WalletIcon size={14} />
-                ) : selectedWallet.icon === "card" ? (
-                  <CreditCard size={14} />
-                ) : (
-                  <Banknote size={14} />
-                )
-              ) : (
-                <Plus size={14} className="text-gray-500" />
-              )}
-            </div>
+            <img
+              src={
+                WALLET_TEMPLATES.find((t) => t.code === selectedWallet?.icon)
+                  ?.img
+              }
+              alt={selectedWallet?.name}
+              className="w-5 h-5 object-contain"
+            />
             <div className="text-left">
               <div className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
                 Ví nguồn

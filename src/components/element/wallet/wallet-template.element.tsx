@@ -1,5 +1,10 @@
 import React from "react";
-import { ChevronLeft, Banknote, Wallet as WalletIcon, CreditCard } from "lucide-react";
+import {
+  ChevronLeft,
+  Banknote,
+  Wallet as WalletIcon,
+  CreditCard,
+} from "lucide-react";
 import { WALLET_TEMPLATES } from "@/pages/message/message.constant";
 
 interface WalletTemplatesProps {
@@ -21,7 +26,9 @@ export const WalletTemplates: React.FC<WalletTemplatesProps> = ({
             onClick={onBack}
             disabled={!canGoBack}
             className={`p-1 -ml-1 transition-colors ${
-              canGoBack ? "text-gray-400 hover:text-gray-800" : "text-gray-200 cursor-not-allowed"
+              canGoBack
+                ? "text-gray-400 hover:text-gray-800"
+                : "text-gray-200 cursor-not-allowed"
             }`}
           >
             <ChevronLeft size={24} />
@@ -40,18 +47,12 @@ export const WalletTemplates: React.FC<WalletTemplatesProps> = ({
               onClick={() => onSelectTemplate(tpl)}
               className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-gray-100 hover:border-gray-300 hover:bg-gray-50 transition-all text-center"
             >
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center mb-1`}
-                style={{
-                  backgroundColor: tpl.bgLight,
-                  color: tpl.text,
-                }}
-              >
-                <Icon size={20} />
-              </div>
-              <div className="font-bold text-xs text-gray-700">
-                {tpl.name}
-              </div>
+              <img
+                src={tpl.img}
+                alt={tpl.name}
+                className="w-10 h-10 object-contain"
+              />
+              <div className="font-bold text-xs text-gray-700">{tpl.name}</div>
             </button>
           );
         })}
