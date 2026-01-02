@@ -8,6 +8,7 @@ interface Props {
   msg: any;
   onRetry?: (msg: any) => void;
   onEditPrompt?: (msg: any) => void;
+  onOpenEditDialog?: (msg: any) => void;
   isCurrentUser: boolean;
   walletName?: string;
 }
@@ -16,6 +17,7 @@ const MessageBubblePart: React.FC<Props> = ({
   msg,
   onRetry,
   onEditPrompt,
+  onOpenEditDialog,
   isCurrentUser,
   walletName,
 }) => {
@@ -45,14 +47,10 @@ const MessageBubblePart: React.FC<Props> = ({
   const isDone = msg.status === "done";
 
   const handleClick = () => {
-    if (!isError) return;
-    if (isNetworkError && onRetry) {
-      onRetry(msg);
-    } else if ((isAIError || msg.status === "error") && onEditPrompt) {
-      onEditPrompt(msg);
+    if (onOpenEditDialog) {
+      onOpenEditDialog?.(msg);
     }
   };
-
   return (
     <div
       onClick={handleClick}

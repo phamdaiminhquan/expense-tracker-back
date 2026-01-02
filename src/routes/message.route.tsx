@@ -196,7 +196,7 @@ export function MessageRoute() {
     const payload = {
       message: updatedMessage.message,
     };
-
+    
     await updateMessage(updatedMessage.id, payload);
   };
 

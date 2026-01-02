@@ -17,7 +17,7 @@ import MessageBubblePart from "../message-bubble/message-bubble.part";
 import useSWR from "swr";
 import { getListWallets } from "@/apis/wallets/wallet.api";
 import WalletSelectorModal from "@/components/element/modal/modal-wallet-selector.element";
-
+import { MessageActionSheetUI } from "@/components/element/dialog/dialog-message-action.element";
 interface ChatMessageViewProps {
   fund: Fund | null;
   messages: Message[];
@@ -59,6 +59,7 @@ export function MessageChatPart({
 }: ChatMessageViewProps) {
   // state
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
+  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [editingPendingPrompt, setEditingPendingPrompt] =
     useState<Message | null>(null);
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
@@ -69,6 +70,7 @@ export function MessageChatPart({
   const [showWalletSelector, setShowWalletSelector] = useState(false);
   const [showCategorySelector, setShowCategorySelector] = useState(false);
   const [selectedWalletId, setSelectedWalletId] = useState("momo");
+  const [actionSheetOpen, setActionSheetOpen] = useState(false);
 
   // OPTIMISTIC UI STATE - Hiện tin nhắn ngay lập tức
   const [optimisticMessages, setOptimisticMessages] = useState<
@@ -337,6 +339,12 @@ export function MessageChatPart({
                       // AI không parse được → mở dialog chỉnh sửa prompt
                       setEditingPendingPrompt(message);
                     }}
+                    onOpenEditDialog={() => {
+                      if (message.status !== "failed") {
+                        setSelectedMessage(message);
+                        setActionSheetOpen(true);
+                      }
+                    }}
                   />
                 </div>
               );
@@ -439,12 +447,29 @@ export function MessageChatPart({
         </div>
       )}
 
+      <MessageActionSheetUI
+        isOpen={actionSheetOpen}
+        onClose={() => setActionSheetOpen(false)}
+        onEdit={() => setEditingMessage(selectedMessage)}
+        onDelete={() => {
+          onDeleteMessage(selectedMessage?.id || "");
+          setActionSheetOpen(false);
+        }}
+        message={selectedMessage?.id}
+      />
+
       <EditMessageDialog
         message={editingMessage}
         open={editingMessage !== null}
         onOpenChange={(open) => !open && setEditingMessage(null)}
-        onSave={onUpdateMessage}
-        onDelete={onDeleteMessage}
+        onSave={async (msg) => {
+          await onUpdateMessage(msg);
+          setActionSheetOpen(false);
+        }}
+        onDelete={async (msg) => {
+          onDeleteMessage(msg);
+          setActionSheetOpen(false);
+        }}
       />
 
       <EditPendingPromptDialog
@@ -452,7 +477,10 @@ export function MessageChatPart({
         categories={categories}
         open={editingPendingPrompt !== null}
         onOpenChange={(open) => !open && setEditingPendingPrompt(null)}
-        onSave={onUpdateMessage}
+        onSave={async (msg) => {
+          await onUpdateMessage(msg);
+          setActionSheetOpen(false);
+        }}
       />
     </div>
   );
