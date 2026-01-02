@@ -1,22 +1,22 @@
 import { useState, useEffect, useRef } from "react";
 import { Message, Category } from "@/lib/types";
-import { FundStatisticsDialog } from "@/components/FundStatisticsDialog";
+import { FundStatisticsDialog } from "@/components/element/dialog/dialog-fund-statistic.element";
 // import { CategoryManagementDialog } from '@/components/CategoryManagementDialog'
-import { CategorySubscriptionDialog } from "@/components/CategorySubscriptionDialog";
+import { CategorySubscriptionDialog } from "@/components/element/dialog/dialog-category-subscription.element";
 import { MessageChatPart } from "@/pages/message/parts/message-chat/message-chat.part";
-import { NavigationDrawer } from "@/components/NavigationDrawer";
+import { NavigationDrawer } from "@/components/element/drawer/drawer-navigation.element";
 import { FundCreatePart } from "@/pages/fund/parts/fund-create/fund-create.part";
 import React from "react";
 import { FundUpdatePart } from "../fund/parts/fund-update/fund-update.part";
 import { Fund } from "@/apis/funds/fund.entities";
 import ChartContent from "../statistic/parts/statistic-chart/statistic-chart.part";
 import { StatisticPage } from "../statistic/statistic.page";
-import { useFundMembers } from '@/hooks/use-fund-members.hook';
+import { useFundMembers } from "@/hooks/use-fund-members.hook";
 import useSWR from "swr";
 import { getListWallets } from "@/apis/wallets/wallet.api";
 
-import { FundMemberListDialog } from "@/components/MemberListDialog";
-import { TutorialOverlay } from "@/components/TutorialOverlay";
+import { FundMemberListDialog } from "@/components/element/dialog/dialog-member-list.element";
+import { TutorialOverlay } from "@/components/element/overlay/overlay-tutorial.element";
 
 interface MessagePageProps {
   fund: Fund | null;
@@ -28,10 +28,7 @@ interface MessagePageProps {
   currentUser: any;
   resolveUserName: (userId: string) => string;
   onSelectFund: (fundId: string) => void;
-  onCreateFund: (
-    name: string,
-    type: "personal" | "shared",
-  ) => Promise<void>;
+  onCreateFund: (name: string, type: "personal" | "shared") => Promise<void>;
   onUpdateFund: (
     fundId: string,
     name: string,
@@ -110,7 +107,10 @@ export function MessagePage({
     loading: isProcessingMember,
     removeMember,
     mutate: mutateMembers,
-  } = useFundMembers(selectedFundId || '', { page: memberPage, take: pageSize });
+  } = useFundMembers(selectedFundId || "", {
+    page: memberPage,
+    take: pageSize,
+  });
 
   // Fetch danh sách ví (wallets)
   const { data: walletData, mutate: mutateWallets } = useSWR(
@@ -153,7 +153,7 @@ export function MessagePage({
 
   const handleCreateFundComplete = async (
     name: string,
-    type: "personal" | "shared",
+    type: "personal" | "shared"
   ) => {
     await onCreateFund(name, type);
     setIsCreateFundDialogOpen(false);

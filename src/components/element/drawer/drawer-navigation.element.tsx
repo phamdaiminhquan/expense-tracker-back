@@ -1,7 +1,7 @@
-import { useEffect, useCallback, useRef, useMemo } from 'react'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { useEffect, useCallback, useRef, useMemo } from "react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import {
   Plus,
   Wallet,
@@ -11,35 +11,34 @@ import {
   X,
   Trash,
   Pencil,
-  LayoutList
-} from 'lucide-react'
-import { Fund } from '@/apis/funds/fund.entities'
-import { Mode } from '@/common/enums/mode.enum'
-import { ACTION_SYSTEM } from '@/redux'
-import { useAppDispatch } from '@/redux/store.redux'
-import { useSelector } from 'react-redux'
-import { GlobalReduxState } from '@/redux/store.interface'
-import { debounce } from '@mui/material'
-import { Button } from './ui/button'
+  LayoutList,
+} from "lucide-react";
+import { Fund } from "@/apis/funds/fund.entities";
+import { Mode } from "@/common/enums/mode.enum";
+import { ACTION_SYSTEM } from "@/redux";
+import { useAppDispatch } from "@/redux/store.redux";
+import { useSelector } from "react-redux";
+import { GlobalReduxState } from "@/redux/store.interface";
+import { debounce } from "@mui/material";
+import { Button } from "../../ui/button";
 
 interface NavigationDrawerProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  funds: Fund[]
-  currentUserName: string
-  currentFundId: string | null
-  isLoadingFunds?: boolean
-  isLoadingMore?: boolean
-  hasMore?: boolean
-  onDeleteFund: (fundId: string) => Promise<void>
-  onSelectFund: (fundId: string) => void
-  onCreateFund: () => void
-  onUpdateFund: (fundId: string) => void
-  onLoadMore: () => void
-  onLogout: () => void
-  onSearchFunds?: (query: string) => void
-  onViewFundMembers: (fundId: string) => void
-
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  funds: Fund[];
+  currentUserName: string;
+  currentFundId: string | null;
+  isLoadingFunds?: boolean;
+  isLoadingMore?: boolean;
+  hasMore?: boolean;
+  onDeleteFund: (fundId: string) => Promise<void>;
+  onSelectFund: (fundId: string) => void;
+  onCreateFund: () => void;
+  onUpdateFund: (fundId: string) => void;
+  onLoadMore: () => void;
+  onLogout: () => void;
+  onSearchFunds?: (query: string) => void;
+  onViewFundMembers: (fundId: string) => void;
 }
 
 export function NavigationDrawer({
@@ -63,62 +62,68 @@ export function NavigationDrawer({
 }: NavigationDrawerProps & { isPermanent?: boolean }) {
   const dispatch = useAppDispatch();
   const system = useSelector((state: GlobalReduxState) => state.system);
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!open || !hasMore || isLoadingMore) return
+    if (!open || !hasMore || isLoadingMore) return;
 
-    const container = scrollContainerRef.current
-    if (!container) return
+    const container = scrollContainerRef.current;
+    if (!container) return;
 
     const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = container
-      const scrollPercentage = (scrollTop + clientHeight) / scrollHeight
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
 
       if (scrollPercentage >= 0.7 && !isLoadingMore && hasMore) {
-        onLoadMore()
+        onLoadMore();
       }
-    }
+    };
 
-    container.addEventListener('scroll', handleScroll)
-    return () => container.removeEventListener('scroll', handleScroll)
-  }, [open, hasMore, isLoadingMore, onLoadMore])
+    container.addEventListener("scroll", handleScroll);
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, [open, hasMore, isLoadingMore, onLoadMore]);
 
-  const handleSelectFund = useCallback((fundId: string) => {
-    onSelectFund(fundId)
-    if (!isPermanent) onOpenChange(false)
-  }, [onSelectFund, onOpenChange, isPermanent])
+  const handleSelectFund = useCallback(
+    (fundId: string) => {
+      onSelectFund(fundId);
+      if (!isPermanent) onOpenChange(false);
+    },
+    [onSelectFund, onOpenChange, isPermanent]
+  );
 
   const handleCreateFund = useCallback(() => {
-    onCreateFund()
-    if (!isPermanent) onOpenChange(false)
-  }, [onCreateFund, onOpenChange, isPermanent])
+    onCreateFund();
+    if (!isPermanent) onOpenChange(false);
+  }, [onCreateFund, onOpenChange, isPermanent]);
 
   const handleUpdateFund = (e: React.MouseEvent, fundId: string) => {
-    e.stopPropagation()
-    onUpdateFund(fundId)
-    if (!isPermanent) onOpenChange(false)
-  }
+    e.stopPropagation();
+    onUpdateFund(fundId);
+    if (!isPermanent) onOpenChange(false);
+  };
 
   const handleDeleteFund = (e: React.MouseEvent, fundId: string) => {
-    e.stopPropagation()
-    onDeleteFund(fundId)
-  }
+    e.stopPropagation();
+    onDeleteFund(fundId);
+  };
 
   const getInitials = (name: string) => {
-    return name.charAt(0).toUpperCase()
-  }
+    return name.charAt(0).toUpperCase();
+  };
 
-  const debounceSearch = useMemo(() => debounce((value: string) => {
-    onSearchFunds?.(value)
-  }, 500), [onSearchFunds]);
-
+  const debounceSearch = useMemo(
+    () =>
+      debounce((value: string) => {
+        onSearchFunds?.(value);
+      }, 500),
+    [onSearchFunds]
+  );
 
   const handleViewFundMembers = (e: React.MouseEvent, fundId: string) => {
-    e.stopPropagation()
-    onViewFundMembers(fundId)
-    if (!isPermanent) onOpenChange(false)
-  }
+    e.stopPropagation();
+    onViewFundMembers(fundId);
+    if (!isPermanent) onOpenChange(false);
+  };
 
   const SidebarContent = (
     <div className="w-full h-full p-0 flex flex-col overflow-hidden bg-white">
@@ -127,13 +132,19 @@ export function NavigationDrawer({
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-gray-800">Menu</h2>
           {!isPermanent && (
-            <button onClick={() => onOpenChange(false)} className="p-2 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors">
+            <button
+              onClick={() => onOpenChange(false)}
+              className="p-2 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors"
+            >
               <X size={20} className="text-gray-500" />
             </button>
           )}
         </div>
         <div className="relative mt-2">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search
+            size={18}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
           <input
             onChange={(e) => debounceSearch?.(e.target.value)}
             placeholder="Tìm kiếm quỹ..."
@@ -148,7 +159,9 @@ export function NavigationDrawer({
         className="flex-1 overflow-y-auto p-4 space-y-2"
       >
         <div className="flex items-center justify-between px-2 mb-2">
-          <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Danh sách quỹ</h3>
+          <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+            Danh sách quỹ
+          </h3>
           <button
             onClick={handleCreateFund}
             className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors"
@@ -171,39 +184,59 @@ export function NavigationDrawer({
           </div>
         ) : (
           funds.map((fund) => {
-            const isActive = fund.id === currentFundId
+            const isActive = fund.id === currentFundId;
             return (
               <div
                 key={fund.id}
                 onClick={() => handleSelectFund(fund.id)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    handleSelectFund(fund.id)
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleSelectFund(fund.id);
                   }
                 }}
                 role="button"
                 tabIndex={0}
-                className={`w-full group flex items-center gap-3 p-3 rounded-2xl transition-all text-left border cursor-pointer ${isActive
-                  ? 'bg-indigo-50 border-indigo-100'
-                  : 'hover:bg-gray-50 border-transparent'
-                  }`}
+                className={`w-full group flex items-center gap-3 p-3 rounded-2xl transition-all text-left border cursor-pointer ${
+                  isActive
+                    ? "bg-indigo-50 border-indigo-100"
+                    : "hover:bg-gray-50 border-transparent"
+                }`}
               >
-                <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${isActive ? 'bg-indigo-200 text-indigo-700' : 'bg-gray-100 text-gray-500'
-                  }`}>
-                  {fund.type === 'shared' ? <Users size={20} /> : <Wallet size={20} />}
+                <div
+                  className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
+                    isActive
+                      ? "bg-indigo-200 text-indigo-700"
+                      : "bg-gray-100 text-gray-500"
+                  }`}
+                >
+                  {fund.type === "shared" ? (
+                    <Users size={20} />
+                  ) : (
+                    <Wallet size={20} />
+                  )}
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <h4 className={`font-bold text-sm truncate ${isActive ? 'text-indigo-900' : 'text-gray-700'}`}>
+                  <h4
+                    className={`font-bold text-sm truncate ${
+                      isActive ? "text-indigo-900" : "text-gray-700"
+                    }`}
+                  >
                     {fund.name}
                   </h4>
                   <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
-                    {fund.type === 'shared' ? 'Quỹ chung' : 'Quỹ cá nhân'}
+                    {fund.type === "shared" ? "Quỹ chung" : "Quỹ cá nhân"}
                   </p>
                 </div>
 
-                <div className={`flex gap-1 transition-opacity ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                <div
+                  className={`flex gap-1 transition-opacity ${
+                    isActive
+                      ? "opacity-100"
+                      : "opacity-0 group-hover:opacity-100"
+                  }`}
+                >
                   <Button
                     variant="ghost"
                     size="icon"
@@ -231,7 +264,7 @@ export function NavigationDrawer({
                     variant="ghost"
                     size="icon"
                     onClick={(e) => {
-                      handleViewFundMembers(e, fund.id)
+                      handleViewFundMembers(e, fund.id);
                     }}
                     className="h-7 w-7 p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-purple-500 transition-colors"
                   >
@@ -239,7 +272,7 @@ export function NavigationDrawer({
                   </Button>
                 </div>
               </div>
-            )
+            );
           })
         )}
 
@@ -259,7 +292,9 @@ export function NavigationDrawer({
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="font-bold text-sm text-gray-800 truncate">{currentUserName}</p>
+            <p className="font-bold text-sm text-gray-800 truncate">
+              {currentUserName}
+            </p>
             <button
               onClick={onLogout}
               className="flex items-center gap-1.5 text-rose-500 font-bold text-[10px] uppercase tracking-wider hover:opacity-80 transition-opacity"
@@ -272,7 +307,12 @@ export function NavigationDrawer({
             onClick={() => dispatch(ACTION_SYSTEM.changeMode(system.mode))}
             className="p-2 bg-white rounded-xl shadow-sm hover:bg-gray-100 transition-colors"
           >
-            <X size={18} className={system.mode === Mode.DARK ? 'text-indigo-500' : 'text-amber-500'} />
+            <X
+              size={18}
+              className={
+                system.mode === Mode.DARK ? "text-indigo-500" : "text-amber-500"
+              }
+            />
           </button>
         </div>
       </div>
@@ -292,6 +332,5 @@ export function NavigationDrawer({
         {SidebarContent}
       </SheetContent>
     </Sheet>
-  )
+  );
 }
-

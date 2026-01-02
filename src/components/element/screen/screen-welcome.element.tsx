@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { CreateFirstWalletScreen } from './welcome/CreateFirstWalletScreen';
-import { CreateFirstFundScreen } from './welcome/CreateFirstFundScreen';
-import { User } from '@/lib/auth';
-import { FundType } from '@/lib/types';
-import { Fund } from '@/apis/funds/fund.entities';
+import React, { useEffect, useState } from "react";
+import { User } from "@/lib/auth";
+import { FundType } from "@/lib/types";
+import { Fund } from "@/apis/funds/fund.entities";
+import { CreateFirstFundScreen } from "../welcome/welcome-create-first-fund.element";
+import { CreateFirstWalletScreen } from "../welcome/welcome-create-fist-wallet.element";
 
 interface WelcomeScreenProps {
   userName?: string;
@@ -18,7 +18,7 @@ interface WelcomeScreenProps {
   isLoadingFunds?: boolean;
 }
 
-export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ 
+export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   userName,
   walletData,
   onWalletMutate,
@@ -28,22 +28,23 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   onComplete,
   onLogout,
   funds = [],
-  isLoadingFunds = false
+  isLoadingFunds = false,
 }) => {
   const [showWalletScreen, setShowWalletScreen] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem('mustCreateWallet') === 'true';
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("mustCreateWallet") === "true";
   });
-  
+
   const [showFundScreen, setShowFundScreen] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    const wallet = localStorage.getItem('mustCreateWallet') === 'true';
-    return !wallet && localStorage.getItem('mustCreateFund') === 'true';
+    if (typeof window === "undefined") return false;
+    const wallet = localStorage.getItem("mustCreateWallet") === "true";
+    return !wallet && localStorage.getItem("mustCreateFund") === "true";
   });
 
   const checkFlags = (triggerComplete = true) => {
-    const mustCreateWallet = localStorage.getItem('mustCreateWallet') === 'true';
-    const mustCreateFund = localStorage.getItem('mustCreateFund') === 'true';
+    const mustCreateWallet =
+      localStorage.getItem("mustCreateWallet") === "true";
+    const mustCreateFund = localStorage.getItem("mustCreateFund") === "true";
 
     if (mustCreateWallet) {
       setShowWalletScreen(true);
@@ -61,7 +62,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   useEffect(() => {
     // Wait for data to load
     if (isLoadingFunds || !walletData) {
-        return;
+      return;
     }
 
     const hasWallets = walletData.data && walletData.data.length > 0;
@@ -69,29 +70,28 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
 
     // Check and set localStorage flags
     if (!hasWallets) {
-      localStorage.setItem('mustCreateWallet', 'true');
+      localStorage.setItem("mustCreateWallet", "true");
     } else {
-      localStorage.setItem('mustCreateWallet', 'false');
+      localStorage.setItem("mustCreateWallet", "false");
     }
 
     if (!hasFunds) {
-      localStorage.setItem('mustCreateFund', 'true');
+      localStorage.setItem("mustCreateFund", "true");
     } else {
-      localStorage.setItem('mustCreateFund', 'false');
+      localStorage.setItem("mustCreateFund", "false");
     }
 
     // Don't trigger onComplete from useEffect to avoid loops
     checkFlags(false);
-    
   }, [walletData, funds, isLoadingFunds]);
 
   const handleWalletComplete = () => {
-    localStorage.setItem('mustCreateWallet', 'false');
+    localStorage.setItem("mustCreateWallet", "false");
     checkFlags(true);
   };
 
   const handleFundComplete = () => {
-    localStorage.setItem('mustCreateFund', 'false');
+    localStorage.setItem("mustCreateFund", "false");
     checkFlags(true);
   };
 

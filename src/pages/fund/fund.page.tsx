@@ -13,11 +13,7 @@ interface FundListPageProps {
   isLoadingFunds?: boolean;
   onRefreshFunds?: () => void;
   onSelectFund: (fund: Fund) => void;
-  onCreateFund: (
-    name: string,
-    type: "personal" | "shared",
-    memberIds: string[]
-  ) => Promise<void>;
+  onCreateFund: (name: string, type: "personal" | "shared") => Promise<void>;
   onLogout: () => void;
 }
 
@@ -38,11 +34,10 @@ export function FundPage({
 
   const handleCreateFund = async (
     name: string,
-    type: "personal" | "shared",
-    memberIds: string[]
+    type: "personal" | "shared"
   ) => {
     try {
-      await onCreateFund(name, type, memberIds);
+      await onCreateFund(name, type);
       toast.success("Đã tạo quỹ thành công!", { description: name });
     } catch (error) {
       console.error(error);

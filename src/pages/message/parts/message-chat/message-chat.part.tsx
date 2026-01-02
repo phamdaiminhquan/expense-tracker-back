@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Message, Category } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import CapyInputBar from "@/components/CapyInputBar";
+import CapyInputBar from "@/components/element/input/input-bar-capy.element";
 import { Search } from "lucide-react";
-import { EditPendingPromptDialog } from "../../../../components/EditPendingPromptDialog";
-import { EditMessageDialog } from "../../../../components/EditMessageDialog";
+import { EditPendingPromptDialog } from "../../../../components/element/dialog/dialog-edit-pending-prompt.element";
+import { EditMessageDialog } from "../../../../components/element/dialog/dialog-edit-message.element";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Fund } from "@/apis/funds/fund.entities";
 import {
@@ -16,7 +16,7 @@ import MessageHeaderPart from "../message-header/message-header.part";
 import MessageBubblePart from "../message-bubble/message-bubble.part";
 import useSWR from "swr";
 import { getListWallets } from "@/apis/wallets/wallet.api";
-import WalletSelectorModal from "@/components/WalletSelectorModal";
+import WalletSelectorModal from "@/components/element/modal/modal-wallet-selector.element";
 
 interface ChatMessageViewProps {
   fund: Fund | null;

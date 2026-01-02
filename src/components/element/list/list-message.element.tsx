@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -6,39 +6,52 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { PencilSimple, Trash, ArrowClockwise, NotePencil } from '@phosphor-icons/react'
-import { Message, Category } from '@/lib/types'
-import { formatCurrency } from '@/lib/currency'
-import { EditPendingPromptDialog } from './EditPendingPromptDialog'
-import { EditMessageDialog } from './EditMessageDialog'
-import React from 'react'
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  PencilSimple,
+  Trash,
+  ArrowClockwise,
+  NotePencil,
+} from "@phosphor-icons/react";
+import { Message, Category } from "@/lib/types";
+import { formatCurrency } from "@/lib/currency";
+import { EditPendingPromptDialog } from "../dialog/dialog-edit-pending-prompt.element";
+import { EditMessageDialog } from "../dialog/dialog-edit-message.element";
+import React from "react";
 
 interface MessageListProps {
-  messages: Message[]
-  categories?: Category[]
-  onUpdate: (message: Message) => void
-  onDelete: (id: string) => void
+  messages: Message[];
+  categories?: Category[];
+  onUpdate: (message: Message) => void;
+  onDelete: (id: string) => void;
 }
 
-export function MessageList({ messages, categories = [], onUpdate, onDelete }: MessageListProps) {
-  const [editingMessage, setEditingMessage] = useState<Message | null>(null)
-  const [editingPendingPrompt, setEditingPendingPrompt] = useState<Message | null>(null)
+export function MessageList({
+  messages,
+  categories = [],
+  onUpdate,
+  onDelete,
+}: MessageListProps) {
+  const [editingMessage, setEditingMessage] = useState<Message | null>(null);
+  const [editingPendingPrompt, setEditingPendingPrompt] =
+    useState<Message | null>(null);
 
-  const sortedMessages = [...messages].sort((a, b) => b.timestamp - a.timestamp)
+  const sortedMessages = [...messages].sort(
+    (a, b) => b.timestamp - a.timestamp
+  );
 
   const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp)
-    return date.toLocaleString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
+    const date = new Date(timestamp);
+    return date.toLocaleString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   if (messages.length === 0) {
     return (
@@ -46,7 +59,7 @@ export function MessageList({ messages, categories = [], onUpdate, onDelete }: M
         <p className="text-lg">Chưa có giao dịch nào</p>
         <p className="text-sm mt-2">Thêm giao dịch đầu tiên của bạn ở trên</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -65,20 +78,32 @@ export function MessageList({ messages, categories = [], onUpdate, onDelete }: M
           </TableHeader>
           <TableBody>
             {sortedMessages.map((message) => {
-              const isPending = message.isPendingPrompt === true
+              const isPending = message.isPendingPrompt === true;
 
               return (
-                <TableRow key={message.id} className={isPending ? 'bg-muted/30' : ''}>
-                  <TableCell className="font-medium">{message.userName}</TableCell>
+                <TableRow
+                  key={message.id}
+                  className={isPending ? "bg-muted/30" : ""}
+                >
+                  <TableCell className="font-medium">
+                    {message.userName}
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       {isPending && (
-                        <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-300">
+                        <Badge
+                          variant="outline"
+                          className="text-xs bg-yellow-50 text-yellow-700 border-yellow-300"
+                        >
                           <NotePencil className="mr-1" size={12} />
                           Ghi chú
                         </Badge>
                       )}
-                      <span className={isPending ? 'text-muted-foreground italic' : ''}>
+                      <span
+                        className={
+                          isPending ? "text-muted-foreground italic" : ""
+                        }
+                      >
                         {message.message}
                       </span>
                     </div>
@@ -137,7 +162,7 @@ export function MessageList({ messages, categories = [], onUpdate, onDelete }: M
                     </div>
                   </TableCell>
                 </TableRow>
-              )
+              );
             })}
           </TableBody>
         </Table>
@@ -158,5 +183,5 @@ export function MessageList({ messages, categories = [], onUpdate, onDelete }: M
         onSave={onUpdate}
       />
     </React.Fragment>
-  )
+  );
 }

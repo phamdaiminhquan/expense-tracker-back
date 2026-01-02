@@ -4,9 +4,9 @@ import { createWallet, deleteWallet } from "@/apis/wallets/wallet.api";
 import { WalletType } from "@/apis/wallets/wallet.enum";
 import { CreateWalletDto } from "@/apis/wallets/wallet.interface";
 import { toast } from "sonner";
-import { WalletList } from "./wallet/WalletList";
-import { WalletTemplates } from "./wallet/WalletTemplates";
-import { WalletForm } from "./wallet/WalletForm";
+import { WalletList } from "../wallet/wallet-list.element";
+import { WalletTemplates } from "../wallet/wallet-template.element";
+import { WalletForm } from "../wallet/wallet-form.element";
 
 interface Props {
   open: boolean;

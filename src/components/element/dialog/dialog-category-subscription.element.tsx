@@ -33,8 +33,8 @@ import { dialogCateOpened } from "@/apis/funds/fund.api";
 import { AvailableCategoryDto } from "@/apis/categories/category.interface";
 import { toast } from "sonner";
 import React from "react";
-import { ImageElement } from "./components-mui/elements/image/image.element";
-import { ImageSizeType } from "./components-mui/elements/image/image.enum";
+import { ImageElement } from "../../components-mui/elements/image/image.element";
+import { ImageSizeType } from "../../components-mui/elements/image/image.enum";
 
 interface CategorySubscriptionDialogProps {
   open: boolean;

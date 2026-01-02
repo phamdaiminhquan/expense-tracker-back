@@ -11,8 +11,8 @@ import { getFundSearchNumberId } from "@/apis/funds/fund.api";
 import { getListWallets } from "@/apis/wallets/wallet.api";
 import { toast } from "sonner";
 import useSWR from "swr";
-import LoadingScreenZen from "@/components/LoadingScreenZen";
-import { WelcomeScreen } from "@/components/WelcomeScreen";
+import LoadingScreenZen from "@/components/element/screen/screen-loading-zen.element";
+import { WelcomeScreen } from "@/components/element/screen/screen-welcome.element";
 
 export function MessageRoute() {
   // hook
@@ -126,11 +126,11 @@ export function MessageRoute() {
           await mutateList();
           await mutateWallets();
           // Clear the onboarding flags
-          localStorage.setItem('mustCreateWallet', 'false');
-          localStorage.setItem('mustCreateFund', 'false');
-          localStorage.setItem('has_onboarded', 'true');
+          localStorage.setItem("mustCreateWallet", "false");
+          localStorage.setItem("mustCreateFund", "false");
+          localStorage.setItem("has_onboarded", "true");
           // Remove the justLoggedIn flag from session
-          sessionStorage.removeItem('justLoggedIn');
+          sessionStorage.removeItem("justLoggedIn");
         }}
         onLogout={logout}
         funds={fundList?.data || []}
@@ -226,7 +226,9 @@ export function MessageRoute() {
       currentUser={currentUser}
       resolveUserName={resolveUserName}
       onSelectFund={handleSelectFund}
-      onCreateFund={(name, type) => handleCreateFund(name, type, [currentUserId as string])}
+      onCreateFund={(name, type) =>
+        handleCreateFund(name, type, [currentUserId as string])
+      }
       onUpdateFund={handleUpdateFund}
       onDeleteFund={handleDeleteFund}
       // onSearchFunds={(prev) => setFundParams((p) => ({ ...p, search: prev, page: 1 }))}
