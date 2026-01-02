@@ -1,8 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { Message, Category } from "@/lib/types";
-import { FundStatisticsDialog } from "@/components/element/dialog/dialog-fund-statistic.element";
-// import { CategoryManagementDialog } from '@/components/CategoryManagementDialog'
-import { CategorySubscriptionDialog } from "@/components/element/dialog/dialog-category-subscription.element";
 import { MessageChatPart } from "@/pages/message/parts/message-chat/message-chat.part";
 import { NavigationDrawer } from "@/components/element/drawer/drawer-navigation.element";
 import { FundCreatePart } from "@/pages/fund/parts/fund-create/fund-create.part";
@@ -195,9 +192,6 @@ export function MessagePage({
     } catch { }
   };
 
-  const hasWallets = walletData?.data && walletData.data.length > 0;
-  // const hasNoFunds = !isLoadingFunds && funds.length === 0;
-
   return (
     <React.Fragment>
       <TutorialOverlay />
@@ -288,11 +282,7 @@ export function MessagePage({
             <h2 className="text-xl font-bold text-gray-800 mb-6 px-2">
               Thống kê chi tiết
             </h2>
-            <ChartContent
-              messages={fundMessages}
-              totalExpense={0}
-              totalIncome={0}
-            />
+            <ChartContent fundId={fund?.id} />
           </div>
         </aside>
 
@@ -300,7 +290,7 @@ export function MessagePage({
         <StatisticPage
           isOpen={isStatisticsDialogOpen}
           onClose={() => setIsStatisticsDialogOpen(false)}
-          messages={fundMessages}
+          fundId={fund?.id}
           totalExpense={0}
           totalIncome={0}
         />
