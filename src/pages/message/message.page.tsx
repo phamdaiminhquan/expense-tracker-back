@@ -17,6 +17,7 @@ import { getListWallets } from "@/apis/wallets/wallet.api";
 
 import { FundMemberListDialog } from "@/components/element/dialog/dialog-member-list.element";
 import { TutorialOverlay } from "@/components/element/overlay/overlay-tutorial.element";
+import InviteFundDialog from "@/components/InviteFundDialog";
 
 interface MessagePageProps {
   fund: Fund | null;
@@ -98,6 +99,8 @@ export function MessagePage({
     ? categories.filter((c) => c.fundId === fund.id)
     : [];
   const fundMessages = fund ? messages.filter((m) => m.fundId === fund.id) : [];
+  const [isShareFund, setIsShareFund] = useState(false)
+
 
   // hook
   const hasShownInitialBanner = useRef(false);
@@ -189,7 +192,7 @@ export function MessagePage({
   const handleRemoveMember = async (memberId: string) => {
     try {
       await removeMember(memberId);
-    } catch {}
+    } catch { }
   };
 
   const hasWallets = walletData?.data && walletData.data.length > 0;
@@ -200,17 +203,16 @@ export function MessagePage({
       <TutorialOverlay />
       {/* Container: p-0 trên mobile, p-3 trên desktop */}
       <div
-        className={`flex h-dvh lg:h-screen overflow-hidden bg-[#F0F2F5] lg:p-3 lg:gap-3 p-0 gap-0 ${
-          showLoadingScreen
-            ? "opacity-0"
-            : "opacity-100 transition-opacity duration-500"
-        }`}
+        className={`flex h-dvh lg:h-screen overflow-hidden bg-[#F0F2F5] lg:p-3 lg:gap-3 p-0 gap-0 ${showLoadingScreen
+          ? "opacity-0"
+          : "opacity-100 transition-opacity duration-500"
+          }`}
       >
         {/* CỘT 1: SIDEBAR LEFT - Chỉ hiện trên lg, giữ nguyên card style vì là desktop */}
         <aside className="hidden lg:flex w-[350px] bg-white flex-col shrink-0 rounded-2xl shadow-sm overflow-hidden border border-gray-100">
           <NavigationDrawer
             open={true}
-            onOpenChange={() => {}}
+            onOpenChange={() => { }}
             funds={funds}
             onDeleteFund={onDeleteFund}
             currentUserName={currentUserName}
@@ -221,7 +223,7 @@ export function MessagePage({
             onSelectFund={onSelectFund}
             onCreateFund={handleOpenCreateFund}
             onUpdateFund={handleOpenUpdateFund}
-            onLoadMore={onLoadMoreFunds || (() => {})}
+            onLoadMore={onLoadMoreFunds || (() => { })}
             onLogout={onLogout}
             onSearchFunds={onSearchFunds}
             isPermanent={true}
@@ -244,7 +246,7 @@ export function MessagePage({
             onSelectFund={onSelectFund}
             onCreateFund={handleOpenCreateFund}
             onUpdateFund={handleOpenUpdateFund}
-            onLoadMore={onLoadMoreFunds || (() => {})}
+            onLoadMore={onLoadMoreFunds || (() => { })}
             onLogout={onLogout}
             onSearchFunds={onSearchFunds}
             onViewFundMembers={handleViewFundMembers}
@@ -267,15 +269,16 @@ export function MessagePage({
             onDeleteMessage={onDeleteMessage}
             isProcessing={isProcessing}
             isLoading={isLoading}
-            // onManageCategories={() => setIsCategoryDialogOpen(true)}
-            // onShowCategorySubscription={() => {
-            //   setIsAutoCategorySubscription(false);
-            //   setIsCategorySubscriptionOpen(true);
-            // }}
-            // resolveUserName={resolveUserName}
-            // isLoadingFunds={isLoadingFunds}
-            // onSelectFund={onSelectFund}
-            // funds={funds}
+            onShareFund={() => setIsShareFund(true)}
+          // onManageCategories={() => setIsCategoryDialogOpen(true)}
+          // onShowCategorySubscription={() => {
+          //   setIsAutoCategorySubscription(false);
+          //   setIsCategorySubscriptionOpen(true);
+          // }}
+          // resolveUserName={resolveUserName}
+          // isLoadingFunds={isLoadingFunds}
+          // onSelectFund={onSelectFund}
+          // funds={funds}
           />
         </main>
 
@@ -322,13 +325,19 @@ export function MessagePage({
         <FundMemberListDialog
           isOpen={isMemberDialogOpen}
           onClose={handleCloseMemberDialog}
-          fund={selectedFund || { id: "", name: "", type: "shared" }}
+          fund={selectedFund!}
           members={members}
           isLoading={isLoadingMembers || isProcessingMember}
           onRefresh={() => mutateMembers()}
           // onInviteMember={handleInviteMember}
           onRemoveMember={handleRemoveMember}
           currentUserId={currentUserId}
+        />
+
+        <InviteFundDialog
+          open={isShareFund}
+          onClose={() => setIsShareFund(false)}
+          fund={fund!}
         />
       </div>
     </React.Fragment>

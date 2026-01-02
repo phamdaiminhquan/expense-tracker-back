@@ -32,6 +32,7 @@ interface ChatMessageViewProps {
   onDeleteMessage: (id: string) => Promise<void>;
   isProcessing?: boolean;
   isLoading?: boolean;
+  onShareFund: () => void
 }
 
 interface OptimisticMessage {
@@ -56,6 +57,7 @@ export function MessageChatPart({
   onDeleteMessage,
   isProcessing = false,
   isLoading = false,
+  onShareFund,
 }: ChatMessageViewProps) {
   // state
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
@@ -229,6 +231,7 @@ export function MessageChatPart({
         onToggleSmart={() => setIsSmartMode(!isSmartMode)}
         fundName={fund?.name}
         onShowStatistics={onShowStatistics}
+        onShareFund={onShareFund}
       />
 
       {/* 3. MESSAGE LIST - Scrollable with safe areas */}

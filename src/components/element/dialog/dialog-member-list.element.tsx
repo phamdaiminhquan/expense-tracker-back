@@ -21,15 +21,12 @@ import {
     Crown
 } from 'lucide-react'
 import { FundMemberDto } from '@/apis/funds/fund.interface'
+import { Fund } from '@/apis/funds/fund.entities'
 
 interface FundMemberListDialogProps {
     isOpen: boolean
     onClose: () => void
-    fund: {
-        id: string
-        name: string
-        type: 'shared' | 'personal'
-    }
+    fund: Fund
     members: FundMemberDto[]
     isLoading: boolean
     onRefresh: () => void
@@ -119,7 +116,7 @@ export function FundMemberListDialog({
                                 Thành viên quỹ
                             </DialogTitle>
                             <DialogDescription className="mt-1 text-base text-left">
-                                {fund.name} • {fund.type === 'shared' ? 'Quỹ chung' : 'Quỹ cá nhân'}
+                                {fund?.name} • {fund?.type === 'shared' ? 'Quỹ chung' : 'Quỹ cá nhân'}
                             </DialogDescription>
                         </div>
 
@@ -134,7 +131,7 @@ export function FundMemberListDialog({
                         placeholder="Tìm kiếm thành viên theo tên, email..."
                         className="w-full px-4 py-2 rounded-lg border border-gray-200 text-sm text-black bg-white"
                     />
-                    {fund.type === 'shared' && onInviteMember && (
+                    {fund?.type === 'shared' && onInviteMember && (
                         <Button
                             size="sm"
                             variant="outline"
@@ -168,7 +165,7 @@ export function FundMemberListDialog({
                             <p className="text-sm text-gray-500 mb-4">
                                 {search.trim()
                                     ? 'Không có thành viên nào phù hợp với từ khóa.'
-                                    : fund.type === 'shared'
+                                    : fund?.type === 'shared'
                                         ? 'Mời thành viên tham gia quỹ chung'
                                         : 'Quỹ cá nhân chỉ có bạn'}
                             </p>
@@ -220,7 +217,7 @@ export function FundMemberListDialog({
                                                 {roleInfo.icon}
                                                 {roleInfo.label}
                                             </Badge>
-                                            {fund.type === 'shared' &&
+                                            {fund?.type === 'shared' &&
                                                 member.role !== 'owner' &&
                                                 onRemoveMember && (
                                                     <Button
@@ -241,7 +238,7 @@ export function FundMemberListDialog({
                     )}
                 </ScrollArea>
 
-                {fund.type === 'shared' && members.length > 0 && (
+                {fund?.type === 'shared' && members.length > 0 && (
                     <div className="px-7 py-4 border-t text-xs text-gray-500">
                         <div className="flex items-center gap-1">
                             <Shield className="h-3 w-3 text-sm text-blue-500" />

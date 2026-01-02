@@ -85,3 +85,20 @@ export interface UpdateFundDto {
   type?: FundType
   description?: string | null
 }
+
+export interface UserJoinRequest extends BaseEntity {
+  email: string,
+  name: string
+}
+
+export interface JoinFundResponse extends BaseEntity {
+  fundId: string
+  userId: string
+  status: string
+  tag?: string
+  userEmail: string
+  reviewedById?: string
+  reviewAt?: string
+  message?: string
+  user: UserJoinRequest
+}

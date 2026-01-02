@@ -79,3 +79,11 @@ export async function dialogCateOpened(fundId: string): Promise<boolean> {
   });
   return true;
 }
+
+export async function approveJoinRequest(fundId: String, requestId: string): Promise<any> {
+  await axiosRequest.post(`/funds/${fundId}/join-requests/${requestId}/approve`)
+}
+
+export async function rejectJoinRequest(fundId: String, requestId: string): Promise<any> {
+  await axiosRequest.post(`/funds/${fundId}/join-requests/${requestId}/reject`)
+}
