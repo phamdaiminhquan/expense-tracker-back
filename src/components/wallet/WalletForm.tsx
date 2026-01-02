@@ -24,7 +24,7 @@ export const WalletForm: React.FC<WalletFormProps> = ({
   loading,
 }) => {
   return (
-    <>
+    <React.Fragment>
       <div className="flex justify-between items-center mb-6 px-1">
         <div className="flex items-center gap-2">
           <button
@@ -93,6 +93,6 @@ export const WalletForm: React.FC<WalletFormProps> = ({
           {loading ? "Đang tạo..." : <><Check size={20} /> Tạo ví ngay</>}
         </Button>
       </div>
-    </>
+    </React.Fragment>
   );
 };

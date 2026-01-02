@@ -31,7 +31,7 @@ export const WalletList: React.FC<WalletListProps> = ({
   const hasWallets = data?.data && data.data.length > 0;
 
   return (
-    <>
+    <React.Fragment>
       <div className="flex justify-between items-center mb-6 px-1">
         <h3 className="text-lg font-bold text-gray-800">Chọn ví nguồn</h3>
         <button
@@ -148,6 +148,6 @@ export const WalletList: React.FC<WalletListProps> = ({
           })
         )}
       </div>
-    </>
+    </React.Fragment>
   );
 };

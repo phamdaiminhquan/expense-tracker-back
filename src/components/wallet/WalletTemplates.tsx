@@ -14,7 +14,7 @@ export const WalletTemplates: React.FC<WalletTemplatesProps> = ({
   canGoBack,
 }) => {
   return (
-    <>
+    <React.Fragment>
       <div className="flex justify-between items-center mb-6 px-1">
         <div className="flex items-center gap-2">
           <button
@@ -56,6 +56,6 @@ export const WalletTemplates: React.FC<WalletTemplatesProps> = ({
           );
         })}
       </div>
-    </>
+    </React.Fragment>
   );
 };
