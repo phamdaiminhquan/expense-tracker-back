@@ -47,19 +47,17 @@ export function MessageRoute() {
   } = useFund(fundParams, fundId);
 
   // Get visible funds (filter by access permission)
-  const visibleFunds = useMemo(() => {
-    if (!fundList?.data || !currentUserId) return [];
-    return fundList.data.filter(
-      (f) => f.ownerId === currentUserId || f.memberIds?.includes(currentUserId)
-    );
-  }, [currentUserId, fundList?.data]);
-
+  // const fundList?.data = useMemo(() => {
+  //   if (!fundList?.data || !currentUserId) return [];
+  //   return fundList.data.filter(
+  //     (f) => f.ownerId === currentUserId || f.memberIds?.includes(currentUserId)
+  //   );
+  // }, [currentUserId, fundList?.data]);
   // Auto-select fund
   const selectedFund = useMemo(() => {
     if (fundId && fund) return fund;
-    return visibleFunds.length > 0 ? visibleFunds[0] : null;
-  }, [fundId, fund, visibleFunds]);
-
+    return fundList?.data ? fundList?.data[0] : null;
+  }, [fundId, fund, fundList?.data]);
   const {
     messageList,
     isLoadingList: isLoadingMessages,
@@ -164,7 +162,7 @@ export function MessageRoute() {
   const handleDeleteFund = async (id: string) => {
     const success = await deleteFund(id);
     if (success && fundId === id) {
-      const remainingFunds = visibleFunds.filter((f) => f.id !== id);
+      const remainingFunds = fundList?.data.filter((f) => f.id !== id);
       if (remainingFunds.length > 0) {
         navigate(`/chat/${remainingFunds[0].id}`, { replace: true });
       } else {
@@ -218,7 +216,7 @@ export function MessageRoute() {
   return (
     <MessagePage
       fund={selectedFund}
-      funds={visibleFunds}
+      funds={fundList?.data}
       messages={messageList?.data || []}
       categories={categories}
       currentUserId={currentUserId as string}

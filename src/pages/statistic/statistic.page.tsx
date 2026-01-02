@@ -5,14 +5,14 @@ import StatisticChartPart from "./parts/statistic-chart/statistic-chart.part";
 interface ChartOverlayProps {
   isOpen?: boolean;
   onClose?: () => void;
-  messages: any[];
+  fundId?: string | null;
   totalExpense: number;
   totalIncome: number;
 }
 export const StatisticPage = ({
   isOpen,
   onClose,
-  messages,
+  fundId,
   totalExpense,
   totalIncome,
 }: ChartOverlayProps) => {
@@ -43,7 +43,7 @@ export const StatisticPage = ({
         </div>
 
         <StatisticChartPart
-          messages={messages}
+          fundId={fundId}
           totalExpense={totalExpense}
           totalIncome={totalIncome}
         />

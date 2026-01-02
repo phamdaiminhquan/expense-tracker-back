@@ -1,17 +1,26 @@
 import React from "react";
 import { PieChart, Pie, Cell, Tooltip as RechartsTooltip } from "recharts";
+import { StackRowAlignJustCenter } from "../styles/stack.style";
 
 interface Props {
   data: any[];
   formatVND: (v: any) => string;
 }
 
-const PieChartComponent: React.FC<Props> = ({ data, formatVND }) => {
+export const PieChartComponent: React.FC<Props> = ({ data, formatVND }) => {
+  const normalized = (data || []).map((e: any) => ({
+    name: e.name ?? e.categoryName ?? "",
+    value: Number(e.value ?? e.amount ?? 0),
+    color: e.color ?? e.categoryColor ?? "#CBD5E1",
+  }));
+
   return (
-    <React.Fragment>
-      <PieChart>
+    <StackRowAlignJustCenter>
+      <PieChart width={280} height={256}>
         <Pie
-          data={data}
+          data={normalized}
+          cx="50%"
+          cy="50%"
           innerRadius={65}
           outerRadius={85}
           paddingAngle={5}
@@ -19,7 +28,7 @@ const PieChartComponent: React.FC<Props> = ({ data, formatVND }) => {
           stroke="none"
           cornerRadius={5}
         >
-          {data.map((entry, index) => (
+          {normalized.map((entry: any, index: number) => (
             <Cell key={`cell-${index}`} fill={entry.color} />
           ))}
         </Pie>
@@ -32,8 +41,6 @@ const PieChartComponent: React.FC<Props> = ({ data, formatVND }) => {
           }}
         />
       </PieChart>
-    </React.Fragment>
+    </StackRowAlignJustCenter>
   );
 };
-
-export default PieChartComponent;

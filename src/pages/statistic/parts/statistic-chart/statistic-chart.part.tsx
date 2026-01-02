@@ -6,78 +6,73 @@ import {
   BarChart3,
 } from "lucide-react";
 import { ResponsiveContainer } from "recharts";
-import PieChartComponent from "../../../../components/components-mui/charts/pie-chart.component";
-import BarChartComponent from "../../../../components/components-mui/charts/bar-chart.component";
+import useSWR from "swr";
+import { getStatisticsByFundIdDetail } from "@/apis/statistics/statistic.api";
+import { Range, TransactionType } from "@/apis/statistics/statistic.enum";
+import {
+  getCategoriesStatisticDto,
+  getListStatisticsDto,
+} from "@/apis/statistics/statistic.interface";
+import { BarChartComponent } from "@/components/components-mui/charts/bar-chart.component";
+import { PieChartComponent } from "@/components/components-mui/charts/pie-chart.component";
 
 interface Props {
-  messages: any[];
-  totalExpense: number;
-  totalIncome: number;
+  fundId?: string | null;
+  totalExpense?: number;
+  totalIncome?: number;
 }
 
 const StatisticChartPart: React.FC<Props> = ({
-  messages,
+  fundId,
   totalExpense,
   totalIncome,
 }) => {
   const [activeTab, setActiveTab] = useState("expense");
   const [chartType, setChartType] = useState("pie");
+  // Fetch statistics for current fund + active tab (EXPENSE/INCOME) using SWR
+  const swrKey = fundId ? ["statistics", fundId, activeTab, Range.MONTH] : null;
+  const {
+    data: statistic,
+    error,
+    isValidating,
+  } = useSWR(
+    swrKey,
+    async () =>
+      await getStatisticsByFundIdDetail(fundId!, {
+        range: Range.MONTH,
+        transactionType:
+          activeTab === "expense"
+            ? TransactionType.EXPENSE
+            : TransactionType.INCOME,
+      } as unknown as getListStatisticsDto),
+    { revalidateOnFocus: false }
+  );
 
   const chartData = useMemo(() => {
-    const relevantType = activeTab;
-    const relevantMsgs = messages.filter(
-      (m) =>
-        m.status === "done" && m.transType === relevantType && m.rawAmount > 0
-    );
+    const stats = statistic;
+    if (!stats || !stats.categories || stats.categories.length === 0) return [];
 
-    const grouped = relevantMsgs.reduce((acc, curr) => {
-      const cat = curr.category || "Khác";
-      if (!acc[cat]) acc[cat] = { name: cat, value: 0, color: "" };
-      acc[cat].value += curr.rawAmount;
-      return acc;
-    }, {} as Record<string, any>);
-
-    let result = Object.values(grouped);
-    if (result.length === 0) {
-      if (relevantType === "expense") {
-        return [
-          { name: "Ăn uống", value: 0, color: "#F43F5E" },
-          { name: "Mua sắm", value: 0, color: "#3B82F6" },
-        ];
-      } else {
-        return [
-          { name: "Lương", value: 0, color: "#10B981" },
-          { name: "Thưởng", value: 0, color: "#F59E0B" },
-        ];
-      }
-    }
-
-    const EXPENSE_COLORS = [
-      "#F43F5E",
-      "#FB923C",
-      "#3B82F6",
-      "#8B5CF6",
-      "#EC4899",
-    ];
-    const INCOME_COLORS = ["#10B981", "#34D399", "#06B6D4", "#F59E0B"];
-    const palette = relevantType === "expense" ? EXPENSE_COLORS : INCOME_COLORS;
-
-    return result
-      .map((item: any, idx: number) => ({
-        ...item,
-        color: palette[idx % palette.length],
+    // Map API fields (categoryName, amount, categoryColor) to chart-friendly keys
+    return stats.categories
+      .map((c: getCategoriesStatisticDto) => ({
+        name: c.categoryName,
+        value: Number(c.amount || 0),
+        color: c.categoryColor || "#CBD5E1",
       }))
-      .sort((a: any, b: any) => b.value - a.value);
-  }, [messages, activeTab]);
+      .sort((a, b) => b.value - a.value);
+  }, [statistic]);
 
-  const currentTotal = activeTab === "expense" ? totalExpense : totalIncome;
+  const currentTotal = statistic
+    ? statistic.totalAmount || 0
+    : activeTab === "expense"
+    ? totalExpense || 0
+    : totalIncome || 0;
 
   const formatVND = (val: any) =>
     new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(Number(val));
-
   return (
     <div className="flex-1 overflow-y-auto px-6 py-6 hide-scrollbar bg-gray-50/50">
       {/* Tab Switcher */}
