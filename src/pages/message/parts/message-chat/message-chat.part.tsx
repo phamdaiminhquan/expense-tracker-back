@@ -14,9 +14,9 @@ import {
 } from "../../message.constant";
 import MessageHeaderPart from "../message-header/message-header.part";
 import MessageBubblePart from "../message-bubble/message-bubble.part";
-import WalletSelectorModal from "../../wallet/WalletSelectorModal";
 import useSWR from "swr";
 import { getListWallets } from "@/apis/wallets/wallet.api";
+import WalletSelectorModal from "@/components/WalletSelectorModal";
 
 interface ChatMessageViewProps {
   fund: Fund | null;
@@ -399,6 +399,17 @@ export function MessageChatPart({
         />
       </div>
 
+      <WalletSelectorModal
+        data={data}
+        mutate={mutate}
+        open={showWalletSelector}
+        onClose={() => setShowWalletSelector(false)}
+        selectedWalletId={selectedWalletId}
+        onSelect={(id) => {
+          setSelectedWalletId(id);
+          setShowWalletSelector(false);
+        }}
+      />
       {showCategorySelector && (
         <div className="fixed inset-0 z-50 flex items-end justify-center">
           <div

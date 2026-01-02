@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { WALLET_TEMPLATES } from "@/pages/message/message.constant";
-import {
-  createWallet,
-  deleteWallet,
-} from "@/apis/wallets/wallet.api";
+import { createWallet, deleteWallet } from "@/apis/wallets/wallet.api";
 import { WalletType } from "@/apis/wallets/wallet.enum";
 import { CreateWalletDto } from "@/apis/wallets/wallet.interface";
 import { toast } from "sonner";
@@ -45,13 +42,11 @@ const WalletSelectorModal: React.FC<Props> = ({
   mutate,
   createOnly = false,
 }) => {
-  const hasWallets = data?.data && data.data.length > 0;
-  
   // Initial view state logic
   const [modalView, setModalView] = useState<"list" | "templates" | "form">(
     createOnly ? "templates" : "list"
   );
-  
+
   const [loading, setLoading] = useState(false);
   const [formBalance, setFormBalance] = useState<number | string>(0);
   const [chosenTemplate, setChosenTemplate] = useState<any>(
@@ -62,13 +57,13 @@ const WalletSelectorModal: React.FC<Props> = ({
   // Reset view when opening/closing or changing mode
   useEffect(() => {
     if (open) {
-       if (createOnly) {
-         setModalView("templates");
-       } else {
-         // Always start at list view if not createOnly, 
-         // even if empty (WalletList handles empty state now)
-         setModalView("list");
-       }
+      if (createOnly) {
+        setModalView("templates");
+      } else {
+        // Always start at list view if not createOnly,
+        // even if empty (WalletList handles empty state now)
+        setModalView("list");
+      }
     }
   }, [open, createOnly]);
 
@@ -125,7 +120,6 @@ const WalletSelectorModal: React.FC<Props> = ({
         onClick={handleClose}
       />
       <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl relative z-10 animate-in slide-in-from-bottom duration-300 max-h-[90vh] flex flex-col min-h-[50vh]">
-        
         {modalView === "list" && (
           <WalletList
             data={data}

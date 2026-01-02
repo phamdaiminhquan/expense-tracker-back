@@ -1,5 +1,13 @@
 import React from "react";
-import { Plus, Wallet as WalletIcon, CreditCard, Banknote, Check, Edit3, Trash } from "lucide-react";
+import {
+  Plus,
+  Wallet as WalletIcon,
+  CreditCard,
+  Banknote,
+  Check,
+  Edit3,
+  Trash,
+} from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { WALLET_TEMPLATES } from "@/pages/message/message.constant";
 
@@ -29,8 +37,8 @@ export const WalletList: React.FC<WalletListProps> = ({
         <button
           onClick={onAddNew}
           className={`p-2 rounded-full transition-colors ${
-            !hasWallets 
-              ? "bg-indigo-100 text-indigo-600 animate-pulse ring-2 ring-indigo-300" 
+            !hasWallets
+              ? "bg-indigo-100 text-indigo-600 animate-pulse ring-2 ring-indigo-300"
               : "bg-gray-100 hover:bg-gray-200 text-gray-600"
           }`}
         >
@@ -38,7 +46,7 @@ export const WalletList: React.FC<WalletListProps> = ({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 overflow-y-auto pb-6 flex-1">
+      <div className="flex flex-col gap-3 overflow-y-auto pb-6 flex-1">
         {!hasWallets ? (
           <div className="flex flex-col items-center justify-center h-full py-10 text-center">
             <div className="w-16 h-16 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mb-4">
@@ -62,63 +70,80 @@ export const WalletList: React.FC<WalletListProps> = ({
               WALLET_TEMPLATES.find((t) => t.code === w.icon) ||
               WALLET_TEMPLATES.find((t) => t.code === "custom");
             const isSelected = selectedWalletId === w.id;
+
             return (
-              <div key={w.id} className="relative group">
-                <button
-                  onClick={() => {
-                    onSelect(w.id);
-                    onClose();
+              <button
+                key={w.id}
+                onClick={() => {
+                  onSelect(w.id);
+                  onClose();
+                }}
+                className={`w-full h-20 flex items-center gap-4 px-4 rounded-2xl border transition-all text-left ${
+                  isSelected
+                    ? "bg-indigo-50 border-indigo-500 shadow-sm"
+                    : "bg-white border-gray-100 hover:border-gray-300"
+                }`}
+              >
+                {/* Icon ví */}
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                  style={{
+                    backgroundColor: style?.bgLight || "#F9FAFB",
+                    color: style?.text || "#374151",
                   }}
-                  className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all overflow-hidden text-left ${
-                    isSelected
-                      ? "bg-indigo-50 border-indigo-500 shadow-sm"
-                      : "bg-white border-gray-100 hover:border-gray-300"
-                  }`}
                 >
+                  {style?.icon === "wallet" ? (
+                    <WalletIcon size={20} />
+                  ) : style?.icon === "card" ? (
+                    <CreditCard size={20} />
+                  ) : (
+                    <Banknote size={20} />
+                  )}
+                </div>
+
+                {/* Thông tin ví */}
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-gray-800 text-sm truncate">
+                    {w.name}
+                  </div>
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center `}
-                    style={{
-                      backgroundColor: style?.bgLight || "#F9FAFB",
-                      color: style?.text || "#374151",
-                    }}
+                    className={`text-xs font-medium mt-0.5 ${
+                      isSelected ? "text-indigo-600" : "text-gray-400"
+                    }`}
                   >
-                    {style?.icon === "wallet" ? (
-                      <WalletIcon size={20} />
-                    ) : style?.icon === "card" ? (
-                      <CreditCard size={20} />
-                    ) : (
-                      <Banknote size={20} />
-                    )}
+                    Số dư: {formatCurrency(w.balance || 0)}
                   </div>
-                  <div className="flex-1">
-                    <div className="font-bold text-gray-800 text-sm">
-                      {w.name}
-                    </div>
-                    <div
-                      className={`text-xs font-medium mt-0.5 ${
-                        isSelected ? "text-indigo-600" : "text-gray-400"
-                      }`}
-                    >
-                      Số dư: {formatCurrency(w.balance || 0)}
-                    </div>
-                  </div>
+                </div>
+
+                {/* Actions bên phải */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Handle edit
+                    }}
+                    className="p-2 text-gray-300 hover:text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors"
+                  >
+                    <Edit3 size={16} />
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(w.id);
+                    }}
+                    className="p-2 text-gray-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                  >
+                    <Trash size={16} />
+                  </button>
+
                   {isSelected && (
-                    <div className="bg-indigo-500 text-white p-1 rounded-full">
-                      <Check size={12} strokeWidth={3} />
+                    <div className="bg-indigo-500 text-white p-1.5 rounded-full ml-1">
+                      <Check size={14} strokeWidth={3} />
                     </div>
                   )}
-                </button>
-
-                <button className="absolute right-16 top-1/2 -translate-y-1/2 p-2 text-gray-300 hover:text-indigo-500 transition-colors">
-                  <Edit3 size={16} />
-                </button>
-                <button
-                  onClick={() => onDelete(w.id)}
-                  className="absolute right-10 top-1/2 -translate-y-1/2 p-2 text-gray-300 hover:text-indigo-500 transition-colors"
-                >
-                  <Trash size={16} />
-                </button>
-              </div>
+                </div>
+              </button>
             );
           })
         )}
