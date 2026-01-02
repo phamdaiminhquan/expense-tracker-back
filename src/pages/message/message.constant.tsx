@@ -103,7 +103,7 @@ export const WALLET_TEMPLATES = [
     text: "#10B981",
     bgLight: "#ECFDF5", // emerald-50
     icon: "cash",
-    img: "/src/assets/image/logo/cash.svg",
+    img: "/assets/image/logo/cash.svg",
   },
   {
     code: "momo",
@@ -112,7 +112,7 @@ export const WALLET_TEMPLATES = [
     text: "#A50064",
     bgLight: "#FDF2F8", // pink-50
     icon: "momo",
-    img: "/src/assets/image/logo/momo.svg",
+    img: "/assets/image/logo/momo.svg",
   },
   {
     code: "tcb",
@@ -121,7 +121,7 @@ export const WALLET_TEMPLATES = [
     text: "#74B156",
     bgLight: "#F0FDF4", // green-50
     icon: "tcb",
-    img: "/src/assets/image/logo/techcombank.svg",
+    img: "/assets/image/logo/techcombank.svg",
   },
   {
     code: "vcb",
@@ -130,7 +130,7 @@ export const WALLET_TEMPLATES = [
     text: "#74B156",
     bgLight: "#F0FDF4", // green-50
     icon: "vcb",
-    img: "/src/assets/image/logo/vietcombank.svg",
+    img: "/assets/image/logo/vietcombank.svg",
   },
   {
     code: "tpb",
@@ -139,7 +139,7 @@ export const WALLET_TEMPLATES = [
     text: "#8B5CF6",
     bgLight: "#F5F3FF", // purple-50
     icon: "tpb",
-    img: "/src/assets/image/logo/tpbank.svg",
+    img: "/assets/image/logo/tpbank.svg",
   },
   {
     code: "mb",
@@ -148,7 +148,7 @@ export const WALLET_TEMPLATES = [
     text: "#1D4ED8",
     bgLight: "#EFF6FF", // blue-50
     icon: "mb",
-    img: "/src/assets/image/logo/mbbank.svg",
+    img: "/assets/image/logo/mbbank.svg",
   },
   {
     code: "zalopay",
@@ -157,7 +157,7 @@ export const WALLET_TEMPLATES = [
     text: "#0068FF",
     bgLight: "#ECFEFF", // cyan-50
     icon: "zalopay",
-    img: "/src/assets/image/logo/zalo-pay.svg",
+    img: "/assets/image/logo/zalo-pay.svg",
   },
   {
     code: "custom",
@@ -166,7 +166,7 @@ export const WALLET_TEMPLATES = [
     text: "#4B5563",
     bgLight: "#F3F4F6", // gray-100
     icon: "custom",
-    img: "/src/assets/image/logo/wallet.svg",
+    img: "/assets/image/logo/wallet.svg",
   },
 ];
 
