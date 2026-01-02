@@ -19,7 +19,7 @@ import { Users, User as UserIcon } from "@phosphor-icons/react";
 interface CreateFundDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreateFund: (name: string, type: FundType, memberIds: string[]) => void;
+  onCreateFund: (name: string, type: FundType) => void;
   currentUserId: string;
   allUsers: User[];
 }
@@ -41,14 +41,13 @@ export function FundCreatePart({
     e.preventDefault();
     if (!name.trim()) return;
 
-    const memberIds = type === "shared" ? selectedMembers : [currentUserId];
-    onCreateFund(name.trim(), type, memberIds);
-
-    setName("");
-    setType("personal");
-    setSelectedMembers([currentUserId]);
-    onOpenChange(false);
-  };
+    onCreateFund(name.trim(), type)
+    
+    setName('')
+    setType('personal')
+    setSelectedMembers([currentUserId])
+    onOpenChange(false)
+  }
 
   const handleMemberToggle = (userId: string) => {
     if (userId === currentUserId) return;

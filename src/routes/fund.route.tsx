@@ -68,7 +68,7 @@ export function FundsRoute() {
     type: "personal" | "shared",
     memberIds: string[]
   ) => {
-    const newFund = await createFund({ name, type, memberIds });
+    const newFund = await createFund({ name, type });
     navigate(`/funds/${newFund.id}`);
   };
 

@@ -11,9 +11,12 @@ import { FundUpdatePart } from "../fund/parts/fund-update/fund-update.part";
 import { Fund } from "@/apis/funds/fund.entities";
 import ChartContent from "../statistic/parts/statistic-chart/statistic-chart.part";
 import { StatisticPage } from "../statistic/statistic.page";
-import { useFundMembers } from "@/hooks/use-fund-members.hook";
+import { useFundMembers } from '@/hooks/use-fund-members.hook';
+import useSWR from "swr";
+import { getListWallets } from "@/apis/wallets/wallet.api";
 
 import { FundMemberListDialog } from "@/components/MemberListDialog";
+import { TutorialOverlay } from "@/components/TutorialOverlay";
 
 interface MessagePageProps {
   fund: Fund | null;
@@ -28,7 +31,6 @@ interface MessagePageProps {
   onCreateFund: (
     name: string,
     type: "personal" | "shared",
-    memberIds: string[]
   ) => Promise<void>;
   onUpdateFund: (
     fundId: string,
@@ -48,6 +50,7 @@ interface MessagePageProps {
   hasMoreFunds?: boolean;
   onLoadMoreFunds?: () => void;
   onSearchFunds?: (query: string) => void;
+  onRefreshFunds?: () => Promise<void>; // Callback để reload funds khi tạo ví
 }
 
 export function MessagePage({
@@ -75,6 +78,7 @@ export function MessagePage({
   hasMoreFunds = false,
   onLoadMoreFunds,
   onSearchFunds,
+  onRefreshFunds,
 }: MessagePageProps) {
   // const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   // const [isCategorySubscriptionOpen, setIsCategorySubscriptionOpen] =
@@ -106,10 +110,14 @@ export function MessagePage({
     loading: isProcessingMember,
     removeMember,
     mutate: mutateMembers,
-  } = useFundMembers(selectedFundId || "", {
-    page: memberPage,
-    take: pageSize,
-  });
+  } = useFundMembers(selectedFundId || '', { page: memberPage, take: pageSize });
+
+  // Fetch danh sách ví (wallets)
+  const { data: walletData, mutate: mutateWallets } = useSWR(
+    "wallets",
+    async () => await getListWallets({ page: 1, take: 10 }),
+    { revalidateOnFocus: false }
+  );
 
   // function
   // Hiển thị banner khi đang load funds (lần đầu vào app)
@@ -146,9 +154,8 @@ export function MessagePage({
   const handleCreateFundComplete = async (
     name: string,
     type: "personal" | "shared",
-    memberIds: string[]
   ) => {
-    await onCreateFund(name, type, memberIds);
+    await onCreateFund(name, type);
     setIsCreateFundDialogOpen(false);
   };
   const handleUpdateFundComplete = async (
@@ -185,8 +192,12 @@ export function MessagePage({
     } catch {}
   };
 
+  const hasWallets = walletData?.data && walletData.data.length > 0;
+  // const hasNoFunds = !isLoadingFunds && funds.length === 0;
+
   return (
     <React.Fragment>
+      <TutorialOverlay />
       {/* Container: p-0 trên mobile, p-3 trên desktop */}
       <div
         className={`flex h-dvh lg:h-screen overflow-hidden bg-[#F0F2F5] lg:p-3 lg:gap-3 p-0 gap-0 ${

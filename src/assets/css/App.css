@@ -90,13 +90,6 @@ html {
   font-display: swap;
 }
 
-/* RESET */
-ul,
-p {
-  margin: 0;
-  padding: 0;
-}
-
 /* RESET AUTOFILL */
 input:-webkit-autofill,
 input:-webkit-autofill:focus {

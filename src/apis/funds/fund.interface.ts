@@ -77,7 +77,6 @@ export interface GetListFundDto extends PageOptionsDto<Fund> { }
 export interface CreateFundDto {
   name: string
   type: FundType
-  memberIds: string[]
   description?: string | null
 }
 

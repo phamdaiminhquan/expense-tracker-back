@@ -69,6 +69,8 @@ export function MessageChatPart({
   const [showWalletSelector, setShowWalletSelector] = useState(false);
   const [showCategorySelector, setShowCategorySelector] = useState(false);
   const [selectedWalletId, setSelectedWalletId] = useState("momo");
+
+  // OPTIMISTIC UI STATE - Hiện tin nhắn ngay lập tức
   const [optimisticMessages, setOptimisticMessages] = useState<
     OptimisticMessage[]
   >([]);
@@ -372,9 +374,8 @@ export function MessageChatPart({
         <div ref={bottomRef} className="h-1" />
       </div>
 
-      {/* 4. FOOTER & INPUT AREA - Fixed at bottom */}
+      {/* FOOTER & INPUT_BAR */}
       <div className="shrink-0 z-20 bg-white">
-        {/* INTEGRATION ZONE: CapyInputBar với Optimistic UI */}
         <CapyInputBar
           inputValue={input}
           setInputValue={setInput}
@@ -397,19 +398,6 @@ export function MessageChatPart({
           onCategoryClick={() => setShowCategorySelector(true)}
         />
       </div>
-
-      {/* 5. MODALS */}
-      <WalletSelectorModal
-        data={data}
-        mutate={mutate}
-        open={showWalletSelector}
-        onClose={() => setShowWalletSelector(false)}
-        selectedWalletId={selectedWalletId}
-        onSelect={(id) => {
-          setSelectedWalletId(id);
-          setShowWalletSelector(false);
-        }}
-      />
 
       {showCategorySelector && (
         <div className="fixed inset-0 z-50 flex items-end justify-center">

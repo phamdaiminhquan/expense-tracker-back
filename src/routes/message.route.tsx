@@ -8,7 +8,11 @@ import { useFund } from "@/app/providers/FundProvider";
 import { useMessage } from "@/app/providers/MessageProvider";
 import { useAppReady } from "@/contexts/app-ready.context";
 import { getFundSearchNumberId } from "@/apis/funds/fund.api";
+import { getListWallets } from "@/apis/wallets/wallet.api";
 import { toast } from "sonner";
+import useSWR from "swr";
+import LoadingScreenZen from "@/components/LoadingScreenZen";
+import { WelcomeScreen } from "@/components/WelcomeScreen";
 
 export function MessageRoute() {
   // hook
@@ -39,6 +43,7 @@ export function MessageRoute() {
     createFund,
     updateFund,
     deleteFund,
+    mutateList,
   } = useFund(fundParams, fundId);
 
   // Get visible funds (filter by access permission)
@@ -67,6 +72,13 @@ export function MessageRoute() {
   const { categories, createCategory, updateCategory, deleteCategory } =
     useCategories();
 
+  // Fetch wallets data for onboarding check
+  const { data: walletsData, mutate: mutateWallets } = useSWR(
+    "onboarding-wallets",
+    async () => await getListWallets({ page: 1, take: 10 }),
+    { revalidateOnFocus: false, dedupingInterval: 30000 }
+  );
+
   // Signal app ready khi đã có data (hoặc đã load xong dù empty)
   useEffect(() => {
     // Ready khi: đã load xong funds (không còn loading)
@@ -82,6 +94,51 @@ export function MessageRoute() {
     }
   }, [selectedFund, fundId, navigate]);
 
+  // Logic: Check if data is still loading
+  const isInitialLoading = isLoadingFunds || !walletsData;
+
+  // Logic: Check onboarding status
+  const hasWallets = walletsData?.data && walletsData.data.length > 0;
+  const hasFunds = fundList?.data && fundList.data.length > 0;
+  const needsOnboarding = !hasWallets || !hasFunds;
+
+  // If initial data is still loading, show loading screen
+  if (isInitialLoading) {
+    return <LoadingScreenZen isLoading={true} />;
+  }
+
+  // If user needs onboarding, show welcome screen
+  if (needsOnboarding) {
+    return (
+      <WelcomeScreen
+        userName={currentUserName || undefined}
+        walletData={walletsData}
+        onWalletMutate={mutateWallets}
+        onCreateFund={async (name, type) => {
+          await createFund({ name, type });
+          // Refresh funds list after creating fund
+          await mutateList();
+        }}
+        currentUserId={currentUserId || undefined}
+        allUsers={currentUser ? [currentUser] : []}
+        onComplete={async () => {
+          // After onboarding complete, refresh data and show main UI
+          await mutateList();
+          await mutateWallets();
+          // Clear the onboarding flags
+          localStorage.setItem('mustCreateWallet', 'false');
+          localStorage.setItem('mustCreateFund', 'false');
+          localStorage.setItem('has_onboarded', 'true');
+          // Remove the justLoggedIn flag from session
+          sessionStorage.removeItem('justLoggedIn');
+        }}
+        onLogout={logout}
+        funds={fundList?.data || []}
+        isLoadingFunds={isLoadingFunds}
+      />
+    );
+  }
+
   // Handle select fund
   const handleSelectFund = (selectedFundId: string) => {
     navigate(`/chat/${selectedFundId}`);
@@ -92,7 +149,7 @@ export function MessageRoute() {
     type: "personal" | "shared",
     memberIds: string[]
   ) => {
-    const newFund = await createFund({ name, type, memberIds });
+    const newFund = await createFund({ name, type });
     navigate(`/chat/${newFund.id}`);
   };
 
@@ -169,7 +226,7 @@ export function MessageRoute() {
       currentUser={currentUser}
       resolveUserName={resolveUserName}
       onSelectFund={handleSelectFund}
-      onCreateFund={handleCreateFund}
+      onCreateFund={(name, type) => handleCreateFund(name, type, [currentUserId as string])}
       onUpdateFund={handleUpdateFund}
       onDeleteFund={handleDeleteFund}
       // onSearchFunds={(prev) => setFundParams((p) => ({ ...p, search: prev, page: 1 }))}
@@ -197,6 +254,10 @@ export function MessageRoute() {
       isLoadingMoreFunds={false}
       hasMoreFunds={hasMoreFunds}
       onLoadMoreFunds={handleLoadMoreFunds}
+      onRefreshFunds={async () => {
+        // Reload funds list khi user tạo ví thành công
+        await mutateList();
+      }}
     />
   );
 }

@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { AuthSession, login, register } from "@/lib/auth";
+import { AuthSession, login, register, saveAuthSession } from "@/lib/auth";
 import { toast } from "sonner";
 import { Eye, EyeOff, ArrowRight, Loader2, Check } from "lucide-react";
 import { Capybara, type CapyMood } from "./capybara/CapyFace";
 import { LoadingScreen } from "./capybara/LoadingScreen";
 import { useIsMobile } from "@/hooks/use-mobile.hook";
+import { useCapyEyeTracking } from '@/hooks/use-capy-eyes-tracking.hook'
+import { getListFunds } from '@/apis/funds/fund.api'
+import { getListWallets } from '@/apis/wallets/wallet.api'
+import { preload } from 'swr'
 
 // ==========================================
 // STYLES & ANIMATIONS
@@ -203,7 +207,6 @@ export function LoginForm({ onLogin }: LoginFormProps) {
 
   // Capybara States
   const [capyMood, setCapyMood] = useState<CapyMood>("sleepy");
-  const [eyePosition, setEyePosition] = useState({ x: 0, y: 0 });
 
   // Form States
   const [mode, setMode] = useState<AuthMode>("login");
@@ -227,10 +230,21 @@ export function LoginForm({ onLogin }: LoginFormProps) {
   const isMobile = useIsMobile();
 
   // Refs
-  const targetButtonRef = useRef<HTMLButtonElement>(null);
-  const moodTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const capybaraRef = useRef<HTMLDivElement>(null);
-  const randomGlanceRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const targetButtonRef = useRef<HTMLButtonElement>(null)
+  const moodTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const capybaraRef = useRef<HTMLDivElement>(null)
+  const randomGlanceRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Hook chuyên dụng để track mắt
+  const { eyePosition, setEyePosition } = useCapyEyeTracking(
+    capybaraRef, 
+    !focusedField && !showPassword && !showConfirmPassword,
+    () => {
+      lastInteractionRef.current = Date.now();
+      // Chỉ chuyển sang neutral nếu đang không ở mood đặc biệt khác
+      setCapyMood(prev => (prev === 'sleepy' || prev === 'neutral') ? 'neutral' : prev);
+    }
+  );
 
   // Validation
   const validateEmail = (emailStr: string): boolean => {
@@ -294,10 +308,10 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     const timer = setTimeout(() => {
       setIsLoading(false);
       setTimeout(() => {
-        setIsAppReady(true);
-      }, 600);
-    }, 2000);
-    return () => clearTimeout(timer);
+        setIsAppReady(true)
+      }, 600)
+    }, 2000)
+    return () => clearTimeout(timer)
   }, []);
 
   // Helper: Calculate eye position relative to Capybara
@@ -516,10 +530,50 @@ export function LoginForm({ onLogin }: LoginFormProps) {
               password: password.trim(),
             });
 
-      setCapyMood("simp");
+      // Save session immediately to enable authenticated API calls
+      saveAuthSession(session)
 
-      if (introMode && mode === "login") {
-        toast.success("Chào mừng trở lại!", {
+      // Fetch initial data to determine welcome screen state
+      try {
+        // 1. Logic kiểm tra user cũ/mới (Giữ nguyên - Rất nhẹ)
+        const [fundsRes, walletsRes] = await Promise.all([
+          getListFunds({ page: 1, take: 1 }),
+          getListWallets({ page: 1, take: 1 })
+        ]);
+
+        const hasFunds = fundsRes.data && fundsRes.data.length > 0;
+        const hasWallets = walletsRes.data && walletsRes.data.length > 0;
+        const hasData = hasFunds || hasWallets;
+
+        localStorage.setItem('mustCreateFund', hasFunds ? 'false' : 'true');
+        localStorage.setItem('mustCreateWallet', hasWallets ? 'false' : 'true');
+        
+        // Lưu flag boolean vào localStorage để Router quyết định hướng đi
+        localStorage.setItem('has_onboarded', hasData ? 'true' : 'false');
+
+        // 2. TỐI ƯU: Pre-fetch dữ liệu đầy đủ cho màn hình tiếp theo
+        // Việc này chạy ngầm (non-blocking) và lưu vào RAM (SWR Cache)
+        // Khi user chuyển sang màn hình Funds/Wallets, dữ liệu đã có sẵn.
+        if (hasData) {
+           // Preload Wallets (matches MessagePage key)
+           preload("wallets", async () => getListWallets({ page: 1, take: 10 }));
+           
+           // Preload Funds (matches FundProvider key with default params)
+           const defaultFundParams = { page: 1, take: 10 };
+           preload('funds' + JSON.stringify(defaultFundParams), async () => getListFunds(defaultFundParams));
+        }
+      } catch (dataError) {
+        console.error('Failed to fetch initial data:', dataError);
+        // Fallback: assume user needs to create nothing if error to avoid blocking
+        localStorage.setItem('mustCreateFund', 'false');
+        localStorage.setItem('mustCreateWallet', 'false');
+        localStorage.setItem('has_onboarded', 'true');
+      }
+
+      setCapyMood('simp')
+      
+      if (introMode && mode === 'login') {
+        toast.success('Chào mừng trở lại!', {
           description: `Xin chào, ${session.user.name}`,
         });
 

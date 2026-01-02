@@ -15,6 +15,7 @@ import {
   Wallet as WalletIcon,
   CreditCard,
   Banknote,
+  Plus,
 } from "lucide-react";
 
 const CATEGORIES_UI = {
@@ -182,14 +183,18 @@ export default function CapyInputBar({
           >
             <div
               className={`w-5 h-5 lg:w-6 lg:h-6 rounded-full flex items-center justify-center`}
-              style={{ backgroundColor: selectedWallet?.color || "#10B981" }}
+              style={{ backgroundColor: selectedWallet?.color || "#F3F4F6" }}
             >
-              {selectedWallet?.icon === "wallet" ? (
-                <WalletIcon size={14} />
-              ) : selectedWallet?.icon === "card" ? (
-                <CreditCard size={14} />
+              {selectedWallet ? (
+                selectedWallet.icon === "wallet" ? (
+                  <WalletIcon size={14} />
+                ) : selectedWallet.icon === "card" ? (
+                  <CreditCard size={14} />
+                ) : (
+                  <Banknote size={14} />
+                )
               ) : (
-                <Banknote size={14} />
+                <Plus size={14} className="text-gray-500" />
               )}
             </div>
             <div className="text-left">
@@ -197,7 +202,7 @@ export default function CapyInputBar({
                 Ví nguồn
               </div>
               <div className="text-[11px] lg:text-xs font-bold text-gray-700">
-                {selectedWallet?.name || "Chọn ví"}
+                {selectedWallet?.name || "Tạo ví"}
               </div>
             </div>
           </button>
