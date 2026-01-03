@@ -1,6 +1,7 @@
 import React from "react";
 import { Sparkles, TrendingUp, Menu } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
+import { formatNumber } from "@/common/utils/number.utils";
 
 interface Props {
   totalExpense: number;
@@ -70,7 +71,7 @@ const MessageHeaderPart: React.FC<Props> = ({
             Chi tiêu
           </div>
           <div className="text-lg lg:text-xl font-black text-gray-800 tracking-tight">
-            {totalExpense}
+            {formatNumber(totalExpense)}
           </div>
         </div>
         <div className="transition-all duration-300">
@@ -78,7 +79,7 @@ const MessageHeaderPart: React.FC<Props> = ({
             Thu nhập
           </div>
           <div className="text-lg lg:text-xl font-black text-gray-800 tracking-tight">
-            {totalIncome}
+            {formatNumber(totalIncome)}
           </div>
         </div>
       </div>

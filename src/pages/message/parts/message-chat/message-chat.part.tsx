@@ -14,11 +14,12 @@ import {
 } from "../../message.constant";
 import MessageHeaderPart from "../message-header/message-header.part";
 import MessageBubblePart from "../message-bubble/message-bubble.part";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { getListWallets } from "@/apis/wallets/wallet.api";
 import WalletSelectorModal from "@/components/element/modal/modal-wallet-selector.element";
 import { DialogMessageAction } from "@/components/element/dialog/dialog-message-action.element";
 import React from "react";
+import { getStatisticsByFundId } from "@/apis/statistics/statistic.api";
 interface ChatMessageViewProps {
   fund: Fund | null;
   messages: Message[];
@@ -79,12 +80,17 @@ export function MessageChatPart({
   >([]);
 
   // function
-  const { data, mutate } = useSWR(
+  const { data, mutate: mutateWallet } = useSWR(
     "wallets",
     async () => await getListWallets({ page: 1, take: 10 }),
     { revalidateOnFocus: false }
   );
 
+  const { data: dataStatisticFundId, mutate: mutateStatisticFundId } = useSWR(
+    fund?.id ? `statistics/funds/${fund.id}` : null,
+    async () => await getStatisticsByFundId(fund?.id || null),
+    { revalidateOnFocus: false }
+  );
   useEffect(() => {
     if (!data?.data || data?.data.length === 0) return;
     const exists = data?.data.find((w) => w?.id === selectedWalletId);
@@ -99,22 +105,6 @@ export function MessageChatPart({
     (a, b) => b.timestamp - a.timestamp
   );
   const visibleMessages = sortedMessages.slice(0, visibleCount);
-
-  // Calculate stats
-  const { totalExpense, totalIncome } = useMemo(() => {
-    let expense = 0;
-    let income = 0;
-    // Lọc tin nhắn của ngày hôm nay
-    const today = new Date().toDateString();
-    messages.forEach((m) => {
-      const msgDate = new Date(m.createdAt || m.timestamp).toDateString();
-      if (msgDate === today && m.transaction) {
-        expense += m.transaction.spendValue || 0;
-        income += m.transaction.earnValue || 0;
-      }
-    });
-    return { totalExpense: expense, totalIncome: income };
-  }, [messages]);
 
   // OPTIMISTIC UI: Xóa optimistic message khi có message thật từ server
   useEffect(() => {
@@ -172,6 +162,11 @@ export function MessageChatPart({
         originalPrompt: textToSend,
         createdAt: optimisticMsg.createdAt,
       });
+      mutateStatisticFundId();
+      mutate(
+        (key) =>
+          Array.isArray(key) && key[0] === "statistics" && key[1] === fund.id
+      );
     } catch (error) {
       setOptimisticMessages((prev) =>
         prev.map((m) =>
@@ -225,8 +220,8 @@ export function MessageChatPart({
     >
       {/* 2. HEADER - Fixed at top */}
       <MessageHeaderPart
-        totalExpense={totalExpense}
-        totalIncome={totalIncome}
+        totalExpense={dataStatisticFundId?.totalSpend || 0}
+        totalIncome={dataStatisticFundId?.totalEarn || 0}
         isSmartMode={isSmartMode}
         onOpenSidebar={onOpenDrawer}
         onToggleSmart={() => setIsSmartMode(!isSmartMode)}
@@ -408,7 +403,7 @@ export function MessageChatPart({
 
       <WalletSelectorModal
         data={data}
-        mutate={mutate}
+        mutate={mutateWallet}
         open={showWalletSelector}
         onClose={() => setShowWalletSelector(false)}
         selectedWalletId={selectedWalletId}

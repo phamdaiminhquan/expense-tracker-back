@@ -3,6 +3,7 @@ import { AlertCircle, RefreshCw } from "lucide-react";
 import { RainbowSpinner } from "@/components/ui/rainbow-spinner";
 import { formatCurrency } from "@/lib/currency";
 import { WALLETS_UI } from "@/pages/message/message.constant";
+import { formatNumber } from "@/common/utils/number.utils";
 
 interface Props {
   msg: any;
@@ -122,7 +123,7 @@ const MessageBubblePart: React.FC<Props> = ({
             }`}
           >
             {msg.transType === "expense" ? "-" : "+"}
-            {msg.rawAmount}
+            {formatNumber(msg.rawAmount)}
           </span>
         )}
       </div>

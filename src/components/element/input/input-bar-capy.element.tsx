@@ -1,29 +1,9 @@
 import { useState, useEffect, useRef } from "react";
+import { MoreHorizontal } from "lucide-react";
 import {
-  MoreHorizontal,
-  Coffee,
-  ShoppingBag,
-  Car,
-  Zap,
-  Home,
-  DollarSign,
-  Gift,
-} from "lucide-react";
-import { WALLET_TEMPLATES } from "@/pages/message/message.constant";
-
-const CATEGORIES_UI = {
-  expense: [
-    { id: "food", label: "Ăn uống", icon: <Coffee size={14} /> },
-    { id: "shopping", label: "Mua sắm", icon: <ShoppingBag size={14} /> },
-    { id: "transport", label: "Di chuyển", icon: <Car size={14} /> },
-    { id: "bill", label: "Hóa đơn", icon: <Zap size={14} /> },
-    { id: "house", label: "Nhà cửa", icon: <Home size={14} /> },
-  ],
-  income: [
-    { id: "salary", label: "Lương", icon: <DollarSign size={14} /> },
-    { id: "bonus", label: "Thưởng", icon: <Gift size={14} /> },
-  ],
-};
+  CATEGORIES_UI,
+  WALLET_TEMPLATES,
+} from "@/pages/message/message.constant";
 
 export default function CapyInputBar({
   // Data Props

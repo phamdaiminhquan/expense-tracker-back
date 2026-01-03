@@ -15,6 +15,7 @@ import {
 } from "@/apis/statistics/statistic.interface";
 import { BarChartComponent } from "@/components/components-mui/charts/bar-chart.component";
 import { PieChartComponent } from "@/components/components-mui/charts/pie-chart.component";
+import { formatVND } from "@/common/utils/number.utils";
 
 interface Props {
   fundId?: string | null;
@@ -31,11 +32,7 @@ const StatisticChartPart: React.FC<Props> = ({
   const [chartType, setChartType] = useState("pie");
   // Fetch statistics for current fund + active tab (EXPENSE/INCOME) using SWR
   const swrKey = fundId ? ["statistics", fundId, activeTab, Range.MONTH] : null;
-  const {
-    data: statistic,
-    error,
-    isValidating,
-  } = useSWR(
+  const { data: statistic } = useSWR(
     swrKey,
     async () =>
       await getStatisticsByFundIdDetail(fundId!, {
@@ -68,11 +65,6 @@ const StatisticChartPart: React.FC<Props> = ({
     ? totalExpense || 0
     : totalIncome || 0;
 
-  const formatVND = (val: any) =>
-    new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(Number(val));
   return (
     <div className="flex-1 overflow-y-auto px-6 py-6 hide-scrollbar">
       {/* Tab Switcher */}
