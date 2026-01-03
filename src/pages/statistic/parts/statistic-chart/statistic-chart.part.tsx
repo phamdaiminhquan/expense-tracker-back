@@ -74,7 +74,7 @@ const StatisticChartPart: React.FC<Props> = ({
       currency: "VND",
     }).format(Number(val));
   return (
-    <div className="flex-1 overflow-y-auto px-6 py-6 hide-scrollbar bg-gray-50/50">
+    <div className="flex-1 overflow-y-auto px-6 py-6 hide-scrollbar">
       {/* Tab Switcher */}
       <div className="flex p-1 bg-gray-100 rounded-xl mb-8 relative">
         <div

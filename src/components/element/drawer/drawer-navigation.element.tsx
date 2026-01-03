@@ -303,7 +303,7 @@ export function NavigationDrawer({
             </button>
           </div>
 
-          <button
+          {/* <button
             onClick={() => dispatch(ACTION_SYSTEM.changeMode(system.mode))}
             className="p-2 bg-white rounded-xl shadow-sm hover:bg-gray-100 transition-colors"
           >
@@ -313,7 +313,7 @@ export function NavigationDrawer({
                 system.mode === Mode.DARK ? "text-indigo-500" : "text-amber-500"
               }
             />
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

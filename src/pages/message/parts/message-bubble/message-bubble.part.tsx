@@ -122,7 +122,7 @@ const MessageBubblePart: React.FC<Props> = ({
             }`}
           >
             {msg.transType === "expense" ? "-" : "+"}
-            {formatCurrency(msg.rawAmount)}
+            {msg.rawAmount}
           </span>
         )}
       </div>

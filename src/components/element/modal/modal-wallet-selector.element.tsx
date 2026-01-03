@@ -119,7 +119,7 @@ const WalletSelectorModal: React.FC<Props> = ({
         className="absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity"
         onClick={handleClose}
       />
-      <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl relative z-10 animate-in slide-in-from-bottom duration-300 max-h-[90vh] flex flex-col min-h-[50vh]">
+      <div className="bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl relative z-10 animate-in slide-in-from-bottom duration-300 max-h-[90vh] flex flex-col min-h-[50vh]">
         {modalView === "list" && (
           <WalletList
             data={data}

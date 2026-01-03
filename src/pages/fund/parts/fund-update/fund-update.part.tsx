@@ -75,9 +75,9 @@ export function FundUpdatePart({
   };
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg backdrop-blur-xl bg-card/95 border-border/40 shadow-2xl">
+      <DialogContent className="sm:max-w-lg backdrop-blur-xl bg-card/95 border-border/40 shadow-2xl rounded-2xl">
         <DialogHeader className="space-y-2">
-          <DialogTitle className="text-3xl font-extrabold bg-linear-to-r from-primary to-accent bg-clip-text text-transparent">
+          <DialogTitle className="text-lg font-bold text-gray-800">
             Cập nhật quỹ
           </DialogTitle>
           <DialogDescription className="text-base text-muted-foreground font-medium">
@@ -87,7 +87,10 @@ export function FundUpdatePart({
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-7">
           <div className="space-y-2.5">
-            <Label htmlFor="fund-name" className="text-sm font-bold">
+            <Label
+              htmlFor="fund-name"
+              className="text-sm font-semibold text-black"
+            >
               Tên quỹ
             </Label>
             <Input
@@ -95,12 +98,12 @@ export function FundUpdatePart({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="VD: Quỹ đi chơi, Quỹ sinh nhật..."
-              className="text-base h-12 border-border/60 bg-background/50 backdrop-blur-sm focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary/50 transition-all shadow-md"
+              className="text-black text-base h-12 border-border/60 bg-background/50 backdrop-blur-sm focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary/50 transition-all shadow-md"
             />
           </div>
 
           <div className="space-y-4">
-            <Label className="text-sm font-bold">Loại quỹ</Label>
+            <Label className="text-sm font-semibold text-black">Loại quỹ</Label>
             <RadioGroup
               value={type}
               onValueChange={(v) => setType(v as FundType)}
@@ -119,7 +122,7 @@ export function FundUpdatePart({
                     />
                   </div>
                   <div>
-                    <div className="font-bold text-base">Quỹ riêng</div>
+                    <div className="font-semibold text-black text-base">Quỹ riêng</div>
                     <div className="text-sm text-muted-foreground font-medium">
                       Chỉ bạn có thể sử dụng
                     </div>
@@ -136,7 +139,7 @@ export function FundUpdatePart({
                     <Users weight="bold" className="text-primary" size={24} />
                   </div>
                   <div>
-                    <div className="font-bold text-base">Quỹ chung</div>
+                    <div className="font-semibold text-black text-base">Quỹ chung</div>
                     <div className="text-sm text-muted-foreground font-medium">
                       Chia sẻ với nhiều người
                     </div>

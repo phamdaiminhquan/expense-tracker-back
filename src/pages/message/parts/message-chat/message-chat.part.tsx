@@ -17,7 +17,8 @@ import MessageBubblePart from "../message-bubble/message-bubble.part";
 import useSWR from "swr";
 import { getListWallets } from "@/apis/wallets/wallet.api";
 import WalletSelectorModal from "@/components/element/modal/modal-wallet-selector.element";
-import { MessageActionSheetUI } from "@/components/element/dialog/dialog-message-action.element";
+import { DialogMessageAction } from "@/components/element/dialog/dialog-message-action.element";
+import React from "react";
 interface ChatMessageViewProps {
   fund: Fund | null;
   messages: Message[];
@@ -340,10 +341,8 @@ export function MessageChatPart({
                       setEditingPendingPrompt(message);
                     }}
                     onOpenEditDialog={() => {
-                      if (message.status !== "failed") {
-                        setSelectedMessage(message);
-                        setActionSheetOpen(true);
-                      }
+                      setSelectedMessage(message);
+                      setActionSheetOpen(true);
                     }}
                   />
                 </div>
@@ -419,20 +418,34 @@ export function MessageChatPart({
         }}
       />
       {showCategorySelector && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center">
+        <React.Fragment>
+          {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50"
             onClick={() => setShowCategorySelector(false)}
           />
-          <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 relative z-10 max-h-[70vh] flex flex-col">
+
+          {/* Modal Panel - Bottom sheet on mobile, centered on sm+ */}
+          <div
+            className="fixed bg-white z-50 shadow-2xl transform transition-all duration-300 ease-out
+      bottom-0 left-0 right-0 rounded-t-2xl p-6
+      sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl sm:w-[480px] sm:max-w-[90vw]
+      animate-in slide-in-from-bottom sm:fade-in sm:zoom-in-95
+      max-h-[70vh] flex flex-col
+    "
+          >
+            {/* Handle bar - chỉ hiện trên mobile */}
+            <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-4 sm:hidden" />
+
             <h3 className="text-lg font-bold text-gray-800 mb-4 px-2">
               Danh mục
             </h3>
-            <div className="grid grid-cols-4 gap-4 overflow-y-auto pb-8">
+
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 overflow-y-auto pb-8">
               {CATEGORIES_UI.expense.map((cat) => (
                 <button
                   key={cat.id}
-                  className="flex flex-col items-center gap-2 p-2 rounded-xl hover:bg-gray-50"
+                  className="flex flex-col items-center gap-2 p-2 rounded-xl hover:bg-gray-50 active:bg-gray-100 transition-colors"
                 >
                   <div className="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center text-xl">
                     {cat.icon}
@@ -444,10 +457,10 @@ export function MessageChatPart({
               ))}
             </div>
           </div>
-        </div>
+        </React.Fragment>
       )}
 
-      <MessageActionSheetUI
+      <DialogMessageAction
         isOpen={actionSheetOpen}
         onClose={() => setActionSheetOpen(false)}
         onEdit={() => setEditingMessage(selectedMessage)}
@@ -455,7 +468,7 @@ export function MessageChatPart({
           onDeleteMessage(selectedMessage?.id || "");
           setActionSheetOpen(false);
         }}
-        message={selectedMessage?.id}
+        message={selectedMessage}
       />
 
       <EditMessageDialog

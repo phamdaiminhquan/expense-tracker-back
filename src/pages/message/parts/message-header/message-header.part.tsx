@@ -70,7 +70,7 @@ const MessageHeaderPart: React.FC<Props> = ({
             Chi tiêu
           </div>
           <div className="text-lg lg:text-xl font-black text-gray-800 tracking-tight">
-            {formatCurrency(totalExpense)}
+            {totalExpense}
           </div>
         </div>
         <div className="transition-all duration-300">
@@ -78,7 +78,7 @@ const MessageHeaderPart: React.FC<Props> = ({
             Thu nhập
           </div>
           <div className="text-lg lg:text-xl font-black text-gray-800 tracking-tight">
-            {formatCurrency(totalIncome)}
+            {totalIncome}
           </div>
         </div>
       </div>
