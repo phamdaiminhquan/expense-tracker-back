@@ -462,6 +462,13 @@ export function MessageChatPart({
         onDelete={() => {
           onDeleteMessage(selectedMessage?.id || "");
           setActionSheetOpen(false);
+          mutateStatisticFundId();
+          mutate(
+            (key) =>
+              Array.isArray(key) &&
+              key[0] === "statistics" &&
+              key[1] === fund?.id
+          );
         }}
         message={selectedMessage}
       />
@@ -473,10 +480,24 @@ export function MessageChatPart({
         onSave={async (msg) => {
           await onUpdateMessage(msg);
           setActionSheetOpen(false);
+          mutateStatisticFundId();
+          mutate(
+            (key) =>
+              Array.isArray(key) &&
+              key[0] === "statistics" &&
+              key[1] === fund?.id
+          );
         }}
         onDelete={async (msg) => {
           onDeleteMessage(msg);
           setActionSheetOpen(false);
+          mutateStatisticFundId();
+          mutate(
+            (key) =>
+              Array.isArray(key) &&
+              key[0] === "statistics" &&
+              key[1] === fund?.id
+          );
         }}
       />
 
@@ -488,6 +509,13 @@ export function MessageChatPart({
         onSave={async (msg) => {
           await onUpdateMessage(msg);
           setActionSheetOpen(false);
+          mutateStatisticFundId();
+          mutate(
+            (key) =>
+              Array.isArray(key) &&
+              key[0] === "statistics" &&
+              key[1] === fund?.id
+          );
         }}
       />
     </div>
