@@ -11,8 +11,8 @@ import { getFundSearchNumberId } from "@/apis/funds/fund.api";
 import { getListWallets } from "@/apis/wallets/wallet.api";
 import { toast } from "sonner";
 import useSWR from "swr";
-import LoadingScreenZen from "@/components/element/screen/screen-loading-zen.element";
-import { WelcomeScreen } from "@/components/element/screen/screen-welcome.element";
+import LoadingScreenZen from "@/components/elements/screen/screen-loading-zen.element";
+import { ScreenWelcome } from "@/components/elements/screen/screen-welcome.element";
 
 export function MessageRoute() {
   // hook
@@ -108,7 +108,7 @@ export function MessageRoute() {
   // If user needs onboarding, show welcome screen
   if (needsOnboarding) {
     return (
-      <WelcomeScreen
+      <ScreenWelcome
         userName={currentUserName || undefined}
         walletData={walletsData}
         onWalletMutate={mutateWallets}
@@ -196,7 +196,7 @@ export function MessageRoute() {
     const payload = {
       message: updatedMessage.message,
     };
-    
+
     await updateMessage(updatedMessage.id, payload);
   };
 

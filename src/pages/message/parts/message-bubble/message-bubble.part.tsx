@@ -1,7 +1,7 @@
 import React from "react";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { RainbowSpinner } from "@/components/ui/rainbow-spinner";
-import { formatCurrency } from "@/lib/currency";
+import { formatCurrency } from "@/lib/currency.lib";
 import { WALLETS_UI } from "@/pages/message/message.constant";
 import { formatNumber } from "@/common/utils/number.utils";
 

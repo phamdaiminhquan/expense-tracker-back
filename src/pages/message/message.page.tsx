@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { Message, Category } from "@/lib/types";
+import { Message, Category } from "@/lib/types.lib";
 import { MessageChatPart } from "@/pages/message/parts/message-chat/message-chat.part";
-import { NavigationDrawer } from "@/components/element/drawer/drawer-navigation.element";
+import { DrawerNavigation } from "@/components/elements/drawer/drawer-navigation.element";
 import { FundCreatePart } from "@/pages/fund/parts/fund-create/fund-create.part";
 import React from "react";
 import { FundUpdatePart } from "../fund/parts/fund-update/fund-update.part";
@@ -9,8 +9,8 @@ import { Fund } from "@/apis/funds/fund.entities";
 import ChartContent from "../statistic/parts/statistic-chart/statistic-chart.part";
 import { StatisticPage } from "../statistic/statistic.page";
 import { useFundMembers } from "@/hooks/use-fund-members.hook";
-import { FundMemberListDialog } from "@/components/element/dialog/dialog-member-list.element";
-import { TutorialOverlay } from "@/components/element/overlay/overlay-tutorial.element";
+import { DialogFundMemberList } from "@/components/elements/dialog/dialog-fund-member-list.element";
+import { OverlayTutorial } from "@/components/elements/overlay/overlay-tutorial.element";
 
 interface MessagePageProps {
   fund: Fund | null;
@@ -174,7 +174,7 @@ export function MessagePage({
 
   return (
     <React.Fragment>
-      <TutorialOverlay />
+      <OverlayTutorial />
       {/* Container: p-0 trên mobile, p-3 trên desktop */}
       <div
         className={`flex h-dvh lg:h-screen overflow-hidden bg-[#F0F2F5] lg:p-3 lg:gap-3 p-0 gap-0 ${
@@ -185,7 +185,7 @@ export function MessagePage({
       >
         {/* CỘT 1: SIDEBAR LEFT - Chỉ hiện trên lg, giữ nguyên card style vì là desktop */}
         <aside className="hidden lg:flex w-[350px] bg-white flex-col shrink-0 rounded-2xl shadow-sm overflow-hidden border border-gray-100">
-          <NavigationDrawer
+          <DrawerNavigation
             open={true}
             onOpenChange={() => {}}
             funds={funds}
@@ -208,7 +208,7 @@ export function MessagePage({
 
         {/* DRAWER CHO MOBILE/TABLET */}
         <div className="lg:hidden">
-          <NavigationDrawer
+          <DrawerNavigation
             open={isDrawerOpen}
             onOpenChange={setIsDrawerOpen}
             funds={funds}
@@ -292,7 +292,7 @@ export function MessagePage({
           allUsers={currentUser ? [currentUser] : []}
         />
 
-        <FundMemberListDialog
+        <DialogFundMemberList
           isOpen={isMemberDialogOpen}
           onClose={handleCloseMemberDialog}
           fund={selectedFund || { id: "", name: "", type: "shared" }}

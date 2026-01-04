@@ -1,6 +1,6 @@
 // AppLoader: Hiển thị loading screen cho đến khi app thực sự ready
 import React, { useState, useEffect, Suspense } from "react";
-import LoadingScreenZen from "@/components/element/screen/screen-loading-zen.element";
+import LoadingScreenZen from "@/components/elements/screen/screen-loading-zen.element";
 import { AppReadyProvider, useAppReady } from "@/contexts/app-ready.context";
 
 const App = React.lazy(() => import("./App"));

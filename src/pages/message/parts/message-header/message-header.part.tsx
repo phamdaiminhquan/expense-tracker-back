@@ -1,6 +1,6 @@
 import React from "react";
 import { Sparkles, TrendingUp, Menu } from "lucide-react";
-import { formatCurrency } from "@/lib/currency";
+import { formatCurrency } from "@/lib/currency.lib";
 import { formatNumber } from "@/common/utils/number.utils";
 
 interface Props {

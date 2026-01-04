@@ -1,4 +1,4 @@
-import { FundType, FundLastMessage } from "@/lib/types";
+import { FundType, FundLastMessage } from "@/lib/types.lib";
 import { BaseEntity } from "../../common/interfaces/api.interface";
 import { WalletType } from "./wallet.enum";
 

@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect, useMemo } from "react";
-import { Message, Category } from "@/lib/types";
+import { useState, useRef, useEffect } from "react";
+import { Message, Category } from "@/lib/types.lib";
 import { Button } from "@/components/ui/button";
-import CapyInputBar from "@/components/element/input/input-bar-capy.element";
+import InputBarCapy from "@/components/elements/input/input-bar-capy.element";
 import { Search } from "lucide-react";
-import { EditPendingPromptDialog } from "../../../../components/element/dialog/dialog-edit-pending-prompt.element";
-import { EditMessageDialog } from "../../../../components/element/dialog/dialog-edit-message.element";
+import { DialogPromptEditPending } from "../../../../components/elements/dialog/dialog-prompt-edit-pending.element";
+import { DialogMessageEdit } from "../../../../components/elements/dialog/dialog-message-edit.element";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Fund } from "@/apis/funds/fund.entities";
 import {
@@ -16,8 +16,8 @@ import MessageHeaderPart from "../message-header/message-header.part";
 import MessageBubblePart from "../message-bubble/message-bubble.part";
 import useSWR, { mutate } from "swr";
 import { getListWallets } from "@/apis/wallets/wallet.api";
-import WalletSelectorModal from "@/components/element/modal/modal-wallet-selector.element";
-import { DialogMessageAction } from "@/components/element/dialog/dialog-message-action.element";
+import DialogWalletSelector from "@/components/elements/dialog/dialog-wallet-selector.element";
+import { DialogMessageAction } from "@/components/elements/dialog/dialog-message-action.element";
 import React from "react";
 import { getStatisticsByFundId } from "@/apis/statistics/statistic.api";
 import { Range } from "@/apis/statistics/statistic.enum";
@@ -379,7 +379,7 @@ export function MessageChatPart({
 
       {/* FOOTER & INPUT_BAR */}
       <div className="shrink-0 z-20 bg-white">
-        <CapyInputBar
+        <InputBarCapy
           inputValue={input}
           setInputValue={setInput}
           selectedWallet={selectedWallet}
@@ -402,7 +402,7 @@ export function MessageChatPart({
         />
       </div>
 
-      <WalletSelectorModal
+      <DialogWalletSelector
         data={data}
         mutate={mutateWallet}
         open={showWalletSelector}
@@ -475,7 +475,7 @@ export function MessageChatPart({
         message={selectedMessage}
       />
 
-      <EditMessageDialog
+      <DialogMessageEdit
         message={editingMessage}
         open={editingMessage !== null}
         onOpenChange={(open) => !open && setEditingMessage(null)}
@@ -499,7 +499,7 @@ export function MessageChatPart({
         }}
       />
 
-      <EditPendingPromptDialog
+      <DialogPromptEditPending
         message={editingPendingPrompt}
         categories={categories}
         open={editingPendingPrompt !== null}

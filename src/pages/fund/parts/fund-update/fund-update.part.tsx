@@ -12,8 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { FundType } from "@/lib/types";
-import { User } from "@/lib/auth";
+import { FundType } from "@/lib/types.lib";
+import { User } from "@/lib/auth.lib";
 import { Users, User as UserIcon } from "@phosphor-icons/react";
 import { Fund } from "@/apis/funds/fund.entities";
 
@@ -122,7 +122,9 @@ export function FundUpdatePart({
                     />
                   </div>
                   <div>
-                    <div className="font-semibold text-black text-base">Quỹ riêng</div>
+                    <div className="font-semibold text-black text-base">
+                      Quỹ riêng
+                    </div>
                     <div className="text-sm text-muted-foreground font-medium">
                       Chỉ bạn có thể sử dụng
                     </div>
@@ -139,7 +141,9 @@ export function FundUpdatePart({
                     <Users weight="bold" className="text-primary" size={24} />
                   </div>
                   <div>
-                    <div className="font-semibold text-black text-base">Quỹ chung</div>
+                    <div className="font-semibold text-black text-base">
+                      Quỹ chung
+                    </div>
                     <div className="text-sm text-muted-foreground font-medium">
                       Chia sẻ với nhiều người
                     </div>
