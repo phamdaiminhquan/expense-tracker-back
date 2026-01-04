@@ -20,6 +20,7 @@ import WalletSelectorModal from "@/components/element/modal/modal-wallet-selecto
 import { DialogMessageAction } from "@/components/element/dialog/dialog-message-action.element";
 import React from "react";
 import { getStatisticsByFundId } from "@/apis/statistics/statistic.api";
+import { Range } from "@/apis/statistics/statistic.enum";
 interface ChatMessageViewProps {
   fund: Fund | null;
   messages: Message[];
@@ -460,15 +461,16 @@ export function MessageChatPart({
         onClose={() => setActionSheetOpen(false)}
         onEdit={() => setEditingMessage(selectedMessage)}
         onDelete={() => {
-          onDeleteMessage(selectedMessage?.id || "");
-          setActionSheetOpen(false);
-          mutateStatisticFundId();
-          mutate(
-            (key) =>
-              Array.isArray(key) &&
-              key[0] === "statistics" &&
-              key[1] === fund?.id
-          );
+          (async () => {
+            await onDeleteMessage(selectedMessage?.id || "");
+            setActionSheetOpen(false);
+            // revalidate fund-level statistics and per-tab statistic keys
+            await mutateStatisticFundId();
+            await Promise.all([
+              mutate(["statistics", fund?.id, "expense", Range.MONTH]),
+              mutate(["statistics", fund?.id, "income", Range.MONTH]),
+            ]);
+          })();
         }}
         message={selectedMessage}
       />
@@ -480,24 +482,20 @@ export function MessageChatPart({
         onSave={async (msg) => {
           await onUpdateMessage(msg);
           setActionSheetOpen(false);
-          mutateStatisticFundId();
-          mutate(
-            (key) =>
-              Array.isArray(key) &&
-              key[0] === "statistics" &&
-              key[1] === fund?.id
-          );
+          await mutateStatisticFundId();
+          await Promise.all([
+            mutate(["statistics", fund?.id, "expense", Range.MONTH]),
+            mutate(["statistics", fund?.id, "income", Range.MONTH]),
+          ]);
         }}
         onDelete={async (msg) => {
-          onDeleteMessage(msg);
+          await onDeleteMessage(msg);
           setActionSheetOpen(false);
-          mutateStatisticFundId();
-          mutate(
-            (key) =>
-              Array.isArray(key) &&
-              key[0] === "statistics" &&
-              key[1] === fund?.id
-          );
+          await mutateStatisticFundId();
+          await Promise.all([
+            mutate(["statistics", fund?.id, "expense", Range.MONTH]),
+            mutate(["statistics", fund?.id, "income", Range.MONTH]),
+          ]);
         }}
       />
 
@@ -509,13 +507,11 @@ export function MessageChatPart({
         onSave={async (msg) => {
           await onUpdateMessage(msg);
           setActionSheetOpen(false);
-          mutateStatisticFundId();
-          mutate(
-            (key) =>
-              Array.isArray(key) &&
-              key[0] === "statistics" &&
-              key[1] === fund?.id
-          );
+          await mutateStatisticFundId();
+          await Promise.all([
+            mutate(["statistics", fund?.id, "expense", Range.MONTH]),
+            mutate(["statistics", fund?.id, "income", Range.MONTH]),
+          ]);
         }}
       />
     </div>
