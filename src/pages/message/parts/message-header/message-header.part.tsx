@@ -3,6 +3,7 @@ import { Sparkles, TrendingUp, Menu, Share2 } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { BellNotification } from "@/components/components-mui/bell/bell.component";
 import { RequestFundItem } from "@/components/JoinFundRequestDialog";
+import { formatNumber } from "@/common/utils/number.utils";
 
 interface Props {
   totalExpense: number;
@@ -125,7 +126,7 @@ const MessageHeaderPart: React.FC<Props> = ({
             Chi tiêu
           </div>
           <div className="text-lg lg:text-xl font-black text-gray-800 tracking-tight">
-            {formatCurrency(totalExpense)}
+            {formatNumber(totalExpense)}
           </div>
         </div>
         <div className="transition-all duration-300">
@@ -133,7 +134,7 @@ const MessageHeaderPart: React.FC<Props> = ({
             Thu nhập
           </div>
           <div className="text-lg lg:text-xl font-black text-gray-800 tracking-tight">
-            {formatCurrency(totalIncome)}
+            {formatNumber(totalIncome)}
           </div>
         </div>
       </div>

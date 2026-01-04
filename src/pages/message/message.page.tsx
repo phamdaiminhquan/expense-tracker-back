@@ -9,9 +9,6 @@ import { Fund } from "@/apis/funds/fund.entities";
 import ChartContent from "../statistic/parts/statistic-chart/statistic-chart.part";
 import { StatisticPage } from "../statistic/statistic.page";
 import { useFundMembers } from "@/hooks/use-fund-members.hook";
-import useSWR from "swr";
-import { getListWallets } from "@/apis/wallets/wallet.api";
-
 import { FundMemberListDialog } from "@/components/element/dialog/dialog-member-list.element";
 import { TutorialOverlay } from "@/components/element/overlay/overlay-tutorial.element";
 import InviteFundDialog from "@/components/InviteFundDialog";
@@ -112,14 +109,8 @@ export function MessagePage({
     take: pageSize,
   });
 
-  // Fetch danh sách ví (wallets)
-  const { data: walletData, mutate: mutateWallets } = useSWR(
-    "wallets",
-    async () => await getListWallets({ page: 1, take: 10 }),
-    { revalidateOnFocus: false }
-  );
-
   // function
+
   // Hiển thị banner khi đang load funds (lần đầu vào app)
   useEffect(() => {
     if (hasShownInitialBanner.current) return;
@@ -166,14 +157,6 @@ export function MessagePage({
     await onUpdateFund(id, name, type);
     setIsUpdateFundDialogOpen(false);
   };
-
-  // useEffect(() => {
-  //   if (!fund?.id) return;
-  //   if (fund.isOpenDialogCate) {
-  //     setIsAutoCategorySubscription(true);
-  //     setIsCategorySubscriptionOpen(true);
-  //   }
-  // }, [fund?.id, fund?.isOpenDialogCate]);
 
   // Hàm mở dialog member khi chọn icon xem thành viên
   const handleViewFundMembers = (fundId: string) => {

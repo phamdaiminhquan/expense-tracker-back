@@ -164,7 +164,7 @@ export function NavigationDrawer({
           </h3>
           <button
             onClick={handleCreateFund}
-            className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors"
+            className="cursor-pointer p-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors"
           >
             <Plus size={16} strokeWidth={3} />
           </button>
@@ -244,7 +244,7 @@ export function NavigationDrawer({
                       e.stopPropagation(); // Ngăn event bubble lên button cha
                       handleUpdateFund(e, fund.id);
                     }}
-                    className="h-7 w-7 p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-indigo-600 transition-colors"
+                    className="cursor-pointer h-7 w-7 p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-indigo-600 transition-colors"
                   >
                     <Pencil size={14} />
                   </Button>
@@ -255,7 +255,7 @@ export function NavigationDrawer({
                       e.stopPropagation(); // Ngăn event bubble lên button cha
                       handleDeleteFund(e, fund.id);
                     }}
-                    className="h-7 w-7 p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-rose-500 transition-colors"
+                    className="cursor-pointer h-7 w-7 p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-rose-500 transition-colors"
                   >
                     <Trash size={14} />
                   </Button>
@@ -266,7 +266,7 @@ export function NavigationDrawer({
                     onClick={(e) => {
                       handleViewFundMembers(e, fund.id);
                     }}
-                    className="h-7 w-7 p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-purple-500 transition-colors"
+                    className="cursor-pointer h-7 w-7 p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-purple-500 transition-colors"
                   >
                     <LayoutList size={14} />
                   </Button>
@@ -297,13 +297,13 @@ export function NavigationDrawer({
             </p>
             <button
               onClick={onLogout}
-              className="flex items-center gap-1.5 text-rose-500 font-bold text-[10px] uppercase tracking-wider hover:opacity-80 transition-opacity"
+              className="cursor-pointer flex items-center gap-1.5 text-rose-500 font-bold text-[10px] uppercase tracking-wider hover:opacity-80 transition-opacity"
             >
               <LogOut size={12} /> Đăng xuất
             </button>
           </div>
 
-          <button
+          {/* <button
             onClick={() => dispatch(ACTION_SYSTEM.changeMode(system.mode))}
             className="p-2 bg-white rounded-xl shadow-sm hover:bg-gray-100 transition-colors"
           >
@@ -313,7 +313,7 @@ export function NavigationDrawer({
                 system.mode === Mode.DARK ? "text-indigo-500" : "text-amber-500"
               }
             />
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

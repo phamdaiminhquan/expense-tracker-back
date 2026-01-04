@@ -39,15 +39,11 @@ export const WalletForm: React.FC<WalletFormProps> = ({
 
       <div className="flex-1 space-y-6">
         <div className="flex justify-center mb-6">
-          <div
-            className={`w-20 h-20 rounded-3xl flex items-center justify-center shadow-md`}
-            style={{
-              backgroundColor: chosenTemplate?.bgLight || "#F3F4F6",
-              color: chosenTemplate?.color || "#374151",
-            }}
-          >
-            {/* icon preview could go here if we passed the Icon component */}
-          </div>
+          <img
+            src={chosenTemplate?.img}
+            alt={chosenTemplate.name}
+            className="w-20 h-20 object-contain"
+          />
         </div>
 
         <div className="space-y-2">
@@ -90,7 +86,13 @@ export const WalletForm: React.FC<WalletFormProps> = ({
           disabled={loading}
           className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-200 active:scale-95 transition-all flex items-center justify-center gap-2"
         >
-          {loading ? "Đang tạo..." : <><Check size={20} /> Tạo ví ngay</>}
+          {loading ? (
+            "Đang tạo..."
+          ) : (
+            <>
+              <Check size={20} /> Tạo ví ngay
+            </>
+          )}
         </Button>
       </div>
     </React.Fragment>

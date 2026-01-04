@@ -3,11 +3,13 @@ import { AlertCircle, RefreshCw } from "lucide-react";
 import { RainbowSpinner } from "@/components/ui/rainbow-spinner";
 import { formatCurrency } from "@/lib/currency";
 import { WALLETS_UI } from "@/pages/message/message.constant";
+import { formatNumber } from "@/common/utils/number.utils";
 
 interface Props {
   msg: any;
   onRetry?: (msg: any) => void;
   onEditPrompt?: (msg: any) => void;
+  onOpenEditDialog?: (msg: any) => void;
   isCurrentUser: boolean;
   walletName?: string;
 }
@@ -16,6 +18,7 @@ const MessageBubblePart: React.FC<Props> = ({
   msg,
   onRetry,
   onEditPrompt,
+  onOpenEditDialog,
   isCurrentUser,
   walletName,
 }) => {
@@ -45,14 +48,10 @@ const MessageBubblePart: React.FC<Props> = ({
   const isDone = msg.status === "done";
 
   const handleClick = () => {
-    if (!isError) return;
-    if (isNetworkError && onRetry) {
-      onRetry(msg);
-    } else if ((isAIError || msg.status === "error") && onEditPrompt) {
-      onEditPrompt(msg);
+    if (onOpenEditDialog) {
+      onOpenEditDialog?.(msg);
     }
   };
-
   return (
     <div
       onClick={handleClick}
@@ -124,7 +123,7 @@ const MessageBubblePart: React.FC<Props> = ({
             }`}
           >
             {msg.transType === "expense" ? "-" : "+"}
-            {formatCurrency(msg.rawAmount)}
+            {formatNumber(msg.rawAmount)}
           </span>
         )}
       </div>

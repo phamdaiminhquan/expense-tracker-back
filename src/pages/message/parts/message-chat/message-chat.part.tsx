@@ -14,10 +14,12 @@ import {
 } from "../../message.constant";
 import MessageHeaderPart from "../message-header/message-header.part";
 import MessageBubblePart from "../message-bubble/message-bubble.part";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { getListWallets } from "@/apis/wallets/wallet.api";
 import WalletSelectorModal from "@/components/element/modal/modal-wallet-selector.element";
-
+import { DialogMessageAction } from "@/components/element/dialog/dialog-message-action.element";
+import React from "react";
+import { getStatisticsByFundId } from "@/apis/statistics/statistic.api";
 interface ChatMessageViewProps {
   fund: Fund | null;
   messages: Message[];
@@ -61,6 +63,7 @@ export function MessageChatPart({
 }: ChatMessageViewProps) {
   // state
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
+  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [editingPendingPrompt, setEditingPendingPrompt] =
     useState<Message | null>(null);
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
@@ -71,6 +74,7 @@ export function MessageChatPart({
   const [showWalletSelector, setShowWalletSelector] = useState(false);
   const [showCategorySelector, setShowCategorySelector] = useState(false);
   const [selectedWalletId, setSelectedWalletId] = useState("momo");
+  const [actionSheetOpen, setActionSheetOpen] = useState(false);
 
   // OPTIMISTIC UI STATE - Hiện tin nhắn ngay lập tức
   const [optimisticMessages, setOptimisticMessages] = useState<
@@ -78,12 +82,17 @@ export function MessageChatPart({
   >([]);
 
   // function
-  const { data, mutate } = useSWR(
+  const { data, mutate: mutateWallet } = useSWR(
     "wallets",
     async () => await getListWallets({ page: 1, take: 10 }),
     { revalidateOnFocus: false }
   );
 
+  const { data: dataStatisticFundId, mutate: mutateStatisticFundId } = useSWR(
+    fund?.id ? `statistics/funds/${fund.id}` : null,
+    async () => await getStatisticsByFundId(fund?.id || null),
+    { revalidateOnFocus: false }
+  );
   useEffect(() => {
     if (!data?.data || data?.data.length === 0) return;
     const exists = data?.data.find((w) => w?.id === selectedWalletId);
@@ -98,22 +107,6 @@ export function MessageChatPart({
     (a, b) => b.timestamp - a.timestamp
   );
   const visibleMessages = sortedMessages.slice(0, visibleCount);
-
-  // Calculate stats
-  const { totalExpense, totalIncome } = useMemo(() => {
-    let expense = 0;
-    let income = 0;
-    // Lọc tin nhắn của ngày hôm nay
-    const today = new Date().toDateString();
-    messages.forEach((m) => {
-      const msgDate = new Date(m.createdAt || m.timestamp).toDateString();
-      if (msgDate === today && m.transaction) {
-        expense += m.transaction.spendValue || 0;
-        income += m.transaction.earnValue || 0;
-      }
-    });
-    return { totalExpense: expense, totalIncome: income };
-  }, [messages]);
 
   // OPTIMISTIC UI: Xóa optimistic message khi có message thật từ server
   useEffect(() => {
@@ -171,6 +164,11 @@ export function MessageChatPart({
         originalPrompt: textToSend,
         createdAt: optimisticMsg.createdAt,
       });
+      mutateStatisticFundId();
+      mutate(
+        (key) =>
+          Array.isArray(key) && key[0] === "statistics" && key[1] === fund.id
+      );
     } catch (error) {
       setOptimisticMessages((prev) =>
         prev.map((m) =>
@@ -224,8 +222,8 @@ export function MessageChatPart({
     >
       {/* 2. HEADER - Fixed at top */}
       <MessageHeaderPart
-        totalExpense={totalExpense}
-        totalIncome={totalIncome}
+        totalExpense={dataStatisticFundId?.totalSpend || 0}
+        totalIncome={dataStatisticFundId?.totalEarn || 0}
         isSmartMode={isSmartMode}
         onOpenSidebar={onOpenDrawer}
         onToggleSmart={() => setIsSmartMode(!isSmartMode)}
@@ -340,6 +338,10 @@ export function MessageChatPart({
                       // AI không parse được → mở dialog chỉnh sửa prompt
                       setEditingPendingPrompt(message);
                     }}
+                    onOpenEditDialog={() => {
+                      setSelectedMessage(message);
+                      setActionSheetOpen(true);
+                    }}
                   />
                 </div>
               );
@@ -404,7 +406,7 @@ export function MessageChatPart({
 
       <WalletSelectorModal
         data={data}
-        mutate={mutate}
+        mutate={mutateWallet}
         open={showWalletSelector}
         onClose={() => setShowWalletSelector(false)}
         selectedWalletId={selectedWalletId}
@@ -414,20 +416,34 @@ export function MessageChatPart({
         }}
       />
       {showCategorySelector && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center">
+        <React.Fragment>
+          {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50"
             onClick={() => setShowCategorySelector(false)}
           />
-          <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 relative z-10 max-h-[70vh] flex flex-col">
+
+          {/* Modal Panel - Bottom sheet on mobile, centered on sm+ */}
+          <div
+            className="fixed bg-white z-50 shadow-2xl transform transition-all duration-300 ease-out
+      bottom-0 left-0 right-0 rounded-t-2xl p-6
+      sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl sm:w-[480px] sm:max-w-[90vw]
+      animate-in slide-in-from-bottom sm:fade-in sm:zoom-in-95
+      max-h-[70vh] flex flex-col
+    "
+          >
+            {/* Handle bar - chỉ hiện trên mobile */}
+            <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-4 sm:hidden" />
+
             <h3 className="text-lg font-bold text-gray-800 mb-4 px-2">
               Danh mục
             </h3>
-            <div className="grid grid-cols-4 gap-4 overflow-y-auto pb-8">
+
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 overflow-y-auto pb-8">
               {CATEGORIES_UI.expense.map((cat) => (
                 <button
                   key={cat.id}
-                  className="flex flex-col items-center gap-2 p-2 rounded-xl hover:bg-gray-50"
+                  className="flex flex-col items-center gap-2 p-2 rounded-xl hover:bg-gray-50 active:bg-gray-100 transition-colors"
                 >
                   <div className="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center text-xl">
                     {cat.icon}
@@ -439,15 +455,53 @@ export function MessageChatPart({
               ))}
             </div>
           </div>
-        </div>
+        </React.Fragment>
       )}
+
+      <DialogMessageAction
+        isOpen={actionSheetOpen}
+        onClose={() => setActionSheetOpen(false)}
+        onEdit={() => setEditingMessage(selectedMessage)}
+        onDelete={() => {
+          onDeleteMessage(selectedMessage?.id || "");
+          setActionSheetOpen(false);
+          mutateStatisticFundId();
+          mutate(
+            (key) =>
+              Array.isArray(key) &&
+              key[0] === "statistics" &&
+              key[1] === fund?.id
+          );
+        }}
+        message={selectedMessage}
+      />
 
       <EditMessageDialog
         message={editingMessage}
         open={editingMessage !== null}
         onOpenChange={(open) => !open && setEditingMessage(null)}
-        onSave={onUpdateMessage}
-        onDelete={onDeleteMessage}
+        onSave={async (msg) => {
+          await onUpdateMessage(msg);
+          setActionSheetOpen(false);
+          mutateStatisticFundId();
+          mutate(
+            (key) =>
+              Array.isArray(key) &&
+              key[0] === "statistics" &&
+              key[1] === fund?.id
+          );
+        }}
+        onDelete={async (msg) => {
+          onDeleteMessage(msg);
+          setActionSheetOpen(false);
+          mutateStatisticFundId();
+          mutate(
+            (key) =>
+              Array.isArray(key) &&
+              key[0] === "statistics" &&
+              key[1] === fund?.id
+          );
+        }}
       />
 
       <EditPendingPromptDialog
@@ -455,7 +509,17 @@ export function MessageChatPart({
         categories={categories}
         open={editingPendingPrompt !== null}
         onOpenChange={(open) => !open && setEditingPendingPrompt(null)}
-        onSave={onUpdateMessage}
+        onSave={async (msg) => {
+          await onUpdateMessage(msg);
+          setActionSheetOpen(false);
+          mutateStatisticFundId();
+          mutate(
+            (key) =>
+              Array.isArray(key) &&
+              key[0] === "statistics" &&
+              key[1] === fund?.id
+          );
+        }}
       />
     </div>
   );
