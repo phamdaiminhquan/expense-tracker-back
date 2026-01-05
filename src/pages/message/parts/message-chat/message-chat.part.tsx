@@ -243,7 +243,7 @@ export function MessageChatPart({
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-2 scroll-smooth relative z-0 bg-[#FAFAFA] min-h-0"
+        className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-2 scroll-smooth relative z-0 bg-gray-50 min-h-0"
       >
         {isLoading ? (
           <div className="space-y-5">

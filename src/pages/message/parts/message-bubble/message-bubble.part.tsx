@@ -104,7 +104,7 @@ const MessageBubblePart: React.FC<Props> = ({
       `}
     >
       <div className="flex items-center justify-between mb-2 pb-2 border-b border-dashed border-gray-100 gap-4">
-        <span className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+        <span className="text-2xs font-bold uppercase tracking-wider flex items-center gap-1.5">
           <img
             src={walletTemplate?.img}
             alt={walletName}
@@ -118,7 +118,7 @@ const MessageBubblePart: React.FC<Props> = ({
         <div className="flex items-center">
           {isAnalyzing && (
             <div className="flex items-center gap-2 animate-pulse">
-              <span className="text-[10px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-pink-500">
+              <span className="text-2xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-pink-500">
                 AI Phân tích...
               </span>
               <RainbowSpinner size="w-3 h-3" />
@@ -127,7 +127,7 @@ const MessageBubblePart: React.FC<Props> = ({
 
           {isDone && (
             <span
-              className={`text-[10px] uppercase font-bold flex items-center gap-1.5 animate-in zoom-in duration-300 ${
+              className={`text-2xs uppercase font-bold flex items-center gap-1.5 animate-in zoom-in duration-300 ${
                 msg.transType === "expense"
                   ? "text-rose-500"
                   : "text-emerald-500"
@@ -139,7 +139,7 @@ const MessageBubblePart: React.FC<Props> = ({
           )}
 
           {isError && (
-            <span className="text-[10px] font-bold text-red-500 flex items-center gap-1 animate-pulse">
+            <span className="text-2xs font-bold text-red-500 flex items-center gap-1 animate-pulse">
               <AlertCircle size={12} />{" "}
               {isNetworkError ? "Lỗi mạng" : "Capy đang bối rối..."}
             </span>
@@ -163,7 +163,7 @@ const MessageBubblePart: React.FC<Props> = ({
       </div>
 
       {isError && (
-        <div className="mt-2 pt-2 border-t border-red-200/50 text-[10px] font-bold text-red-600 flex items-center gap-1 justify-end">
+        <div className="mt-2 pt-2 border-t border-red-200/50 text-2xs font-bold text-red-600 flex items-center gap-1 justify-end">
           <RefreshCw size={10} />{" "}
           {isNetworkError ? "Bấm để thử lại" : "Sửa prompt"}
         </div>

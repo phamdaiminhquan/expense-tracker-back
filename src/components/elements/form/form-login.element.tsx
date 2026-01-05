@@ -667,7 +667,7 @@ export function FormLogin({ onLogin }: FormLoginProps) {
   );
 
   return (
-    <div className="relative w-full min-h-screen bg-[#FAFAFA] text-gray-900 font-sans overflow-hidden selection:bg-black selection:text-white">
+    <div className="relative w-full min-h-screen bg-gray-50 text-gray-900 font-sans overflow-hidden selection:bg-black selection:text-white">
       <style>{formStyles}</style>
 
       <LoadingScreen isLoading={isLoading} />
@@ -675,7 +675,7 @@ export function FormLogin({ onLogin }: FormLoginProps) {
       {/* INTRO LOGIN FORM */}
       {introMode && mode === "login" && (
         <div
-          className={`fixed inset-0 z-40 bg-[#FAFAFA] flex flex-col px-8 transition-opacity duration-500 ${
+          className={`fixed inset-0 z-40 bg-gray-50 flex flex-col px-8 transition-opacity duration-500 ${
             isFlying ? "pointer-events-none" : ""
           }`}
         >

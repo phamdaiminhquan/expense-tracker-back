@@ -159,7 +159,7 @@ export function DrawerNavigation({
         className="flex-1 overflow-y-auto p-4 space-y-2"
       >
         <div className="flex items-center justify-between px-2 mb-2">
-          <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+          <h3 className="text-2xs font-bold text-gray-400 uppercase tracking-widest">
             Danh sách quỹ
           </h3>
           <button
@@ -225,7 +225,7 @@ export function DrawerNavigation({
                   >
                     {fund.name}
                   </h4>
-                  <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
+                  <p className="text-2xs text-gray-400 font-semibold uppercase tracking-wider">
                     {fund.type === "shared" ? "Quỹ chung" : "Quỹ cá nhân"}
                   </p>
                 </div>
@@ -297,7 +297,7 @@ export function DrawerNavigation({
             </p>
             <button
               onClick={onLogout}
-              className="cursor-pointer flex items-center gap-1.5 text-rose-500 font-bold text-[10px] uppercase tracking-wider hover:opacity-80 transition-opacity"
+              className="cursor-pointer flex items-center gap-1.5 text-rose-500 font-bold text-2xs uppercase tracking-wider hover:opacity-80 transition-opacity"
             >
               <LogOut size={12} /> Đăng xuất
             </button>
