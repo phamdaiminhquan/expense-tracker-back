@@ -22,7 +22,7 @@ export const createFund = async (body: CreateFundDto): Promise<Fund> => {
   return res.data;
 };
 
-export const getFund = async (id: string): Promise<Fund> => {
+export const getFund = async (id: string): Promise<Fund | any> => {
   const res = await axiosRequest.get(`funds/${id}`);
   return res.data;
 };
@@ -78,4 +78,8 @@ export async function dialogCateOpened(fundId: string): Promise<boolean> {
     isOpenDialogCate: false,
   });
   return true;
+}
+
+export async function joinFundRequest(fundId: string): Promise<any> {
+  return await axiosRequest.post(`/funds/${fundId}/join-requests`)
 }

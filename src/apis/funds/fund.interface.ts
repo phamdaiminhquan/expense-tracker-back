@@ -48,7 +48,7 @@ export type FundMemberDto = {
   };
 };
 
-export interface GetListFundMemberDto extends PageOptionsDto<FundMemberDto> {}
+export interface GetListFundMemberDto extends PageOptionsDto<FundMemberDto> { }
 
 export interface CreateFundPayload {
   name: string;
@@ -71,7 +71,7 @@ export interface CloseDialogCateDto {
   isOpenDialogCate: boolean;
 }
 
-export interface GetListFundDto extends PageOptionsDto<Fund> {}
+export interface GetListFundDto extends PageOptionsDto<Fund> { }
 
 export interface CreateFundDto {
   name: string;
@@ -84,3 +84,4 @@ export interface UpdateFundDto {
   type?: FundType;
   description?: string | null;
 }
+

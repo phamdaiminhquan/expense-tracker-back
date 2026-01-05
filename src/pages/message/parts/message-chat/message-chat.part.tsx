@@ -30,6 +30,7 @@ interface ChatMessageViewProps {
   onOpenDrawer: () => void;
   onCreateFund: () => void;
   onShowStatistics: () => void;
+  onOpenShareFundDialog: () => void;
   onAddMessage: (message: Omit<Message, "id" | "timestamp">) => Promise<void>;
   onResendMessage: (message: Message) => Promise<void>;
   onUpdateMessage: (message: Message) => Promise<void>;
@@ -62,6 +63,7 @@ export function MessageChatPart({
   onDeleteMessage,
   isProcessing = false,
   isLoading = false,
+  onOpenShareFundDialog
 }: ChatMessageViewProps) {
   // state
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
@@ -234,6 +236,7 @@ export function MessageChatPart({
         onToggleSmart={() => setIsSmartMode(!isSmartMode)}
         fundName={fund?.name}
         onShowStatistics={onShowStatistics}
+        onOpenShareFundDialog={onOpenShareFundDialog}
       />
 
       {/* 3. MESSAGE LIST - Scrollable with safe areas */}
@@ -247,9 +250,8 @@ export function MessageChatPart({
             {[1, 2, 3, 4, 5].map((i) => (
               <div
                 key={i}
-                className={`flex ${
-                  i % 2 === 0 ? "justify-end" : "justify-start"
-                }`}
+                className={`flex ${i % 2 === 0 ? "justify-end" : "justify-start"
+                  }`}
               >
                 <Skeleton className="h-16 w-48 rounded-2xl" />
               </div>
@@ -318,9 +320,8 @@ export function MessageChatPart({
               return (
                 <div
                   key={message.id}
-                  className={`flex w-full ${
-                    isCurrentUser ? "justify-end" : "justify-start"
-                  } animate-in fade-in slide-in-from-bottom-4 duration-500`}
+                  className={`flex w-full ${isCurrentUser ? "justify-end" : "justify-start"
+                    } animate-in fade-in slide-in-from-bottom-4 duration-500`}
                 >
                   {(() => {
                     const wallet =
@@ -406,13 +407,13 @@ export function MessageChatPart({
           }
           capyMood={
             isProcessing ||
-            optimisticMessages.some((m) => m.status === "analyzing")
+              optimisticMessages.some((m) => m.status === "analyzing")
               ? "excited"
               : "sleepy"
           }
           onSend={() => handleOptimisticSend()}
-          onFocus={() => {}}
-          onBlur={() => {}}
+          onFocus={() => { }}
+          onBlur={() => { }}
           onWalletClick={() => setShowWalletSelector(true)}
           onCategoryClick={() => setShowCategorySelector(true)}
         />
@@ -530,6 +531,7 @@ export function MessageChatPart({
           ]);
         }}
       />
+
     </div>
   );
 }
