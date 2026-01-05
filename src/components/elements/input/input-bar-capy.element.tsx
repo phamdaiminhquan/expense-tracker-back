@@ -4,6 +4,7 @@ import {
   CATEGORIES_UI,
   WALLET_TEMPLATES,
 } from "@/pages/message/message.constant";
+import { formatCurrency } from "@/lib/currency.lib";
 
 export default function InputBarCapy({
   // Data Props
@@ -166,8 +167,20 @@ export default function InputBarCapy({
               <div className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
                 Ví nguồn
               </div>
-              <div className="text-[11px] lg:text-xs font-bold text-gray-700">
-                {selectedWallet?.name || "Tạo ví"}
+              <div className="text-[11px] lg:text-xs font-bold flex items-center gap-1.5">
+                <span style={{ color: selectedWallet?.color || "#374151" }}>
+                  {selectedWallet?.name || "Tạo ví"}
+                </span>
+                {selectedWallet && (
+                  <span className="text-gray-400 font-medium">
+                    •
+                  </span>
+                )}
+                {selectedWallet && (
+                  <span className="text-indigo-500 font-extrabold tracking-tight">
+                    {formatCurrency(selectedWallet.balance || 0)}
+                  </span>
+                )}
               </div>
             </div>
           </button>

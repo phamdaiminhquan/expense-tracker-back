@@ -1,14 +1,8 @@
-export const formatNumber = (value: any, decimalPlaces?: number) => {
+export const formatNumber = (value: any) => {
   const number = Number(value);
   if (!Number.isFinite(number)) return value;
 
-  const formatted = new Intl.NumberFormat("en-US", {
-    ...(decimalPlaces !== undefined && {
-      minimumFractionDigits: decimalPlaces,
-      maximumFractionDigits: decimalPlaces,
-    }),
-  }).format(number);
-  return formatted.replace(/,/g, ".");
+  return Math.round(number).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };
 
 export const round5000 = (number: number) => {
@@ -18,7 +12,4 @@ export const round5000 = (number: number) => {
 };
 
 export const formatVND = (val: number) =>
-  new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(Number(val));
+  `${Math.round(Number(val)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} ₫`;

@@ -204,6 +204,7 @@ export function MessageRoute() {
 
     const payload = {
       message: messageData.message || null,
+      walletId: messageData.walletId || null,
     };
 
     await createMessage(selectedFund.id, payload);
@@ -215,6 +216,7 @@ export function MessageRoute() {
     const messageText = failedMessage.originalPrompt || failedMessage.message;
     const payload = {
       message: messageText,
+      walletId: failedMessage.walletId || null,
     };
 
     await createMessage(selectedFund.id, payload);
@@ -223,6 +225,7 @@ export function MessageRoute() {
   const handleUpdateMessage = async (updatedMessage: any) => {
     const payload = {
       message: updatedMessage.message,
+      walletId: updatedMessage.walletId || null,
     };
 
     await updateMessage(updatedMessage.id, payload);

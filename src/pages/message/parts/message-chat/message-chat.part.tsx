@@ -28,6 +28,7 @@ interface ChatMessageViewProps {
   currentUserId: string;
   currentUserName: string;
   onOpenDrawer: () => void;
+  onCreateFund: () => void;
   onShowStatistics: () => void;
   onOpenShareFundDialog: () => void;
   onAddMessage: (message: Omit<Message, "id" | "timestamp">) => Promise<void>;
@@ -44,6 +45,7 @@ interface OptimisticMessage {
   status: OptimisticMessageStatus;
   createdAt: number;
   originalPrompt: string;
+  walletId?: string;
 }
 
 export function MessageChatPart({
@@ -53,6 +55,7 @@ export function MessageChatPart({
   currentUserId,
   currentUserName,
   onOpenDrawer,
+  onCreateFund,
   onShowStatistics,
   onAddMessage,
   onResendMessage,
@@ -141,6 +144,7 @@ export function MessageChatPart({
       status: "analyzing",
       createdAt: retryMessage?.createdAt || Date.now(),
       originalPrompt: textToSend,
+      walletId: selectedWalletId,
     };
 
     if (retryMessage) {
@@ -164,7 +168,9 @@ export function MessageChatPart({
         isPendingPrompt: true,
         originalPrompt: textToSend,
         createdAt: optimisticMsg.createdAt,
+        walletId: selectedWalletId,
       });
+      mutateWallet();
       mutateStatisticFundId();
       mutate(
         (key) =>
@@ -237,7 +243,7 @@ export function MessageChatPart({
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-6 scroll-smooth relative z-0 bg-[#FAFAFA] min-h-0"
+        className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-2 scroll-smooth relative z-0 bg-[#FAFAFA] min-h-0"
       >
         {isLoading ? (
           <div className="space-y-5">
@@ -260,14 +266,14 @@ export function MessageChatPart({
               Chưa chọn quỹ
             </p>
             <p className="text-sm text-gray-400 mb-6">
-              Vui lòng chọn một quỹ từ menu bên trái để bắt đầu.
+              Vui lòng chọn một quỹ hoặc tạo quỹ mới để bắt đầu.
             </p>
             <Button
-              onClick={onOpenDrawer}
-              variant="outline"
-              className="rounded-xl"
+              onClick={onCreateFund}
+              variant="default"
+              className="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-100"
             >
-              Mở danh sách quỹ
+              Tạo quỹ mới ngay
             </Button>
           </div>
         ) : (
@@ -275,28 +281,19 @@ export function MessageChatPart({
             {/* REAL MESSAGES từ Server */}
             {[...visibleMessages].reverse().map((message) => {
               const isCurrentUser = message.createdById === currentUserId;
-
-              // Xác định trạng thái message:
-              // - 'network_error': clientStatus === 'failed' (lỗi mạng khi gửi)
-              // - 'ai_error': AI không thể parse được transaction (transaction === null và đã xử lý xong)
-              // - 'analyzing': isPendingPrompt === true và đang đợi AI xử lý
-              // - 'done': đã có transaction thành công
+              
               const getMessageStatus = () => {
                 // 1. Lỗi mạng khi gửi
                 if (message.clientStatus === "failed") return "network_error";
 
                 // 2. Đang chờ AI xử lý
                 if (message.isPendingPrompt) {
-                  // Nếu có flag aiError từ backend
                   if (message.aiError) return "ai_error";
                   return "analyzing";
                 }
 
                 // 3. Đã xử lý xong nhưng KHÔNG có transaction → AI FAIL
-                // (AI không thể extract được số tiền/loại giao dịch từ prompt)
-                if (!message.transaction) {
-                  return "ai_error";
-                }
+                if (!message.transaction) return "ai_error";
 
                 // 4. Có transaction → thành công
                 return "done";
@@ -316,6 +313,7 @@ export function MessageChatPart({
                     : "income",
                 category:
                   message.transaction?.category?.name || "Chưa phân loại",
+                categoryIcon: message.transaction?.category?.icon,
                 wallet: fund?.name,
               };
 
@@ -325,23 +323,32 @@ export function MessageChatPart({
                   className={`flex w-full ${isCurrentUser ? "justify-end" : "justify-start"
                     } animate-in fade-in slide-in-from-bottom-4 duration-500`}
                 >
-                  <MessageBubblePart
-                    msg={uiMsg}
-                    isCurrentUser={isCurrentUser}
-                    walletName={fund?.name}
-                    onRetry={() => {
-                      // Lỗi mạng → gửi lại trực tiếp
-                      onResendMessage(message);
-                    }}
-                    onEditPrompt={() => {
-                      // AI không parse được → mở dialog chỉnh sửa prompt
-                      setEditingPendingPrompt(message);
-                    }}
-                    onOpenEditDialog={() => {
-                      setSelectedMessage(message);
-                      setActionSheetOpen(true);
-                    }}
-                  />
+                  {(() => {
+                    const wallet =
+                      message.transaction?.wallet ||
+                      data?.data?.find((w) => w.id === message.walletId);
+                    return (
+                      <MessageBubblePart
+                        msg={uiMsg}
+                        isCurrentUser={isCurrentUser}
+                        walletName={wallet?.name || fund?.name}
+                        walletColor={wallet?.color}
+                        walletIcon={wallet?.icon}
+                        onRetry={() => {
+                          // Lỗi mạng → gửi lại trực tiếp
+                          onResendMessage(message);
+                        }}
+                        onEditPrompt={() => {
+                          // AI không parse được → mở dialog chỉnh sửa prompt
+                          setEditingPendingPrompt(message);
+                        }}
+                        onOpenEditDialog={() => {
+                          setSelectedMessage(message);
+                          setActionSheetOpen(true);
+                        }}
+                      />
+                    );
+                  })()}
                 </div>
               );
             })}
@@ -363,13 +370,22 @@ export function MessageChatPart({
                   key={optMsg.id}
                   className="flex w-full justify-end animate-in fade-in slide-in-from-bottom-4 duration-300"
                 >
-                  <MessageBubblePart
-                    msg={uiMsg}
-                    isCurrentUser={true}
-                    walletName={fund?.name}
-                    onRetry={() => handleOptimisticRetry(optMsg)}
-                    onEditPrompt={() => handleOptimisticEditPrompt(optMsg)}
-                  />
+                  {(() => {
+                    const wallet = data?.data?.find(
+                      (w) => w.id === optMsg.walletId
+                    );
+                    return (
+                      <MessageBubblePart
+                        msg={uiMsg}
+                        isCurrentUser={true}
+                        walletName={wallet?.name || fund?.name}
+                        walletColor={wallet?.color}
+                        walletIcon={wallet?.icon}
+                        onRetry={() => handleOptimisticRetry(optMsg)}
+                        onEditPrompt={() => handleOptimisticEditPrompt(optMsg)}
+                      />
+                    );
+                  })()}
                 </div>
               );
             })}
