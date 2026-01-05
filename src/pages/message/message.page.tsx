@@ -71,11 +71,6 @@ export function MessagePage({
   onSearchFunds,
   onRefreshFunds,
 }: MessagePageProps) {
-  // const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
-  // const [isCategorySubscriptionOpen, setIsCategorySubscriptionOpen] =
-  //   useState(false);
-  // const [isAutoCategorySubscription, setIsAutoCategorySubscription] =
-  //   useState(false);
 
   // state
   const [isStatisticsDialogOpen, setIsStatisticsDialogOpen] = useState(false);
@@ -237,6 +232,7 @@ export function MessagePage({
             currentUserId={currentUserId}
             currentUserName={currentUserName}
             onOpenDrawer={() => setIsDrawerOpen(true)}
+            onCreateFund={handleOpenCreateFund}
             onShowStatistics={() => setIsStatisticsDialogOpen(true)}
             onAddMessage={onAddMessage}
             onResendMessage={onResendMessage}
@@ -244,26 +240,17 @@ export function MessagePage({
             onDeleteMessage={onDeleteMessage}
             isProcessing={isProcessing}
             isLoading={isLoading}
-            // onManageCategories={() => setIsCategoryDialogOpen(true)}
-            // onShowCategorySubscription={() => {
-            //   setIsAutoCategorySubscription(false);
-            //   setIsCategorySubscriptionOpen(true);
-            // }}
-            // resolveUserName={resolveUserName}
-            // isLoadingFunds={isLoadingFunds}
-            // onSelectFund={onSelectFund}
-            // funds={funds}
           />
         </main>
 
         {/* CỘT 3: STATISTIC VIEW - Giữ nguyên card style trên desktop */}
-        <aside className="hidden xl:flex w-[380px] bg-white flex-col shrink-0 rounded-2xl shadow-sm overflow-hidden border border-gray-100">
-          <div className="p-8 flex flex-col h-full">
-            <h2 className="text-xl font-bold text-gray-800 mb-6 px-2">
-              Thống kê chi tiết
-            </h2>
-            <ChartContent fundId={fund?.id} />
+        <aside className="hidden xl:flex w-[400px] bg-white flex-col shrink-0 rounded-2xl shadow-sm overflow-hidden border border-gray-100">
+          <div className="p-6 pb-4 border-b border-gray-100">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold text-gray-800">Thống kê chi tiết</h2>
+            </div>
           </div>
+          <ChartContent fundId={fund?.id} />
         </aside>
 
         {/* DRAWER CHO MOBILE/TABLET (SIDEBAR RIGHT / STATISTIC) */}

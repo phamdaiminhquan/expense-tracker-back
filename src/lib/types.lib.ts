@@ -8,6 +8,7 @@ export interface Category {
   id: string
   fundId: string
   name: string
+  icon?: string
   description: string
   createdAt: number
 }
@@ -40,6 +41,7 @@ export interface Message {
   message: string
   categoryId?: string | null
   categoryName?: string | null
+  walletId?: string | null
   timestamp: number
 
   status?: MessageStatus
