@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles, TrendingUp, Menu } from "lucide-react";
+import { Sparkles, TrendingUp, Menu, Share2 } from "lucide-react";
 import { formatCurrency } from "@/lib/currency.lib";
 import { formatNumber } from "@/common/utils/number.utils";
 
@@ -11,6 +11,7 @@ interface Props {
   onToggleSmart: () => void;
   fundName?: string;
   onShowStatistics: () => void;
+  onOpenShareFundDialog: () => void
 }
 
 const MessageHeaderPart: React.FC<Props> = ({
@@ -21,6 +22,7 @@ const MessageHeaderPart: React.FC<Props> = ({
   onToggleSmart,
   fundName,
   onShowStatistics,
+  onOpenShareFundDialog
 }) => {
   return (
     <div className="lg:pt-6 lg:pb-4 lg:px-6 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2 px-4 bg-white/90 backdrop-blur-md border-b border-gray-100 z-20 shrink-0">
@@ -45,15 +47,21 @@ const MessageHeaderPart: React.FC<Props> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={onToggleSmart}
-            className={`flex items-center gap-1.5 px-2.5 py-1 lg:px-3 lg:py-1.5 rounded-full text-[9px] lg:text-[10px] font-bold uppercase tracking-wider transition-all border 
-               ${
-                 isSmartMode
-                   ? "bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm"
-                   : "bg-gray-50 border-gray-200 text-gray-400"
-               }`}
+            className={`flex items-center gap-1.5 px-2.5 py-1 lg:px-3 lg:py-1.5 rounded-full text-[9px] lg:text-[10px] font-bold uppercase tracking-wider transition-all border cursor-pointer
+               ${isSmartMode
+                ? "bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm"
+                : "bg-gray-50 border-gray-200 text-gray-400"
+              }`}
           >
             {isSmartMode && <Sparkles size={10} />}{" "}
             {isSmartMode ? "AI PRO" : "BASIC"}
+          </button>
+
+          <button
+            onClick={onOpenShareFundDialog}
+            className="flex items-center gap-1.5 px-2.5 py-1 lg:px-3 lg:py-1.5 rounded-full text-[9px] lg:text-[10px] font-bold uppercase tracking-wider transition-all border cursor-pointer hover:bg-black hover:text-white"
+          >
+            <Share2 size={12} /> Chia sẻ
           </button>
 
           <button

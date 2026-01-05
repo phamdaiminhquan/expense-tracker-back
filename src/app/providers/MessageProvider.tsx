@@ -13,7 +13,7 @@ import {
 } from "@/apis/messages/message.interface";
 import { toast } from "sonner";
 
-export const useMessage = (fundId: string, messageId?: string) => {
+export const useMessage = (fundId?: string, messageId?: string) => {
   const [loading, setLoading] = useState(false);
 
   const {
@@ -22,7 +22,7 @@ export const useMessage = (fundId: string, messageId?: string) => {
     mutate: mutateList,
   } = useSWR(
     fundId ? "messages" + JSON.stringify(fundId) : null,
-    async () => await getListMessages(fundId),
+    async () => await getListMessages(fundId!),
     {
       keepPreviousData: true,
       revalidateOnFocus: false,

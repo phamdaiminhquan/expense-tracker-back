@@ -1,11 +1,13 @@
 import { useState, useCallback } from 'react';
 import useSWR from 'swr';
-import { getListFunds, createFund as apiCreateFund, getFund, updateFund as apiUpdateFund, deleteFund as apiDeleteFund } from '@/apis/funds/fund.api';
+import { getListFunds, createFund as apiCreateFund, getFund, updateFund as apiUpdateFund, deleteFund as apiDeleteFund, joinFundRequest } from '@/apis/funds/fund.api';
 import { GetListFundDto, CreateFundDto, UpdateFundDto } from '@/apis/funds/fund.interface';
 import { toast } from 'sonner';
 
 export const useFund = (params?: GetListFundDto, fundId?: string) => {
   const [loading, setLoading] = useState(false);
+  const [needJoinFund, setNeedJoinFund] = useState(false);
+
 
   // Fetch list funds
   const {
@@ -15,9 +17,9 @@ export const useFund = (params?: GetListFundDto, fundId?: string) => {
   } = useSWR(
     params ? 'funds' + JSON.stringify(params) : null,
     async () => await getListFunds(params!),
-    { 
-      keepPreviousData: true, 
-      revalidateOnFocus: false 
+    {
+      keepPreviousData: true,
+      revalidateOnFocus: false
     },
   );
 
@@ -27,9 +29,25 @@ export const useFund = (params?: GetListFundDto, fundId?: string) => {
     mutate: mutateFund,
   } = useSWR(
     fundId ? `funds/${fundId}` : null,
-    async () => await getFund(fundId!),
-    { revalidateOnFocus: false },
+    async () => {
+      try {
+        const res = await getFund(fundId!);
+
+        if (res?.memberCount !== undefined) {
+          setNeedJoinFund(true);
+        } else {
+          setNeedJoinFund(false);
+        }
+
+        return res;
+      } catch (err) {
+        throw err;
+      }
+
+    },
+    { revalidateOnFocus: false }
   );
+
 
   // Create fund
   const createFund = useCallback(
@@ -41,8 +59,8 @@ export const useFund = (params?: GetListFundDto, fundId?: string) => {
         mutateList();
         return newFund;
       } catch (error: any) {
-        toast.error('Tạo quỹ thất bại', { 
-          description: error?.message || 'Vui lòng thử lại' 
+        toast.error('Tạo quỹ thất bại', {
+          description: error?.message || 'Vui lòng thử lại'
         });
         throw error;
       } finally {
@@ -63,8 +81,8 @@ export const useFund = (params?: GetListFundDto, fundId?: string) => {
         mutateFund();
         return updatedFund;
       } catch (error: any) {
-        toast.error('Cập nhật quỹ thất bại', { 
-          description: error?.message || 'Vui lòng thử lại' 
+        toast.error('Cập nhật quỹ thất bại', {
+          description: error?.message || 'Vui lòng thử lại'
         });
         throw error;
       } finally {
@@ -84,8 +102,8 @@ export const useFund = (params?: GetListFundDto, fundId?: string) => {
         mutateList();
         return true;
       } catch (error: any) {
-        toast.error('Xóa quỹ thất bại', { 
-          description: error?.message || 'Vui lòng thử lại' 
+        toast.error('Xóa quỹ thất bại', {
+          description: error?.message || 'Vui lòng thử lại'
         });
         return false;
       } finally {
@@ -95,18 +113,39 @@ export const useFund = (params?: GetListFundDto, fundId?: string) => {
     [mutateList],
   );
 
+  const joinFund = useCallback(
+    async (fundId: string) => {
+      setLoading(true);
+      try {
+        await joinFundRequest(fundId);
+        toast.success('Chúc mừng bạn tham gia quỹ thành công!');
+        mutateList();
+        return true
+      } catch (error: any) {
+        toast.error('Tham gia quỹ thất bại. Vui lòng thử lại');
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [mutateList],
+  );
+
   return {
-    fundList,       
+    fundList,
     fund,
-    
+
     isLoadingList,
     isLoadingFund,
+    needJoinFund,
+    setNeedJoinFund,
     loading,
-    
+
     createFund,
     updateFund,
     deleteFund,
-    
+    joinFund,
+
     mutateList,
     mutateFund,
   };
