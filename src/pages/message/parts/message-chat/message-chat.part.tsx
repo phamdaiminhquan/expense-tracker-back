@@ -235,6 +235,7 @@ export function MessageChatPart({
         onOpenSidebar={onOpenDrawer}
         onToggleSmart={() => setIsSmartMode(!isSmartMode)}
         fundName={fund?.name}
+        fundId={fund?.id}
         onShowStatistics={onShowStatistics}
         onOpenShareFundDialog={onOpenShareFundDialog}
       />
@@ -281,7 +282,7 @@ export function MessageChatPart({
             {/* REAL MESSAGES từ Server */}
             {[...visibleMessages].reverse().map((message) => {
               const isCurrentUser = message.createdById === currentUserId;
-              
+
               const getMessageStatus = () => {
                 // 1. Lỗi mạng khi gửi
                 if (message.clientStatus === "failed") return "network_error";

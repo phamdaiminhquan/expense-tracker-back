@@ -98,7 +98,6 @@ export function MessagePage({
   const fundMessages = fund ? messages.filter((m) => m.fundId === fund.id) : [];
   const [isOpenShareFundDialog, setIsOpenShareFundDialog] = useState(false)
 
-  const navigate = useNavigate()
 
   // hook
   const hasShownInitialBanner = useRef(false);
