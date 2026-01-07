@@ -18,7 +18,7 @@ import { Users, User as UserIcon } from "@phosphor-icons/react";
 import { Fund } from "@/apis/funds/fund.entities";
 
 interface UpdateFundDialogProps {
-  fund: Fund;
+  fund?: Fund;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUpdateFund: (
@@ -44,6 +44,8 @@ export function FundUpdatePart({
   const [selectedMembers, setSelectedMembers] = useState<string[]>([
     currentUserId,
   ]);
+
+  if (!fund) return null;
 
   useEffect(() => {
     if (open && fund) {

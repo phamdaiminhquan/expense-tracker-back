@@ -17,10 +17,10 @@ import { FundMemberDto } from "@/apis/funds/fund.interface";
 interface DialogFundMemberListProps {
   isOpen: boolean;
   onClose: () => void;
-  fund: {
+  fund?: {
     id: string;
     name: string;
-    type: "shared" | "personal";
+    type: string;
   };
   members: FundMemberDto[];
   isLoading: boolean;
@@ -41,6 +41,9 @@ export function DialogFundMemberList({
   currentUserId,
 }: DialogFundMemberListProps) {
   const [search, setSearch] = React.useState("");
+
+  if (!fund) return null;
+
   const filteredMembers = React.useMemo(() => {
     if (!search.trim()) return members;
     const lower = search.trim().toLowerCase();

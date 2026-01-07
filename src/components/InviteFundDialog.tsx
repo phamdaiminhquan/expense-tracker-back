@@ -19,7 +19,7 @@ const InviteFundDialog: React.FC<InviteFundDialogProps> = ({
 
     if (!open) return null;
 
-    const shareLink = `${baseUrl}/fund/${fund.id}?share=true`;
+    const shareLink = `${baseUrl}/invite/${fund.id}`;
 
     const formattedCode = fund.numberId
         ? `${fund.numberId.slice(0, 3)}-${fund.numberId.slice(3)}`

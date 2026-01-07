@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useCategories } from "@/hooks/use-categories.hook";
 import { useAuth } from "@/hooks/use-auth.hook";
 import { MessagePage } from "@/pages/message/message.page";
@@ -7,7 +7,7 @@ import { PAGE_TAKE_DEFAULT } from "@/common/constant/page-take.constant";
 import { useFund } from "@/app/providers/FundProvider";
 import { useMessage } from "@/app/providers/MessageProvider";
 import { useAppReady } from "@/contexts/app-ready.context";
-import { getFundSearchNumberId, joinFundRequest } from "@/apis/funds/fund.api";
+import { getFund, getFundSearchNumberId, joinFundRequest } from "@/apis/funds/fund.api";
 import { getListWallets } from "@/apis/wallets/wallet.api";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -39,8 +39,6 @@ export function MessageRoute() {
     fundList,
     fund,
     isLoadingList: isLoadingFunds,
-    needJoinFund,
-    setNeedJoinFund,
     isLoadingFund,
     loading: isFundProcessing,
     createFund,
@@ -48,19 +46,17 @@ export function MessageRoute() {
     deleteFund,
     mutateFund,
     mutateList,
+    needJoinFund,
   } = useFund(fundParams, fundId);
 
   // Auto-select fund
   const selectedFund = useMemo(() => {
-    if (needJoinFund) return null;
     if (fundId && fund) return fund;
     return fundList?.data?.[0] ?? null;
-  }, [fundId, fund, fundList?.data, needJoinFund]);
-
-
+  }, [fundId, fund, fundList?.data]);
 
   const canLoadMessages =
-    !!selectedFund && !needJoinFund && !!selectedFund.id;
+    !!selectedFund && !!selectedFund.id;
 
   const {
     messageList,
@@ -176,19 +172,6 @@ export function MessageRoute() {
     }
   };
 
-  const handleJoinFund = async (fundId: string) => {
-    await joinFundRequest(fundId);
-
-
-    await mutateFund();
-    await mutateList();
-    setNeedJoinFund(false);
-    toast.success('Gửi yêu cầu tham gia quỹ thành công!', {
-      description: 'Vui lòng chờ quản trị viên duyệt',
-    })
-    navigate(`/chat/${fundId}`, { replace: true });
-  };
-
 
   const handleAddMessage = async (messageData: any) => {
     if (!selectedFund) return;
@@ -238,9 +221,11 @@ export function MessageRoute() {
   const hasMoreFunds = fundList?.total
     ? fundList.data.length < fundList.total
     : false;
+
   return (
     <MessagePage
       fund={selectedFund || fund}
+      fundId={fundId}
       funds={fundList?.data}
       messages={messageList?.data || []}
       categories={categories}
@@ -252,12 +237,6 @@ export function MessageRoute() {
       onCreateFund={(name, type) =>
         handleCreateFund(name, type, [currentUserId as string])
       }
-      onJoinFund={handleJoinFund}
-      needJoinFund={needJoinFund}
-      onCloseJoinDialog={() => {
-        setNeedJoinFund(false)
-        navigate("/chat", { replace: true });
-      }}
       onUpdateFund={handleUpdateFund}
       onDeleteFund={handleDeleteFund}
       // onSearchFunds={(prev) => setFundParams((p) => ({ ...p, search: prev, page: 1 }))}

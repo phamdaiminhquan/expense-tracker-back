@@ -3,6 +3,7 @@ import { LoginRoute } from "@/routes/login.route";
 import { RequireAuth } from "@/routes/require-auth.route";
 import { useAuth } from "@/hooks/use-auth.hook";
 import { MessageRoute } from "@/routes/message.route";
+import { InvitePage } from "@/pages/invite/invite.page";
 
 // Redirect component for legacy /funds/:fundId route
 function LegacyFundRedirect() {
@@ -16,6 +17,9 @@ export function AppRouter() {
   return (
     <Routes>
       <Route path="/login" element={<LoginRoute />} />
+
+      {/* Public invite route */}
+      <Route path="/invite/:fundId" element={<InvitePage />} />
 
       {/* Chat is now the main screen */}
       <Route

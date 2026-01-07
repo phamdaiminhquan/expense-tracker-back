@@ -64,7 +64,7 @@ export function MessageChatPart({
   onDeleteMessage,
   isProcessing = false,
   isLoading = false,
-  onOpenShareFundDialog
+  onOpenShareFundDialog,
 }: ChatMessageViewProps) {
   // state
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);

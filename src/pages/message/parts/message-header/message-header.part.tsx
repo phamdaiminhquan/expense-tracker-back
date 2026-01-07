@@ -13,7 +13,7 @@ interface Props {
   fundName?: string;
   fundId?: string,
   onShowStatistics: () => void;
-  onOpenShareFundDialog: () => void
+  onOpenShareFundDialog: () => void;
 }
 
 
@@ -26,7 +26,7 @@ const MessageHeaderPart: React.FC<Props> = ({
   fundName,
   fundId,
   onShowStatistics,
-  onOpenShareFundDialog
+  onOpenShareFundDialog,
 }) => {
   const {
     joinRequests,
@@ -80,7 +80,7 @@ const MessageHeaderPart: React.FC<Props> = ({
           <button
             onClick={onToggleSmart}
             className={`flex items-center gap-1.5 px-2.5 py-1 lg:px-3 lg:py-1.5 rounded-full text-2xs lg:text-2xs font-bold uppercase tracking-wider transition-all border cursor-pointer
-               ${isSmartMode
+              ${isSmartMode
                 ? "bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm"
                 : "bg-gray-50 border-gray-200 text-gray-400"
               }`}

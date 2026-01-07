@@ -18,11 +18,13 @@ import {
 } from '@/apis/funds/fund.interface'
 import { toast } from 'sonner'
 import { JoinFundStatus } from '@/apis/funds/fund.enum'
+import { useAuth } from '@/hooks/use-auth.hook'
 
 
 export const useFund = (params?: GetListFundDto, fundId?: string) => {
   const [loading, setLoading] = useState(false)
   const [needJoinFund, setNeedJoinFund] = useState(false)
+  const { currentUser } = useAuth()
 
   const {
     data: fundList,
@@ -44,13 +46,27 @@ export const useFund = (params?: GetListFundDto, fundId?: string) => {
   } = useSWR(
     fundId ? ['fund', fundId] : null,
     async () => {
-      const res = await getFund(fundId!)
-      if (res.type === 'shared') {
-        setNeedJoinFund(res?.memberCount !== undefined)
+      try {
+        const res = await getFund(fundId!)
+        // Backend trả về public site (có memberCount) khi user chưa là thành viên
+        if (res.memberCount !== undefined) {
+          setNeedJoinFund(true)
+        } else {
+          setNeedJoinFund(false)
+        }
+        return res
+      } catch (error: any) {
+        // Trường hợp BE trả về 403 thay vì public site
+        if (error?.response?.status === 403) {
+          setNeedJoinFund(true)
+        }
+        throw error
       }
-      return res
     },
-    { revalidateOnFocus: false }
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false
+    }
   )
 
   const {
@@ -58,7 +74,7 @@ export const useFund = (params?: GetListFundDto, fundId?: string) => {
     isLoading: isLoadingJoinRequests,
     mutate: mutateJoinRequests,
   } = useSWR(
-    fundId
+    fundId && currentUser && fund?.ownerId === currentUser.id
       ? ['fund-join-requests', fundId, JoinFundStatus.PENDING]
       : null,
     () => getJoinRequests(fundId!, { status: JoinFundStatus.PENDING }),
