@@ -108,4 +108,4 @@ export async function rejectJoinRequest(fundId: string, requestId: string): Prom
   )
   return true
 }
-}
+

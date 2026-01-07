@@ -12,11 +12,11 @@ import { useFundMembers } from "@/hooks/use-fund-members.hook";
 import { DialogFundMemberList } from "@/components/elements/dialog/dialog-fund-member-list.element";
 import { OverlayTutorial } from "@/components/elements/overlay/overlay-tutorial.element";
 import ShareFundDialog from "@/components/elements/dialog/dialog-share-fund.element";
-import JoinFundDialog from "@/components/elements/dialog/dialog-join-fund.element";
 import { useNavigate } from "react-router-dom";
 
 interface MessagePageProps {
   fund: Fund | any;
+  fundId?: string;
   funds: Fund[];
   messages: Message[];
   categories: Category[];
@@ -32,7 +32,6 @@ interface MessagePageProps {
     type: "personal" | "shared"
   ) => Promise<void>;
   onDeleteFund: (fundId: string) => Promise<void>;
-  onJoinFund: (fundId: string) => Promise<void>
   onLogout: () => void;
   onAddMessage: (message: Omit<Message, "id" | "timestamp">) => Promise<void>;
   onResendMessage: (message: Message) => Promise<void>;
@@ -43,8 +42,6 @@ interface MessagePageProps {
   isLoadingFunds?: boolean;
   isLoadingMoreFunds?: boolean;
   hasMoreFunds?: boolean;
-  needJoinFund: boolean;
-  onCloseJoinDialog: () => void;
   onLoadMoreFunds?: () => void;
   onSearchFunds?: (query: string) => void;
   onRefreshFunds?: () => Promise<void>; // Callback để reload funds khi tạo ví
@@ -52,6 +49,7 @@ interface MessagePageProps {
 
 export function MessagePage({
   fund,
+  fundId,
   funds,
   messages,
   categories,
@@ -72,8 +70,6 @@ export function MessagePage({
   isProcessing = false,
   isLoading = false,
   isLoadingFunds = false,
-  needJoinFund,
-  onCloseJoinDialog,
   isLoadingMoreFunds = false,
   hasMoreFunds = false,
   onLoadMoreFunds,
@@ -282,7 +278,7 @@ export function MessagePage({
         />
 
         <FundUpdatePart
-          fund={fund!}
+          fund={fund}
           open={isUpdateFundDialogOpen}
           onOpenChange={setIsUpdateFundDialogOpen}
           onUpdateFund={handleUpdateFundComplete}
@@ -293,7 +289,7 @@ export function MessagePage({
         <DialogFundMemberList
           isOpen={isMemberDialogOpen}
           onClose={handleCloseMemberDialog}
-          fund={selectedFund!}
+          fund={selectedFund}
           members={members}
           isLoading={isLoadingMembers || isProcessingMember}
           onRefresh={() => mutateMembers()}
@@ -305,13 +301,7 @@ export function MessagePage({
         <ShareFundDialog
           isOpen={isOpenShareFundDialog}
           onClose={() => setIsOpenShareFundDialog(false)}
-          fund={fund!}
-        />
-        <JoinFundDialog
-          isOpen={needJoinFund}
-          onClose={onCloseJoinDialog}
-          onJoin={onJoinFund}
-          fund={fund!}
+          fund={fund}
         />
       </div>
     </React.Fragment>

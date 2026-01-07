@@ -6,7 +6,7 @@ import { Fund } from '@/apis/funds/fund.entities';
 interface ShareFundDialogProps {
     isOpen: boolean;
     onClose: () => void;
-    fund: Fund;
+    fund?: Fund;
     baseUrl?: string;
 }
 
@@ -18,7 +18,7 @@ const ShareFundDialog: React.FC<ShareFundDialogProps> = ({
 }) => {
     const [copied, setCopied] = useState(false);
 
-    if (!isOpen) return null;
+    if (!isOpen || !fund) return null;
 
     const shareLink = `${baseUrl}/chat/${fund.id}`;
 
