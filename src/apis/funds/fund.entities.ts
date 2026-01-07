@@ -6,6 +6,7 @@ export interface Fund extends BaseEntity {
   name: string;
   type: FundType;
   ownerId: string;
+  numberId: string;
   memberIds: string[];
   lastMessage?: FundLastMessage;
   isOpenDialogCate?: boolean;

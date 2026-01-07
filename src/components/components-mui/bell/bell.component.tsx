@@ -7,15 +7,15 @@ import {
     ListItem,
     Popover,
     Typography,
-} from '@mui/material'
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
-import React, { useState } from 'react'
-import { STYLE } from '@/common/constant'
-import { BadgeComponent } from '../badge/badge.component'
-import { BadgeFundItemComponent } from '../badge/badge-fund-item.component'
+} from "@mui/material"
+import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone"
+import React, { useState } from "react"
+import { STYLE } from "@/common/constant"
+import { BadgeComponent } from "../badge/badge.component"
+import { BadgeFundItemComponent } from "../badge/badge-fund-item.component"
 
 
-export type BellItemType = 'FUND_REQUEST' | 'SYSTEM'
+export type BellItemType = "FUND_REQUEST" | "SYSTEM"
 
 export interface BellItem {
     id: string
@@ -41,15 +41,15 @@ export const BellComponent: React.FC<BellComponentProps> = ({
 
     const renderItem = (item: BellItem) => {
         switch (item.type) {
-            case 'FUND_REQUEST':
-                return <React.Fragment>
+            case "FUND_REQUEST":
+                return <React.Fragment key={item.id}>
                     <BadgeFundItemComponent {...item.payload} />
                     <Divider />
                 </React.Fragment>
 
-            case 'SYSTEM':
+            case "SYSTEM":
                 return (
-                    <Typography variant="body2">
+                    <Typography key={item.id} variant="body2">
                         {item.payload.message}
                     </Typography>
                 )
@@ -72,14 +72,14 @@ export const BellComponent: React.FC<BellComponentProps> = ({
                     open={open}
                     anchorEl={anchorEl}
                     onClose={() => setAnchorEl(null)}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                    transformOrigin={{ vertical: "top", horizontal: "right" }}
                     PaperProps={{
                         sx: {
                             width: 440,
                             maxHeight: 420,
-                            display: 'flex',
-                            flexDirection: 'column',
+                            display: "flex",
+                            flexDirection: "column",
                             p: 2,
                         },
                     }}

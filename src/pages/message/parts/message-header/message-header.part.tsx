@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { Sparkles, TrendingUp, Menu, Share2 } from "lucide-react";
-import { formatNumber } from "@/common/utils/number.utils";
 import { BellComponent, BellItem } from "@/components/components-mui/bell/bell.component";
+import { formatNumber } from "@/common/utils/number.utils";
 import { useFund } from "@/app/providers/FundProvider";
 
 interface Props {
@@ -91,7 +91,7 @@ const MessageHeaderPart: React.FC<Props> = ({
 
           <button
             onClick={onOpenShareFundDialog}
-            className="flex items-center gap-1.5 px-2.5 py-1 lg:px-3 lg:py-1.5 rounded-full text-2xs lg:text-2xs font-bold uppercase tracking-wider transition-all border cursor-pointer hover:bg-black hover:text-white"
+            className={`flex items-center gap-1.5 px-2.5 py-1 lg:px-3 lg:py-1.5 rounded-full text-2xs lg:text-2xs font-bold uppercase tracking-wider transition-all border cursor-pointer hover:bg-black hover:text-white ${!fundName ? 'hidden' : 'block'}`}
           >
             <Share2 size={12} /> Chia sẻ
           </button>

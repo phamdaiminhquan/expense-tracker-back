@@ -293,7 +293,7 @@ export function MessagePage({
         <DialogFundMemberList
           isOpen={isMemberDialogOpen}
           onClose={handleCloseMemberDialog}
-          fund={selectedFund || { id: "", name: "", type: "shared" }}
+          fund={selectedFund!}
           members={members}
           isLoading={isLoadingMembers || isProcessingMember}
           onRefresh={() => mutateMembers()}
@@ -313,8 +313,6 @@ export function MessagePage({
           onJoin={onJoinFund}
           fund={fund!}
         />
-
-
       </div>
     </React.Fragment>
   );
