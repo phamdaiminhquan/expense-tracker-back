@@ -192,6 +192,7 @@ export const light = {
 
 export const OTHER: ThemeOptions = {
   typography: {
+    fontFamily: '"Inter", sans-serif',
     fontWeightRegular: 400,
     fontWeightMedium: 550,
     fontWeightBold: 600,

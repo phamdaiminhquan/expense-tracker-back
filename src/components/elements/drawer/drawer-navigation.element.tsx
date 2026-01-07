@@ -12,6 +12,7 @@ import {
   Trash,
   Pencil,
   LayoutList,
+  ChevronLeft,
 } from "lucide-react";
 import { Fund } from "@/apis/funds/fund.entities";
 import { Mode } from "@/common/enums/mode.enum";
@@ -136,7 +137,7 @@ export function DrawerNavigation({
               onClick={() => onOpenChange(false)}
               className="p-2 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors"
             >
-              <X size={20} className="text-gray-500" />
+              <ChevronLeft size={20} className="text-gray-500" />
             </button>
           )}
         </div>
@@ -159,7 +160,7 @@ export function DrawerNavigation({
         className="flex-1 overflow-y-auto p-4 space-y-2"
       >
         <div className="flex items-center justify-between px-2 mb-2">
-          <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+          <h3 className="text-2xs font-bold text-gray-400 uppercase tracking-widest">
             Danh sách quỹ
           </h3>
           <button
@@ -197,18 +198,16 @@ export function DrawerNavigation({
                 }}
                 role="button"
                 tabIndex={0}
-                className={`w-full group flex items-center gap-3 p-3 rounded-2xl transition-all text-left border cursor-pointer ${
-                  isActive
-                    ? "bg-indigo-50 border-indigo-100"
-                    : "hover:bg-gray-50 border-transparent"
-                }`}
+                className={`w-full group flex items-center gap-3 p-3 rounded-2xl transition-all text-left border cursor-pointer ${isActive
+                  ? "bg-indigo-50 border-indigo-100"
+                  : "hover:bg-gray-50 border-transparent"
+                  }`}
               >
                 <div
-                  className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
-                    isActive
-                      ? "bg-indigo-200 text-indigo-700"
-                      : "bg-gray-100 text-gray-500"
-                  }`}
+                  className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${isActive
+                    ? "bg-indigo-200 text-indigo-700"
+                    : "bg-gray-100 text-gray-500"
+                    }`}
                 >
                   {fund.type === "shared" ? (
                     <Users size={20} />
@@ -219,23 +218,21 @@ export function DrawerNavigation({
 
                 <div className="flex-1 min-w-0">
                   <h4
-                    className={`font-bold text-sm truncate ${
-                      isActive ? "text-indigo-900" : "text-gray-700"
-                    }`}
+                    className={`font-bold text-sm truncate ${isActive ? "text-indigo-900" : "text-gray-700"
+                      }`}
                   >
                     {fund.name}
                   </h4>
-                  <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
+                  <p className="text-2xs text-gray-400 font-semibold uppercase tracking-wider">
                     {fund.type === "shared" ? "Quỹ chung" : "Quỹ cá nhân"}
                   </p>
                 </div>
 
                 <div
-                  className={`flex gap-1 transition-opacity ${
-                    isActive
-                      ? "opacity-100"
-                      : "opacity-0 group-hover:opacity-100"
-                  }`}
+                  className={`flex gap-1 transition-opacity ${isActive
+                    ? "opacity-100"
+                    : "opacity-0 group-hover:opacity-100"
+                    }`}
                 >
                   <Button
                     variant="ghost"
@@ -297,7 +294,7 @@ export function DrawerNavigation({
             </p>
             <button
               onClick={onLogout}
-              className="cursor-pointer flex items-center gap-1.5 text-rose-500 font-bold text-[10px] uppercase tracking-wider hover:opacity-80 transition-opacity"
+              className="cursor-pointer flex items-center gap-1.5 text-rose-500 font-bold text-2xs uppercase tracking-wider hover:opacity-80 transition-opacity"
             >
               <LogOut size={12} /> Đăng xuất
             </button>
@@ -327,7 +324,7 @@ export function DrawerNavigation({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="left"
-        className="w-[85%] sm:w-[400px] p-0 flex flex-col overflow-hidden border-none shadow-2xl bg-white"
+        className="w-[85%] sm:w-[400px] p-0 flex flex-col overflow-hidden border-none shadow-2xl bg-white  [&>button]:hidden"
       >
         {SidebarContent}
       </SheetContent>

@@ -4,6 +4,7 @@ import {
   CATEGORIES_UI,
   WALLET_TEMPLATES,
 } from "@/pages/message/message.constant";
+import { formatCurrency } from "@/lib/currency.lib";
 
 export default function InputBarCapy({
   // Data Props
@@ -163,16 +164,28 @@ export default function InputBarCapy({
               className="w-5 h-5 object-contain"
             />
             <div className="text-left">
-              <div className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
+              <div className="text-2xs text-gray-400 font-semibold uppercase tracking-wider">
                 Ví nguồn
               </div>
-              <div className="text-[11px] lg:text-xs font-bold text-gray-700">
-                {selectedWallet?.name || "Tạo ví"}
+              <div className="text-2xs lg:text-xs font-bold flex items-center gap-1.5">
+                <span style={{ color: selectedWallet?.color || "#374151" }}>
+                  {selectedWallet?.name || "Tạo ví"}
+                </span>
+                {selectedWallet && (
+                  <span className="text-gray-400 font-medium">
+                    •
+                  </span>
+                )}
+                {selectedWallet && (
+                  <span className="text-indigo-500 font-extrabold tracking-tight">
+                    {formatCurrency(selectedWallet.balance || 0)}
+                  </span>
+                )}
               </div>
             </div>
           </button>
           {isSmartMode && (
-            <div className="text-[9px] lg:text-[10px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-pink-500 animate-pulse uppercase tracking-widest">
+            <div className="text-3xs lg:text-2xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-pink-500 animate-pulse uppercase tracking-widest">
               Smart Extract Active
             </div>
           )}

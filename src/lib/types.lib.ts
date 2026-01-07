@@ -5,11 +5,12 @@ export type FundType = "personal" | "shared";
 export type MessageStatus = "pending" | "processed" | "failed";
 
 export interface Category {
-  id: string;
-  fundId: string;
-  name: string;
-  description: string;
-  createdAt: number;
+  id: string
+  fundId: string
+  name: string
+  icon?: string
+  description: string
+  createdAt: number
 }
 
 export interface FundLastMessage {

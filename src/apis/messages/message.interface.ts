@@ -1,6 +1,7 @@
 import { PageOptionsDto } from "@/common/interfaces/api.interface";
 import { MessageStatus, FundType } from "@/lib/types.lib";
 import { Message } from "./message.entities";
+import { Wallet } from "../wallets/wallet.entities";
 
 export type CategoryParentDto = {
   id: string;
@@ -12,6 +13,7 @@ export type CategoryParentDto = {
 export type CategoryDto = {
   id: string;
   name: string;
+  icon?: string | null;
   description?: string | null;
   fundId?: string | null;
   parent?: CategoryParentDto | null;
@@ -25,6 +27,8 @@ export type TransactionDto = {
   content?: string | null;
   categoryId?: string | null;
   category?: CategoryDto | null;
+  walletId?: string | null;
+  wallet?: Wallet | null;
   createdAt?: string | number;
   updatedAt?: string | number;
 };

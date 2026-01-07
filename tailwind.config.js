@@ -18,6 +18,13 @@ const defaultTheme = {
     padding: "2rem",
   },
   extend: {
+    fontFamily: {
+      sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+    },
+    fontSize: {
+      "2xs": ["0.625rem", { lineHeight: "0.75rem" }], // 10px
+      "3xs": ["0.5rem", { lineHeight: "0.625rem" }],  // 8px
+    },
     screens: {
       coarse: { raw: "(pointer: coarse)" },
       fine: { raw: "(pointer: fine)" },

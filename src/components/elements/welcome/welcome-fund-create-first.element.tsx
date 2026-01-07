@@ -32,7 +32,7 @@ export const WelcomeFundCreateFirst: React.FC<WelcomeFundCreateFirstProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 h-screen w-full bg-[#FAFAFA] flex flex-col items-center justify-center p-8 overflow-hidden">
+    <div className="fixed inset-0 z-50 h-screen w-full bg-gray-50 flex flex-col items-center justify-center p-8 overflow-hidden">
       {/* Logout Button */}
       {onLogout && (
         <button
