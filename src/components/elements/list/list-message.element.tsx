@@ -18,23 +18,23 @@ import {
 import { Message, Category } from "@/lib/types.lib";
 import { formatCurrency } from "@/lib/currency.lib";
 import { DialogPromptEditPending } from "../dialog/dialog-prompt-edit-pending.element";
-import { DialogMessageEdit } from "../dialog/dialog-message-edit.element";
 import React from "react";
 
 interface MessageListProps {
   messages: Message[];
   categories?: Category[];
-  onUpdate: (message: Message) => void;
-  onDelete: (id: string) => void;
+  wallets?: any[];
+  onUpdate: (message: Message) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
 }
 
 export function ListMessage({
   messages,
   categories = [],
+  wallets = [],
   onUpdate,
   onDelete,
 }: MessageListProps) {
-  const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [editingPendingPrompt, setEditingPendingPrompt] =
     useState<Message | null>(null);
 
@@ -131,26 +131,14 @@ export function ListMessage({
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex gap-1 justify-end">
-                      {isPending ? (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setEditingPendingPrompt(message)}
-                          className="h-8 w-8 text-primary hover:text-primary"
-                          title="Chỉnh sửa và xử lý"
-                        >
-                          <ArrowClockwise />
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setEditingMessage(message)}
-                          className="h-8 w-8"
-                        >
-                          <PencilSimple />
-                        </Button>
-                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setEditingPendingPrompt(message)}
+                        className="h-8 w-8"
+                      >
+                        <PencilSimple />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -168,19 +156,16 @@ export function ListMessage({
         </Table>
       </div>
 
-      <DialogMessageEdit
-        message={editingMessage}
-        open={editingMessage !== null}
-        onOpenChange={(open) => !open && setEditingMessage(null)}
-        onSave={onUpdate}
-      />
-
       <DialogPromptEditPending
         message={editingPendingPrompt}
-        categories={categories}
+        categories={categories || []}
+        wallets={wallets || []}
         open={editingPendingPrompt !== null}
         onOpenChange={(open) => !open && setEditingPendingPrompt(null)}
         onSave={onUpdate}
+        onDelete={async (id) => {
+          if (id) onDelete(id);
+        }}
       />
     </React.Fragment>
   );

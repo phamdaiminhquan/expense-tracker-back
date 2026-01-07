@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import InputBarCapy from "@/components/elements/input/input-bar-capy.element";
 import { Search } from "lucide-react";
 import { DialogPromptEditPending } from "../../../../components/elements/dialog/dialog-prompt-edit-pending.element";
-import { DialogMessageEdit } from "../../../../components/elements/dialog/dialog-message-edit.element";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Fund } from "@/apis/funds/fund.entities";
 import {
@@ -17,7 +16,6 @@ import MessageBubblePart from "../message-bubble/message-bubble.part";
 import useSWR, { mutate } from "swr";
 import { getListWallets } from "@/apis/wallets/wallet.api";
 import DialogWalletSelector from "@/components/elements/dialog/dialog-wallet-selector.element";
-import { DialogMessageAction } from "@/components/elements/dialog/dialog-message-action.element";
 import React from "react";
 import { getStatisticsByFundId } from "@/apis/statistics/statistic.api";
 import { Range } from "@/apis/statistics/statistic.enum";
@@ -67,7 +65,6 @@ export function MessageChatPart({
   onOpenShareFundDialog,
 }: ChatMessageViewProps) {
   // state
-  const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [editingPendingPrompt, setEditingPendingPrompt] =
     useState<Message | null>(null);
@@ -327,12 +324,11 @@ export function MessageChatPart({
                       })
                     }
                     onEditPrompt={() => {
-                      // AI không parse được → mở dialog chỉnh sửa prompt
+                      // AI không parse được → mở dialog chỉnh sửa
                       setEditingPendingPrompt(message);
                     }}
                     onOpenEditDialog={() => {
-                      setSelectedMessage(message);
-                      setActionSheetOpen(true);
+                      setEditingPendingPrompt(message);
                     }}
                   />
                 </div>
@@ -459,60 +455,25 @@ export function MessageChatPart({
         </React.Fragment>
       )}
 
-      <DialogMessageAction
-        isOpen={actionSheetOpen}
-        onClose={() => setActionSheetOpen(false)}
-        onEdit={() => setEditingMessage(selectedMessage)}
-        onDelete={() => {
-          (async () => {
-            await onDeleteMessage(selectedMessage?.id || "");
-            setActionSheetOpen(false);
-            // revalidate fund-level statistics and per-tab statistic keys
-            await mutateStatisticFundId();
-            await Promise.all([
-              mutate(["statistics", fund?.id, "expense", Range.MONTH]),
-              mutate(["statistics", fund?.id, "income", Range.MONTH]),
-            ]);
-          })();
-        }}
-        message={selectedMessage}
-      />
-
-      <DialogMessageEdit
-        message={editingMessage}
-        open={editingMessage !== null}
-        onOpenChange={(open) => !open && setEditingMessage(null)}
-        onSave={async (msg) => {
-          await onUpdateMessage({
-            walletId: selectedWalletId,
-            ...msg,
-          });
-          setActionSheetOpen(false);
-          await mutateStatisticFundId();
-          await Promise.all([
-            mutate(["statistics", fund?.id, "expense", Range.MONTH]),
-            mutate(["statistics", fund?.id, "income", Range.MONTH]),
-          ]);
-        }}
-        onDelete={async (msg) => {
-          await onDeleteMessage(msg);
-          setActionSheetOpen(false);
-          await mutateStatisticFundId();
-          await Promise.all([
-            mutate(["statistics", fund?.id, "expense", Range.MONTH]),
-            mutate(["statistics", fund?.id, "income", Range.MONTH]),
-          ]);
-        }}
-      />
-
       <DialogPromptEditPending
         message={editingPendingPrompt}
         categories={categories}
+        wallets={data?.data || []}
         open={editingPendingPrompt !== null}
         onOpenChange={(open) => !open && setEditingPendingPrompt(null)}
         onSave={async (msg) => {
           await onUpdateMessage(msg);
-          setActionSheetOpen(false);
+          await mutateStatisticFundId();
+          await Promise.all([
+            mutate(["statistics", fund?.id, "expense", Range.MONTH]),
+            mutate(["statistics", fund?.id, "income", Range.MONTH]),
+          ]);
+        }}
+        onDelete={async (id) => {
+          if (id) {
+            await onDeleteMessage(id);
+          }
+          setEditingPendingPrompt(null);
           await mutateStatisticFundId();
           await Promise.all([
             mutate(["statistics", fund?.id, "expense", Range.MONTH]),

@@ -33,7 +33,6 @@ const MessageBubblePart: React.FC<Props> = ({
     if (!msg.categoryIcon) return null;
 
     // 1. Thử tìm icon động từ Lucide dựa trên tên BE trả về
-    // Chuyển kebab-case (utensils) sang PascalCase (Utensils)
     const iconName = msg.categoryIcon
       .split("-")
       .map((part: string) => part.charAt(0).toUpperCase() + part.slice(1))

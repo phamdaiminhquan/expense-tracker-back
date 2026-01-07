@@ -93,7 +93,6 @@ function MinimalInput({
         style={
           type === "password"
             ? ({
-                // Đảm bảo password hiển thị dấu * trên iOS
                 WebkitTextSecurity: "disc",
                 textSecurity: "disc",
               } as React.CSSProperties)
@@ -193,6 +192,28 @@ interface FormErrors {
 }
 
 // ==========================================
+// UTILS & COMPONENTS
+// ==========================================
+const PasswordToggle = ({
+  show,
+  onToggle,
+  disabled,
+}: {
+  show: boolean;
+  onToggle: () => void;
+  disabled?: boolean;
+}) => (
+  <button
+    type="button"
+    onClick={onToggle}
+    disabled={disabled}
+    className="p-2 text-gray-400 hover:text-black transition-colors disabled:opacity-50"
+  >
+    {show ? <Eye size={18} /> : <EyeOff size={18} />}
+  </button>
+);
+
+// ==========================================
 // MAIN LOGIN FORM
 // ==========================================
 export function FormLogin({ onLogin }: FormLoginProps) {
@@ -222,11 +243,10 @@ export function FormLogin({ onLogin }: FormLoginProps) {
   // Focus state for Capybara mood
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  // Mouse/Touch tracking state
-  const [isMouseInView, setIsMouseInView] = useState(false);
+  // Interaction tracking
   const lastInteractionRef = useRef<number>(Date.now());
 
-  // Detect mobile device - tắt touch tracking trên mobile để ưu tiên input focus
+  // Detect mobile device
   const isMobile = useIsMobile();
 
   // Refs
@@ -316,94 +336,6 @@ export function FormLogin({ onLogin }: FormLoginProps) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Helper: Calculate eye position relative to Capybara
-  // Function này được tạo 1 lần và không thay đổi, không cần memoize
-  const calculateEyePosition = (clientX: number, clientY: number) => {
-    if (!capybaraRef.current) return { x: 0, y: 0 };
-
-    const rect = capybaraRef.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-
-    // Calculate direction from Capybara to cursor
-    const deltaX = clientX - centerX;
-    const deltaY = clientY - centerY;
-
-    // Normalize to max range of 2 (within pupil bounds)
-    const maxRange = 2;
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    const normalizedDistance = Math.min(distance / 200, 1); // 200px = max distance for full movement
-
-    const x = (deltaX / (distance || 1)) * maxRange * normalizedDistance;
-    const y = (deltaY / (distance || 1)) * maxRange * normalizedDistance;
-
-    return { x, y };
-  };
-
-  // Random glance function
-  const doRandomGlance = () => {
-    const rX = (Math.random() - 0.5) * 3; // -1.5 to 1.5
-    const rY = (Math.random() - 0.5) * 2; // -1 to 1
-    setEyePosition({ x: rX, y: rY });
-  };
-
-  // Mouse tracking for Desktop ONLY - Tắt hoàn toàn trên mobile
-  useEffect(() => {
-    // Tắt hoàn toàn trên mobile để ưu tiên input focus
-    if (isMobile) {
-      return;
-    }
-
-    let rafId: number | null = null;
-    let lastPos = { x: 0, y: 0 };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      lastInteractionRef.current = Date.now();
-      setIsMouseInView(true);
-
-      // Chỉ theo dõi chuột khi không đang focus vào input
-      if (!focusedField && !showPassword && !showConfirmPassword) {
-        // Throttle với requestAnimationFrame để tránh quá nhiều updates
-        if (rafId === null) {
-          rafId = requestAnimationFrame(() => {
-            const pos = calculateEyePosition(e.clientX, e.clientY);
-            // Chỉ update nếu vị trí thay đổi đáng kể (> 0.1px) để tránh re-render không cần thiết
-            const deltaX = Math.abs(pos.x - lastPos.x);
-            const deltaY = Math.abs(pos.y - lastPos.y);
-            if (deltaX > 0.1 || deltaY > 0.1) {
-              lastPos = pos;
-              setEyePosition(pos);
-              setCapyMood("neutral");
-            }
-            rafId = null;
-          });
-        }
-      }
-    };
-
-    const handleMouseLeave = () => {
-      setIsMouseInView(false);
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId);
-        rafId = null;
-      }
-    };
-
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    document.addEventListener("mouseleave", handleMouseLeave);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseleave", handleMouseLeave);
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId);
-      }
-    };
-  }, [isMobile, focusedField, showPassword, showConfirmPassword]);
-
-  // Touch tracking TẮT HOÀN TOÀN trên mobile để ưu tiên input focus
-  // Trên mobile: chỉ có random glance khi idle, không track touch
-  // Trên desktop: vẫn track mouse như bình thường
 
   // Random glancing when idle (no interaction for 2s) - Optimized
   useEffect(() => {
@@ -627,44 +559,8 @@ export function FormLogin({ onLogin }: FormLoginProps) {
     setConfirmPassword("");
     setIsFlying(false);
     setCapyMood("neutral");
-    if (newMode === "login") {
-      setIntroMode(true);
-    } else {
-      setIntroMode(false);
-    }
+    setIntroMode(newMode === "login");
   };
-
-  // Flying styles
-  const flyStyle: React.CSSProperties =
-    isFlying && targetRect
-      ? {
-          position: "fixed",
-          top: targetRect.top + "px",
-          left: targetRect.left + "px",
-          width: targetRect.width + "px",
-          height: targetRect.height + "px",
-          transform: "translate(0, 0) scale(0.35)",
-          borderRadius: "1rem",
-          zIndex: 100,
-        }
-      : {};
-
-  // Password toggle button
-  const PasswordToggle = ({
-    show,
-    onToggle,
-  }: {
-    show: boolean;
-    onToggle: () => void;
-  }) => (
-    <button
-      type="button"
-      onClick={onToggle}
-      className="p-2 text-gray-400 hover:text-black transition-colors"
-    >
-      {show ? <Eye size={18} /> : <EyeOff size={18} />}
-    </button>
-  );
 
   return (
     <div className="relative w-full min-h-screen bg-gray-50 text-gray-900 font-sans overflow-hidden selection:bg-black selection:text-white">
@@ -740,6 +636,7 @@ export function FormLogin({ onLogin }: FormLoginProps) {
                 delay={0.1}
                 error={errors.email}
                 autoComplete="email"
+                disabled={isSubmitting}
               />
 
               <MinimalInput
@@ -759,10 +656,12 @@ export function FormLogin({ onLogin }: FormLoginProps) {
                 delay={0.2}
                 error={errors.password}
                 autoComplete="current-password"
+                disabled={isSubmitting}
                 rightElement={
                   <PasswordToggle
                     show={showPassword}
                     onToggle={() => setShowPassword(!showPassword)}
+                    disabled={isSubmitting}
                   />
                 }
               />
@@ -923,6 +822,7 @@ export function FormLogin({ onLogin }: FormLoginProps) {
                     <PasswordToggle
                       show={showPassword}
                       onToggle={() => setShowPassword(!showPassword)}
+                      disabled={isSubmitting}
                     />
                   }
                 />
@@ -955,6 +855,7 @@ export function FormLogin({ onLogin }: FormLoginProps) {
                         onToggle={() =>
                           setShowConfirmPassword(!showConfirmPassword)
                         }
+                        disabled={isSubmitting}
                       />
                     </div>
                   }
@@ -1068,6 +969,7 @@ export function FormLogin({ onLogin }: FormLoginProps) {
                     <PasswordToggle
                       show={showPassword}
                       onToggle={() => setShowPassword(!showPassword)}
+                      disabled={isSubmitting}
                     />
                   }
                 />

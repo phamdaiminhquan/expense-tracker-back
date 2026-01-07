@@ -1,132 +1,325 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-  DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Message, Category } from "@/lib/types.lib";
+import { Check, Trash2, AlertCircle, Loader2 } from "lucide-react";
+import useSWR from "swr";
+import { getListWallets } from "@/apis/wallets/wallet.api";
+import { Wallet } from "@/apis/wallets/wallet.entities";
+import { WALLET_TEMPLATES } from "@/pages/message/message.constant";
 import { toast } from "sonner";
-import { SpinnerGap } from "@phosphor-icons/react";
-import React from "react";
+import { formatCurrency } from "@/lib/currency.lib";
 
 interface DialogPromptEditPendingProps {
   message: Message | null;
   categories: Category[];
+  wallets: Wallet[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (message: Message) => void;
+  onSave: (message: Message) => Promise<void>;
+  onDelete: (id: string | null) => Promise<void>;
 }
 
 export function DialogPromptEditPending({
   message,
   categories,
+  wallets,
   open,
   onOpenChange,
   onSave,
+  onDelete,
 }: DialogPromptEditPendingProps) {
-  const [promptText, setPromptText] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    text: "",
+    amount: 0,
+    categoryId: "",
+    walletId: "",
+    type: "expense" as "expense" | "income",
+  });
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [retryCount, setRetryCount] = useState(0);
+  const isInitialMount = useRef(true);
+  const lastSavedData = useRef<string>("");
+
+  const MAX_RETRIES = 3;
 
   useEffect(() => {
-    if (message) {
-      setPromptText(message.originalPrompt || message.message);
+    if (message && open) {
+      // Ưu tiên lấy dữ liệu từ transaction nếu có, fallback về message level
+      const transaction = message.transaction;
+      
+      const earnValue = transaction?.earnValue ?? message.earn;
+      const spendValue = transaction?.spendValue ?? message.spend;
+      const isIncome = earnValue !== null && earnValue > 0;
+      
+      const initialType = isIncome ? "income" : "expense";
+      const initialData = {
+        text: transaction?.content || message.message || message.originalPrompt || "",
+        amount: isIncome ? (earnValue || 0) : (spendValue || 0),
+        categoryId: transaction?.categoryId || message.categoryId || "",
+        walletId: transaction?.walletId || message.walletId || "",
+        type: initialType as "expense" | "income",
+      };
+      
+      setFormData(initialData);
+      lastSavedData.current = JSON.stringify(initialData);
+      setConfirmDelete(false);
+      setSaveStatus("idle");
+      setRetryCount(0);
+      isInitialMount.current = true;
     }
-  }, [message]);
+  }, [message, open]);
 
-  const handleProcess = async () => {
-    if (!message || !promptText.trim()) return;
+  const handleSave = useCallback(async (data: typeof formData, isManual = false) => {
+    if (!message) return;
 
-    setIsLoading(true);
+    // Chỉ thực hiện lưu khi có sự thay đổi so với dữ liệu ban đầu/lần lưu cuối
+    const currentDataStr = JSON.stringify(data);
+    if (!isManual && currentDataStr === lastSavedData.current) return;
 
+    setSaveStatus("saving");
     try {
-      // Update message with new prompt and set status to 'pending' to trigger AI processing
       await onSave({
         ...message,
-        message: promptText.trim(),
-        originalPrompt: promptText.trim(),
-        isPendingPrompt: true,
-        status: "pending",
-        spend: null,
-        earn: null,
-        categoryId: null,
+        message: data.text,
+        spend: data.type === "expense" ? data.amount : null,
+        earn: data.type === "income" ? data.amount : null,
+        categoryId: data.categoryId || null,
+        walletId: data.walletId || null,
       });
-
-      toast.success("Đã cập nhật prompt, AI sẽ xử lý lại.", {
-        description: promptText.trim(),
-      });
-
-      onOpenChange(false);
+      setSaveStatus("saved");
+      lastSavedData.current = currentDataStr;
+      setRetryCount(0);
     } catch (error) {
-      toast.error("Có lỗi xảy ra", {
-        description: "Vui lòng thử lại",
-      });
-    } finally {
-      setIsLoading(false);
+      setSaveStatus("error");
+      if (!isManual) {
+        setRetryCount(prev => prev + 1);
+      }
     }
-  };
+  }, [message, onSave]);
+
+  useEffect(() => {
+    if (!message || !open || isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    if (retryCount > 0 && retryCount <= MAX_RETRIES && saveStatus === "error") {
+      const retryTimer = setTimeout(() => {
+        handleSave(formData);
+      }, 2000 * retryCount);
+      return () => clearTimeout(retryTimer);
+    }
+
+    // Debounce: Chỉ tự động cập nhật nếu dữ liệu khác với lần lưu cuối
+    if (retryCount === 0 && JSON.stringify(formData) !== lastSavedData.current) {
+      const timer = setTimeout(() => {
+        handleSave(formData);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [formData, message, open, retryCount, saveStatus, handleSave]);
+
+  if (!message) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">
-            Chỉnh sửa và xử lý ghi chú
+      <DialogContent className="sm:max-w-md p-6 rounded-[32px] gap-0 border-none shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
+        <DialogHeader className="mb-4">
+          <DialogTitle className="text-xl font-bold text-center text-gray-800 flex items-center justify-center gap-2">
+            Chi tiết giao dịch
+            {saveStatus === "saving" && <Loader2 size={16} className="animate-spin text-indigo-500" />}
+            {saveStatus === "saved" && <Check size={16} className="text-emerald-500 animate-in fade-in zoom-in" />}
+            {saveStatus === "error" && (
+              <div className="flex items-center gap-1">
+                <AlertCircle size={16} className="text-rose-500" />
+                {retryCount > MAX_RETRIES && (
+                  <button 
+                    onClick={() => handleSave(formData, true)}
+                    className="text-[10px] bg-rose-50 text-rose-600 px-2 py-0.5 rounded-full hover:bg-rose-100 transition-colors"
+                  >
+                    Thử lại
+                  </button>
+                )}
+              </div>
+            )}
           </DialogTitle>
-          <DialogDescription className="text-base">
-            Chỉnh sửa prompt và xử lý lại để tạo giao dịch hợp lệ. Thời gian
-            giao dịch sẽ là thời điểm bạn tạo ghi chú ban đầu.
-          </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="pending-prompt" className="text-sm font-semibold">
-              Prompt giao dịch
-            </Label>
-            <Input
-              id="pending-prompt"
-              value={promptText}
-              onChange={(e) => setPromptText(e.target.value)}
-              placeholder="VD: bánh tráng trộn 35"
-              disabled={isLoading}
-              className="h-11 transition-all focus-visible:ring-2 focus-visible:ring-primary/20"
+
+        <div className="w-full pb-4">
+          {/* Toggle Thu/Chi */}
+          <div className="flex bg-gray-100 p-1 rounded-2xl mb-6">
+            <button
+              onClick={() => setFormData({ ...formData, type: "expense" })}
+              className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
+                formData.type === "expense"
+                  ? "bg-white text-rose-600 shadow-sm scale-[1.02]"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Chi tiêu
+            </button>
+            <button
+              onClick={() => setFormData({ ...formData, type: "income" })}
+              className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
+                formData.type === "income"
+                  ? "bg-white text-emerald-600 shadow-sm scale-[1.02]"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Thu nhập
+            </button>
+          </div>
+
+          <div className="relative mb-4">
+            <div className={`absolute top-1/2 left-4 -translate-y-1/2 font-bold text-lg ${formData.type === "expense" ? "text-rose-400" : "text-emerald-400"}`}>
+              ₫
+            </div>
+            <input
+              type="number"
+              value={formData.amount || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, amount: Number(e.target.value) })
+              }
+              className={`w-full p-4 pl-10 text-3xl font-bold text-center bg-transparent border-b-2 outline-none transition-all placeholder-gray-200 ${
+                formData.type === "expense" 
+                  ? "text-rose-600 border-rose-100 focus:border-rose-500" 
+                  : "text-emerald-600 border-emerald-100 focus:border-emerald-500"
+              }`}
+              placeholder="0"
+              autoFocus
             />
-            <p className="text-xs text-muted-foreground">
-              Mô tả giao dịch và số tiền (VD: "cơm trưa 45" hoặc "nhận lương
-              5000")
-            </p>
+          </div>
+
+          <div className="mb-6 px-1">
+            <input
+              value={formData.text}
+              onChange={(e) =>
+                setFormData({ ...formData, text: e.target.value })
+              }
+              className="w-full p-3 bg-gray-50 rounded-xl text-base font-medium text-gray-700 border border-transparent focus:bg-white focus:border-indigo-200 outline-none transition-all text-center"
+              placeholder="Nhập nội dung giao dịch..."
+            />
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 px-1">
+                Ví thanh toán
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                {wallets.map((w: Wallet) => {
+                  const isSelected = formData.walletId === w.id;
+                  const template = WALLET_TEMPLATES.find(t => t.code === w.icon) || WALLET_TEMPLATES.find(t => t.code === "custom");
+                  
+                  return (
+                    <button
+                      key={w.id}
+                      onClick={() =>
+                        setFormData({ ...formData, walletId: w.id })
+                      }
+                      style={{ 
+                        borderColor: isSelected ? template?.color : undefined,
+                        backgroundColor: isSelected ? template?.bgLight : undefined,
+                        color: isSelected ? template?.text : undefined 
+                      }}
+                      className={`flex flex-col items-start gap-1 px-4 py-2.5 rounded-xl border transition-all min-w-[120px] ${
+                        isSelected
+                          ? `ring-2 ring-offset-1 font-bold shadow-sm`
+                          : "bg-white border-gray-100 text-gray-500 hover:bg-gray-50 shadow-sm"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {template?.img ? (
+                          <img src={template.img} alt={w.name} className="w-5 h-5 object-contain" />
+                        ) : (
+                          <span className="text-lg">💰</span>
+                        )}
+                        <span className="text-sm whitespace-nowrap">{w.name}</span>
+                      </div>
+                      <div className={`text-[10px] font-medium ${isSelected ? "" : "text-gray-400"}`}>
+                        {formatCurrency(w.balance)} ₫
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 px-1">
+                Danh mục
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {categories.length === 0 ? (
+                  <div className="text-xs text-amber-500 italic px-1 py-2">
+                    Nhu liệu: Không tìm thấy danh mục từ Backend.
+                  </div>
+                ) : (
+                  categories.map((c) => {
+                    const isSelected = formData.categoryId === c.id;
+                    return (
+                      <button
+                        key={c.id}
+                        onClick={() =>
+                          setFormData({ ...formData, categoryId: c.id })
+                        }
+                        className={`px-3 py-2 rounded-lg text-xs font-bold border transition-all flex items-center gap-1.5 ${
+                          isSelected
+                            ? formData.type === "expense"
+                              ? "bg-rose-500 text-white border-rose-500 shadow-rose-200 shadow-md transform scale-105"
+                              : "bg-emerald-500 text-white border-emerald-500 shadow-emerald-200 shadow-md transform scale-105"
+                            : "bg-white text-gray-600 border-gray-100 hover:border-gray-300"
+                        }`}
+                      >
+                        {c.name}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 pt-4 border-t border-gray-50 flex justify-center">
+            {!confirmDelete ? (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="text-gray-400 hover:text-rose-500 transition-colors text-xs font-bold flex items-center gap-1 py-2 px-4 rounded-full hover:bg-rose-50"
+              >
+                <Trash2 size={14} /> <span className="pt-0.5">Xóa giao dịch này</span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-3 animate-in fade-in zoom-in">
+                <span className="text-xs text-rose-500 font-bold">
+                  Bạn chắc chắn?
+                </span>
+                <button
+                  onClick={async () => {
+                    await onDelete(message.id);
+                    onOpenChange(false);
+                  }}
+                  className="bg-rose-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:bg-rose-600"
+                >
+                  Xóa luôn
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-gray-200"
+                >
+                  Hủy
+                </button>
+              </div>
+            )}
           </div>
         </div>
-        <DialogFooter className="gap-2">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isLoading}
-            className="shadow-sm"
-          >
-            Hủy
-          </Button>
-          <Button
-            onClick={handleProcess}
-            disabled={isLoading || !promptText.trim()}
-            className="shadow-md hover:shadow-lg transition-all"
-          >
-            {isLoading ? (
-              <React.Fragment>
-                <SpinnerGap className="animate-spin mr-2" />
-                Đang xử lý...
-              </React.Fragment>
-            ) : (
-              "Xử lý"
-            )}
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+  

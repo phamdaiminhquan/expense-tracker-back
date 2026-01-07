@@ -211,11 +211,13 @@ export function MessageRoute() {
   };
 
   const handleUpdateMessage = async (updatedMessage: any) => {
-    // Only update message and optionally walletId
-    // Update message; always set walletId from selectedWalletId in the UI
+    // Manually updating message details
     const payload: any = {
       message: updatedMessage.message,
       walletId: updatedMessage.walletId ?? null,
+      spendValue: updatedMessage.spend,
+      earnValue: updatedMessage.earn,
+      categoryId: updatedMessage.categoryId,
     };
 
     await updateMessage(updatedMessage.id, payload);
