@@ -22,6 +22,8 @@ export type FundDto = {
   memberIds?: string[];
   isOpenDialogCate?: boolean;
   lastMessage: FundLastMessageDto | null; // Message mới nhất từ BE (đã được sort)
+  canAccess?: boolean;
+  membershipRole?: "owner" | "member";
 };
 
 export interface FundsListResponse {

@@ -234,28 +234,32 @@ export function DrawerNavigation({
                     : "opacity-0 group-hover:opacity-100"
                     }`}
                 >
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation(); // Ngăn event bubble lên button cha
-                      handleUpdateFund(e, fund.id);
-                    }}
-                    className="cursor-pointer h-7 w-7 p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-indigo-600 transition-colors"
-                  >
-                    <Pencil size={14} />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation(); // Ngăn event bubble lên button cha
-                      handleDeleteFund(e, fund.id);
-                    }}
-                    className="cursor-pointer h-7 w-7 p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-rose-500 transition-colors"
-                  >
-                    <Trash size={14} />
-                  </Button>
+                  {fund.membershipRole === "owner" && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Ngăn event bubble lên button cha
+                          handleUpdateFund(e, fund.id);
+                        }}
+                        className="cursor-pointer h-7 w-7 p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-indigo-600 transition-colors"
+                      >
+                        <Pencil size={14} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Ngăn event bubble lên button cha
+                          handleDeleteFund(e, fund.id);
+                        }}
+                        className="cursor-pointer h-7 w-7 p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-rose-500 transition-colors"
+                      >
+                        <Trash size={14} />
+                      </Button>
+                    </>
+                  )}
 
                   <Button
                     variant="ghost"

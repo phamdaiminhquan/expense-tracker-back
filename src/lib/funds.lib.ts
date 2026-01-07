@@ -31,12 +31,15 @@ export function createFund(
 }
 
 export function canAccessFund(fund: Fund, userId: string): boolean {
-  // Owner luôn có quyền truy cập
-  if (fund.ownerId === userId) return true;
-  // Check memberIds
-  return fund.memberIds.includes(userId);
+  // Ưu tiên check canAccess từ BE nếu có
+  if (fund.canAccess !== undefined) return fund.canAccess;
+  // Fallback check memberIds
+  return fund.ownerId === userId || fund.memberIds.includes(userId);
 }
 
 export function canEditFund(fund: Fund, userId: string): boolean {
+  // Ưu tiên check membershipRole từ BE nếu có
+  if (fund.membershipRole !== undefined) return fund.membershipRole === "owner";
+  // Fallback check ownerId
   return fund.ownerId === userId;
 }

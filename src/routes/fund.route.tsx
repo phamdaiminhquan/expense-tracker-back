@@ -32,12 +32,9 @@ export function FundsRoute() {
 
   // Get visible funds (filter by access permission)
   const visibleFunds = useMemo(() => {
-    if (!fundList?.data || !currentUserId) return [];
-    return fundList?.data.filter(
-      (fund) =>
-        fund.ownerId === currentUserId || fund.memberIds.includes(currentUserId)
-    );
-  }, [fundList?.data, currentUserId]);
+    if (!fundList?.data) return [];
+    return fundList.data.filter((fund) => fund.canAccess !== false);
+  }, [fundList?.data]);
 
   // Check if this is a fresh login (from login page)
   useEffect(() => {

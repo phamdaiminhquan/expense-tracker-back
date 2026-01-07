@@ -29,6 +29,8 @@ export interface Fund {
   createdAt: number;
   lastMessage?: FundLastMessage; // Message mới nhất từ BE
   isOpenDialogCate?: boolean;
+  canAccess?: boolean;
+  membershipRole?: "owner" | "member";
 }
 
 export interface Message {

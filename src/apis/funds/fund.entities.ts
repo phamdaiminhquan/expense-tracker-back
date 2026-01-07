@@ -11,4 +11,6 @@ export interface Fund extends BaseEntity {
   lastMessage?: FundLastMessage;
   isOpenDialogCate?: boolean;
   description: string | null;
+  canAccess?: boolean;
+  membershipRole?: "owner" | "member";
 }

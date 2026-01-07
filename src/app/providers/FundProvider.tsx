@@ -48,8 +48,8 @@ export const useFund = (params?: GetListFundDto, fundId?: string) => {
     async () => {
       try {
         const res = await getFund(fundId!)
-        // Backend trả về public site (có memberCount) khi user chưa là thành viên
-        if (res.memberCount !== undefined) {
+        // Dựa vào field canAccess để lấy interface và xử lý logic
+        if (res.canAccess === false) {
           setNeedJoinFund(true)
         } else {
           setNeedJoinFund(false)
@@ -74,7 +74,7 @@ export const useFund = (params?: GetListFundDto, fundId?: string) => {
     isLoading: isLoadingJoinRequests,
     mutate: mutateJoinRequests,
   } = useSWR(
-    fundId && currentUser && fund?.ownerId === currentUser.id
+    fundId && currentUser && fund?.membershipRole === 'owner'
       ? ['fund-join-requests', fundId, JoinFundStatus.PENDING]
       : null,
     () => getJoinRequests(fundId!, { status: JoinFundStatus.PENDING }),

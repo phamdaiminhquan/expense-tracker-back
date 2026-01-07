@@ -49,11 +49,17 @@ export function MessageRoute() {
     needJoinFund,
   } = useFund(fundParams, fundId);
 
+  // Get accessible funds
+  const accessibleFunds = useMemo(() => {
+    if (!fundList?.data) return [];
+    return fundList.data.filter((f) => f.canAccess !== false);
+  }, [fundList?.data]);
+
   // Auto-select fund
   const selectedFund = useMemo(() => {
     if (fundId && fund) return fund;
-    return fundList?.data?.[0] ?? null;
-  }, [fundId, fund, fundList?.data]);
+    return accessibleFunds[0] ?? null;
+  }, [fundId, fund, accessibleFunds]);
 
   const canLoadMessages =
     !!selectedFund && !!selectedFund.id;
@@ -87,6 +93,13 @@ export function MessageRoute() {
       setAppReady();
     }
   }, [isLoadingFunds, setAppReady]);
+
+  // Redirect to invite page if fund is not accessible
+  useEffect(() => {
+    if (needJoinFund && fundId) {
+      navigate(`/invite/${fundId}`, { replace: true });
+    }
+  }, [needJoinFund, fundId, navigate]);
 
   // Auto-navigate to first fund
   useEffect(() => {
@@ -226,7 +239,7 @@ export function MessageRoute() {
     <MessagePage
       fund={selectedFund || fund}
       fundId={fundId}
-      funds={fundList?.data}
+      funds={accessibleFunds}
       messages={messageList?.data || []}
       categories={categories}
       currentUserId={currentUserId as string}
