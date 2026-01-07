@@ -20,11 +20,11 @@ interface Props {
 
 const mapTemplateToCreate = (tpl: any) => {
   const code = tpl.code;
-  let type = WalletType.OTHERS;
+  let type = WalletType.OTHER;
   if (code === "cash") type = WalletType.CASH;
   else if (["vcb", "tpb", "mb"].includes(code)) type = WalletType.BANK;
   else if (["momo", "zalopay"].includes(code)) type = WalletType.E_WALLET;
-  else type = WalletType.OTHERS;
+  else type = WalletType.OTHER;
 
   return {
     type,

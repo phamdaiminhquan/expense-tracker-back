@@ -2,5 +2,5 @@ export enum WalletType {
   CASH = "CASH",
   BANK = "BANK",
   E_WALLET = "E_WALLET",
-  OTHERS = "OTHERS",
+  OTHER = "OTHER",
 }

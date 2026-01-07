@@ -46,13 +46,6 @@ export function MessageRoute() {
     mutateList,
   } = useFund(fundParams, fundId);
 
-  // Get visible funds (filter by access permission)
-  // const fundList?.data = useMemo(() => {
-  //   if (!fundList?.data || !currentUserId) return [];
-  //   return fundList.data.filter(
-  //     (f) => f.ownerId === currentUserId || f.memberIds?.includes(currentUserId)
-  //   );
-  // }, [currentUserId, fundList?.data]);
   // Auto-select fund
   const selectedFund = useMemo(() => {
     if (fundId && fund) return fund;
@@ -67,8 +60,7 @@ export function MessageRoute() {
     deleteMessage,
   } = useMessage(selectedFund?.id || "");
 
-  const { categories, createCategory, updateCategory, deleteCategory } =
-    useCategories();
+  const { categories } = useCategories();
 
   // Fetch wallets data for onboarding check
   const { data: walletsData, mutate: mutateWallets } = useSWR(
@@ -79,7 +71,6 @@ export function MessageRoute() {
 
   // Signal app ready khi đã có data (hoặc đã load xong dù empty)
   useEffect(() => {
-    // Ready khi: đã load xong funds (không còn loading)
     if (!isLoadingFunds) {
       setAppReady();
     }
@@ -114,13 +105,11 @@ export function MessageRoute() {
         onWalletMutate={mutateWallets}
         onCreateFund={async (name, type) => {
           await createFund({ name, type });
-          // Refresh funds list after creating fund
           await mutateList();
         }}
         currentUserId={currentUserId || undefined}
         allUsers={currentUser ? [currentUser] : []}
         onComplete={async () => {
-          // After onboarding complete, refresh data and show main UI
           await mutateList();
           await mutateWallets();
           // Clear the onboarding flags
@@ -174,27 +163,33 @@ export function MessageRoute() {
   const handleAddMessage = async (messageData: any) => {
     if (!selectedFund) return;
 
+    // Only send the fields required by the API: message and walletId (provided by UI)
     const payload = {
       message: messageData.message || null,
+      walletId: messageData.walletId ?? null,
     };
 
     await createMessage(selectedFund.id, payload);
   };
 
-  const handleResendMessage = async (failedMessage: any) => {
+  const handleResendMessage = async (failedMessage: any, walletId?: string) => {
     if (!selectedFund) return;
 
     const messageText = failedMessage.originalPrompt || failedMessage.message;
     const payload = {
       message: messageText,
+      walletId: walletId ?? failedMessage.walletId ?? null,
     };
 
     await createMessage(selectedFund.id, payload);
   };
 
   const handleUpdateMessage = async (updatedMessage: any) => {
-    const payload = {
+    // Only update message and optionally walletId
+    // Update message; always set walletId from selectedWalletId in the UI
+    const payload: any = {
       message: updatedMessage.message,
+      walletId: updatedMessage.walletId ?? null,
     };
 
     await updateMessage(updatedMessage.id, payload);

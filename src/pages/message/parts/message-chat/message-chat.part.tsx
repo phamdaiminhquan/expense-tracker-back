@@ -21,6 +21,7 @@ import { DialogMessageAction } from "@/components/elements/dialog/dialog-message
 import React from "react";
 import { getStatisticsByFundId } from "@/apis/statistics/statistic.api";
 import { Range } from "@/apis/statistics/statistic.enum";
+import { CreateMessageDto } from "@/apis/messages/message.interface";
 interface ChatMessageViewProps {
   fund: Fund | null;
   messages: Message[];
@@ -29,7 +30,7 @@ interface ChatMessageViewProps {
   currentUserName: string;
   onOpenDrawer: () => void;
   onShowStatistics: () => void;
-  onAddMessage: (message: Omit<Message, "id" | "timestamp">) => Promise<void>;
+  onAddMessage: (message: CreateMessageDto) => Promise<void>;
   onResendMessage: (message: Message) => Promise<void>;
   onUpdateMessage: (message: Message) => Promise<void>;
   onDeleteMessage: (id: string) => Promise<void>;
@@ -153,16 +154,10 @@ export function MessageChatPart({
 
     try {
       await onAddMessage({
-        createdById: currentUserId,
-        userName: currentUserName,
         fundId: fund.id,
-        spend: null,
-        earn: null,
         message: textToSend,
-        isPendingPrompt: true,
-        originalPrompt: textToSend,
-        createdAt: optimisticMsg.createdAt,
-      });
+        walletId: selectedWalletId ?? null,
+      } as CreateMessageDto);
       mutateStatisticFundId();
       mutate(
         (key) =>
@@ -214,7 +209,6 @@ export function MessageChatPart({
       bottomRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages.length, optimisticMessages.length]);
-
   return (
     <div
       className={`flex flex-col h-dvh lg:h-full bg-white font-sans overflow-hidden relative`}
@@ -328,10 +322,12 @@ export function MessageChatPart({
                     msg={uiMsg}
                     isCurrentUser={isCurrentUser}
                     walletName={fund?.name}
-                    onRetry={() => {
-                      // Lỗi mạng → gửi lại trực tiếp
-                      onResendMessage(message);
-                    }}
+                    onRetry={() =>
+                      onResendMessage({
+                        walletId: selectedWalletId,
+                        ...message,
+                      })
+                    }
                     onEditPrompt={() => {
                       // AI không parse được → mở dialog chỉnh sửa prompt
                       setEditingPendingPrompt(message);
@@ -480,7 +476,10 @@ export function MessageChatPart({
         open={editingMessage !== null}
         onOpenChange={(open) => !open && setEditingMessage(null)}
         onSave={async (msg) => {
-          await onUpdateMessage(msg);
+          await onUpdateMessage({
+            walletId: selectedWalletId,
+            ...msg,
+          });
           setActionSheetOpen(false);
           await mutateStatisticFundId();
           await Promise.all([

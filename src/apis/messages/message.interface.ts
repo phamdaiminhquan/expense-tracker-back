@@ -73,6 +73,7 @@ export interface CreateMessageDto {
   spendValue?: number | null;
   earnValue?: number | null;
   categoryId?: string | null;
+  walletId?: string | null;
 }
 
 export interface UpdateMessageDto {
@@ -80,4 +81,5 @@ export interface UpdateMessageDto {
   spendValue?: number | null;
   earnValue?: number | null;
   categoryId?: string | null;
+  walletId?: string | null;
 }
