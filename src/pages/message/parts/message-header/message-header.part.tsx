@@ -3,7 +3,6 @@ import { Sparkles, TrendingUp, Menu, Share2 } from "lucide-react";
 import { BellComponent, BellItem } from "@/components/components-mui/bell/bell.component";
 import { formatNumber } from "@/common/utils/number.utils";
 import { useFund } from "@/app/providers/FundProvider";
-import { formatCurrency } from "@/lib/currency";
 
 interface Props {
   totalExpense: number;
