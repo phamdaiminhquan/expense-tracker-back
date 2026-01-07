@@ -82,14 +82,12 @@ const JoinFundDialog: React.FC<JoinFundDialogProps> = ({
                         </div>
                     </div>
 
-                    {/* Body */}
                     <div className="p-6">
                         <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                             <UserPlus className="text-blue-600" />
                             Tham gia quỹ
                         </h2>
 
-                        {/* FOLLOW – CHƯA HỖ TRỢ */}
                         <div className="opacity-50 pointer-events-none mb-4">
                             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
                                 <div className="flex items-center gap-3">
@@ -108,12 +106,10 @@ const JoinFundDialog: React.FC<JoinFundDialogProps> = ({
                             </div>
                         </div>
 
-                        {/* Note */}
                         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-sm text-amber-800">
                             💡 Khi tham gia, bạn có thể xem và thảo luận tất cả giao dịch trong quỹ.
                         </div>
 
-                        {/* Actions */}
                         <button
                             onClick={handleJoin}
                             disabled={isJoining}

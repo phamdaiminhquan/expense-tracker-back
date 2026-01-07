@@ -190,11 +190,13 @@ export function MessageRoute() {
   const handleJoinFund = async (fundId: string) => {
     await joinFundRequest(fundId);
 
-    setNeedJoinFund(false);
 
     await mutateFund();
     await mutateList();
-
+    setNeedJoinFund(false);
+    toast.success('Gửi yêu cầu tham gia quỹ thành công!', {
+      description: 'Vui lòng chờ quản trị viên duyệt',
+    })
     navigate(`/chat/${fundId}`, { replace: true });
   };
 

@@ -1,6 +1,7 @@
 import { BaseEntity, PageOptionsDto } from "@/common/interfaces/api.interface";
 import { FundType } from "@/lib/types.lib";
 import { Fund } from "./fund.entities";
+import { JoinFundStatus } from "./fund.enum";
 
 export type FundLastMessageDto = {
   id: string;
@@ -85,3 +86,14 @@ export interface UpdateFundDto {
   description?: string | null;
 }
 
+export interface JoinFundRequest {
+  id: string
+  fundId: string,
+  status: JoinFundStatus,
+  createdAt: string,
+  user?: {
+    id: string;
+    email: string;
+    name: string;
+  };
+}

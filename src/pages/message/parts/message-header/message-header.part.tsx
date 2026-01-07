@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Sparkles, TrendingUp, Menu, Share2 } from "lucide-react";
-import { formatCurrency } from "@/lib/currency.lib";
 import { formatNumber } from "@/common/utils/number.utils";
+import { BellComponent, BellItem } from "@/components/components-mui/bell/bell.component";
+import { useFund } from "@/app/providers/FundProvider";
 
 interface Props {
   totalExpense: number;
@@ -10,9 +11,11 @@ interface Props {
   isSmartMode: boolean;
   onToggleSmart: () => void;
   fundName?: string;
+  fundId?: string,
   onShowStatistics: () => void;
   onOpenShareFundDialog: () => void
 }
+
 
 const MessageHeaderPart: React.FC<Props> = ({
   totalExpense,
@@ -21,9 +24,38 @@ const MessageHeaderPart: React.FC<Props> = ({
   isSmartMode,
   onToggleSmart,
   fundName,
+  fundId,
   onShowStatistics,
   onOpenShareFundDialog
 }) => {
+  const {
+    joinRequests,
+    approveRequest,
+    rejectRequest,
+  } = useFund(undefined, fundId)
+
+  const bellItems: BellItem[] = useMemo(() => {
+    if (!joinRequests || joinRequests.length === 0) return []
+
+    return joinRequests.map((req) => ({
+      id: req.id,
+      type: 'FUND_REQUEST',
+      payload: {
+        id: req.id,
+        name: req.user?.name ?? 'User',
+        message: 'Yêu cầu tham gia quỹ',
+        time: req.createdAt,
+        fundType: 'MEMBER', // fix cứng chờ BE
+        onApprove: () => approveRequest(req.id),
+        onReject: () => rejectRequest(req.id),
+      },
+    }))
+  }, [joinRequests, approveRequest, rejectRequest])
+
+
+
+
+
   return (
     <div className="lg:pt-6 lg:pb-4 lg:px-6 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2 px-4 bg-white/90 backdrop-blur-md border-b border-gray-100 z-20 shrink-0">
       <div className="flex justify-between items-center mb-3 lg:mb-4">
@@ -63,6 +95,12 @@ const MessageHeaderPart: React.FC<Props> = ({
           >
             <Share2 size={12} /> Chia sẻ
           </button>
+
+          <BellComponent
+            title="Thông báo"
+            count={bellItems.length}
+            items={bellItems}
+          />
 
           <button
             onClick={onShowStatistics}

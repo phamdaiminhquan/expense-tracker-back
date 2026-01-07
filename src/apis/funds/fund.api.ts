@@ -6,9 +6,11 @@ import {
   CreateFundDto,
   UpdateFundDto,
   GetListFundMemberDto,
+  JoinFundRequest,
 } from "./fund.interface";
 import { ResList } from "@/common/interfaces/api.interface";
 import { Fund } from "./fund.entities";
+import { JoinFundStatus } from "./fund.enum";
 
 export const getListFunds = async (
   params: GetListFundDto
@@ -82,4 +84,27 @@ export async function dialogCateOpened(fundId: string): Promise<boolean> {
 
 export async function joinFundRequest(fundId: string): Promise<any> {
   return await axiosRequest.post(`/funds/${fundId}/join-requests`)
+}
+
+export async function getJoinRequests(fundId: string, params?: { status?: JoinFundStatus }): Promise<JoinFundRequest[]> {
+  const res = await axiosRequest.get(
+    `/funds/${fundId}/join-requests`,
+    { params }
+  )
+  return res.data ?? []
+}
+
+
+export async function approveJoinRequest(fundId: string, requestId: string): Promise<boolean> {
+  await axiosRequest.post(
+    `/funds/${fundId}/join-requests/${requestId}/approve`
+  )
+  return true
+}
+
+export async function rejectJoinRequest(fundId: string, requestId: string): Promise<boolean> {
+  await axiosRequest.post(
+    `/funds/${fundId}/join-requests/${requestId}/reject`
+  )
+  return true
 }
