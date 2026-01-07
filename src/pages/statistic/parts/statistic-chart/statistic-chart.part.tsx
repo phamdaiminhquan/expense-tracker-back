@@ -217,7 +217,7 @@ const StatisticChartPart: React.FC<Props> = ({
                   {activeTab === "expense" ? "-" : "+"}
                   {formatVND(item.value).replace("₫", "")}
                 </div>
-                <div className="text-[10px] text-gray-400 font-bold uppercase">
+                <div className="text-2xs text-gray-400 font-bold uppercase">
                   VND
                 </div>
               </div>

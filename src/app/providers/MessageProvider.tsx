@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import {
   getListMessages,
   createMessage as apiCreateMessage,
@@ -13,7 +13,7 @@ import {
 } from "@/apis/messages/message.interface";
 import { toast } from "sonner";
 
-export const useMessage = (fundId: string, messageId?: string) => {
+export const useMessage = (fundId?: string, messageId?: string) => {
   const [loading, setLoading] = useState(false);
 
   const {
@@ -22,7 +22,7 @@ export const useMessage = (fundId: string, messageId?: string) => {
     mutate: mutateList,
   } = useSWR(
     fundId ? "messages" + JSON.stringify(fundId) : null,
-    async () => await getListMessages(fundId),
+    async () => await getListMessages(fundId!),
     {
       keepPreviousData: true,
       revalidateOnFocus: false,
@@ -52,6 +52,7 @@ export const useMessage = (fundId: string, messageId?: string) => {
             : "Đã thêm giao dịch!"
         );
         mutateList();
+        mutate("wallets");
         return newMessage;
       } catch (error: any) {
         toast.error("Có lỗi xảy ra", {
@@ -74,6 +75,7 @@ export const useMessage = (fundId: string, messageId?: string) => {
         toast.success("Cập nhật giao dịch thành công!");
         mutateList();
         mutateMessage();
+        mutate("wallets");
         return updatedMessage;
       } catch (error) {
         toast.error("Cập nhật giao dịch thất bại", {
@@ -95,6 +97,7 @@ export const useMessage = (fundId: string, messageId?: string) => {
         await apiDeleteMessage(id);
         toast.success("Xóa giao dịch thành công!");
         mutateList();
+        mutate("wallets");
         return true;
       } catch (error: any) {
         toast.error("Xóa giao dịch thất bại", {

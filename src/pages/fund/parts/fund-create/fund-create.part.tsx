@@ -12,8 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { FundType } from "@/lib/types";
-import { User } from "@/lib/auth";
+import { FundType } from "@/lib/types.lib";
+import { User } from "@/lib/auth.lib";
 import { Users, User as UserIcon } from "@phosphor-icons/react";
 
 interface CreateFundDialogProps {
@@ -72,7 +72,10 @@ export function FundCreatePart({
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-7">
           <div className="space-y-2.5">
-            <Label htmlFor="fund-name" className="text-sm font-semibold text-black">
+            <Label
+              htmlFor="fund-name"
+              className="text-sm font-semibold text-black"
+            >
               Tên quỹ
             </Label>
             <Input
@@ -104,7 +107,9 @@ export function FundCreatePart({
                     />
                   </div>
                   <div>
-                    <div className="font-semibold text-base text-black">Quỹ riêng</div>
+                    <div className="font-semibold text-base text-black">
+                      Quỹ riêng
+                    </div>
                     <div className="text-sm text-muted-foreground font-medium">
                       Chỉ bạn có thể sử dụng
                     </div>
@@ -121,7 +126,9 @@ export function FundCreatePart({
                     <Users weight="bold" className="text-primary" size={24} />
                   </div>
                   <div>
-                    <div className="font-semibold text-base text-black">Quỹ chung</div>
+                    <div className="font-semibold text-base text-black">
+                      Quỹ chung
+                    </div>
                     <div className="text-sm text-muted-foreground font-medium">
                       Chia sẻ với nhiều người
                     </div>

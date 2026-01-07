@@ -1,6 +1,6 @@
-import { ComponentProps } from "react"
+import { ComponentProps } from "react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils.lib";
 
 function Card({ className, ...props }: ComponentProps<"div">) {
   return (
@@ -12,7 +12,7 @@ function Card({ className, ...props }: ComponentProps<"div">) {
       )}
       {...props}
     />
-  )
+  );
 }
 
 function CardHeader({ className, ...props }: ComponentProps<"div">) {
@@ -25,7 +25,7 @@ function CardHeader({ className, ...props }: ComponentProps<"div">) {
       )}
       {...props}
     />
-  )
+  );
 }
 
 function CardTitle({ className, ...props }: ComponentProps<"div">) {
@@ -54,7 +54,7 @@ function CardAction({ className, ...props }: ComponentProps<"div">) {
       )}
       {...props}
     />
-  )
+  );
 }
 
 function CardContent({ className, ...props }: ComponentProps<"div">) {
@@ -64,7 +64,7 @@ function CardContent({ className, ...props }: ComponentProps<"div">) {
       className={cn("px-6", className)}
       {...props}
     />
-  )
+  );
 }
 
 function CardFooter({ className, ...props }: ComponentProps<"div">) {
@@ -74,14 +74,7 @@ function CardFooter({ className, ...props }: ComponentProps<"div">) {
       className={cn("flex items-center px-6 [.border-t]:pt-6", className)}
       {...props}
     />
-  )
+  );
 }
 
-export {
-  Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardAction,
-  CardContent,
-}
+export { Card, CardHeader, CardFooter, CardTitle, CardAction, CardContent };

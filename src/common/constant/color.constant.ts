@@ -1,3 +1,7 @@
+/**
+ * @deprecated This file is deprecated. Please use Tailwind CSS utility classes and CSS variables defined in src/index.css instead.
+ * Example: Instead of COLOR_CONSTANT.main, use 'text-primary' or 'bg-primary'.
+ */
 
 interface ColorSystem {
   tag: Record<string, string>;

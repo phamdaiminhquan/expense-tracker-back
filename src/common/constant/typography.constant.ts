@@ -1,3 +1,7 @@
+/**
+ * @deprecated This file is deprecated. Please use Tailwind CSS utility classes instead.
+ * Example: Instead of TYPOGRAPHY_STYLES.textXs.medium, use 'text-xs font-medium'.
+ */
 export const TYPOGRAPHY_STYLES = {
   '2xl': {
     regular: {

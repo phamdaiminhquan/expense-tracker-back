@@ -1,5 +1,5 @@
 import { Navigate, useNavigate } from "react-router-dom";
-import { LoginForm } from "@/components/element/form/form-login.element";
+import { FormLogin } from "@/components/elements/form/form-login.element";
 import { useAuth } from "@/hooks/use-auth.hook";
 
 export function LoginRoute() {
@@ -16,5 +16,5 @@ export function LoginRoute() {
     navigate("/chat", { state: { fromLogin: true } });
   };
 
-  return <LoginForm onLogin={handleLogin} />;
+  return <FormLogin onLogin={handleLogin} />;
 }

@@ -7,17 +7,18 @@ import { PAGE_TAKE_DEFAULT } from "@/common/constant/page-take.constant";
 import { useFund } from "@/app/providers/FundProvider";
 import { useMessage } from "@/app/providers/MessageProvider";
 import { useAppReady } from "@/contexts/app-ready.context";
-import { getFundSearchNumberId } from "@/apis/funds/fund.api";
+import { getFundSearchNumberId, joinFundRequest } from "@/apis/funds/fund.api";
 import { getListWallets } from "@/apis/wallets/wallet.api";
 import { toast } from "sonner";
 import useSWR from "swr";
-import LoadingScreenZen from "@/components/element/screen/screen-loading-zen.element";
-import { WelcomeScreen } from "@/components/element/screen/screen-welcome.element";
+import LoadingScreenZen from "@/components/elements/screen/screen-loading-zen.element";
+import { ScreenWelcome } from "@/components/elements/screen/screen-welcome.element";
 
 export function MessageRoute() {
   // hook
   const { fundId } = useParams();
   const navigate = useNavigate();
+
   const {
     currentUserId,
     currentUserName,
@@ -38,11 +39,14 @@ export function MessageRoute() {
     fundList,
     fund,
     isLoadingList: isLoadingFunds,
+    needJoinFund,
+    setNeedJoinFund,
     isLoadingFund,
     loading: isFundProcessing,
     createFund,
     updateFund,
     deleteFund,
+    mutateFund,
     mutateList,
   } = useFund(fundParams, fundId);
 
@@ -55,9 +59,16 @@ export function MessageRoute() {
   // }, [currentUserId, fundList?.data]);
   // Auto-select fund
   const selectedFund = useMemo(() => {
+    if (needJoinFund) return null;
     if (fundId && fund) return fund;
-    return fundList?.data ? fundList?.data[0] : null;
-  }, [fundId, fund, fundList?.data]);
+    return fundList?.data?.[0] ?? null;
+  }, [fundId, fund, fundList?.data, needJoinFund]);
+
+
+
+  const canLoadMessages =
+    !!selectedFund && !needJoinFund && !!selectedFund.id;
+
   const {
     messageList,
     isLoadingList: isLoadingMessages,
@@ -65,7 +76,12 @@ export function MessageRoute() {
     createMessage,
     updateMessage,
     deleteMessage,
-  } = useMessage(selectedFund?.id || "");
+  } = useMessage(
+    canLoadMessages ? selectedFund.id : undefined
+  );
+
+
+
 
   const { categories, createCategory, updateCategory, deleteCategory } =
     useCategories();
@@ -108,7 +124,7 @@ export function MessageRoute() {
   // If user needs onboarding, show welcome screen
   if (needsOnboarding) {
     return (
-      <WelcomeScreen
+      <ScreenWelcome
         userName={currentUserName || undefined}
         walletData={walletsData}
         onWalletMutate={mutateWallets}
@@ -171,11 +187,26 @@ export function MessageRoute() {
     }
   };
 
+  const handleJoinFund = async (fundId: string) => {
+    await joinFundRequest(fundId);
+
+
+    await mutateFund();
+    await mutateList();
+    setNeedJoinFund(false);
+    toast.success('Gửi yêu cầu tham gia quỹ thành công!', {
+      description: 'Vui lòng chờ quản trị viên duyệt',
+    })
+    navigate(`/chat/${fundId}`, { replace: true });
+  };
+
+
   const handleAddMessage = async (messageData: any) => {
     if (!selectedFund) return;
 
     const payload = {
       message: messageData.message || null,
+      walletId: messageData.walletId || null,
     };
 
     await createMessage(selectedFund.id, payload);
@@ -187,6 +218,7 @@ export function MessageRoute() {
     const messageText = failedMessage.originalPrompt || failedMessage.message;
     const payload = {
       message: messageText,
+      walletId: failedMessage.walletId || null,
     };
 
     await createMessage(selectedFund.id, payload);
@@ -195,8 +227,9 @@ export function MessageRoute() {
   const handleUpdateMessage = async (updatedMessage: any) => {
     const payload = {
       message: updatedMessage.message,
+      walletId: updatedMessage.walletId || null,
     };
-    
+
     await updateMessage(updatedMessage.id, payload);
   };
 
@@ -215,7 +248,7 @@ export function MessageRoute() {
     : false;
   return (
     <MessagePage
-      fund={selectedFund}
+      fund={selectedFund || fund}
       funds={fundList?.data}
       messages={messageList?.data || []}
       categories={categories}
@@ -227,6 +260,12 @@ export function MessageRoute() {
       onCreateFund={(name, type) =>
         handleCreateFund(name, type, [currentUserId as string])
       }
+      onJoinFund={handleJoinFund}
+      needJoinFund={needJoinFund}
+      onCloseJoinDialog={() => {
+        setNeedJoinFund(false)
+        navigate("/chat", { replace: true });
+      }}
       onUpdateFund={handleUpdateFund}
       onDeleteFund={handleDeleteFund}
       // onSearchFunds={(prev) => setFundParams((p) => ({ ...p, search: prev, page: 1 }))}

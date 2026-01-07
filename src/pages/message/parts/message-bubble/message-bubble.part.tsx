@@ -1,8 +1,9 @@
 import React from "react";
 import { AlertCircle, RefreshCw } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { RainbowSpinner } from "@/components/ui/rainbow-spinner";
-import { formatCurrency } from "@/lib/currency";
-import { WALLETS_UI } from "@/pages/message/message.constant";
+import { formatCurrency } from "@/lib/currency.lib";
+import { WALLETS_UI, WALLET_TEMPLATES, CATEGORIES_UI } from "@/pages/message/message.constant";
 import { formatNumber } from "@/common/utils/number.utils";
 
 interface Props {
@@ -12,6 +13,8 @@ interface Props {
   onOpenEditDialog?: (msg: any) => void;
   isCurrentUser: boolean;
   walletName?: string;
+  walletColor?: string;
+  walletIcon?: string;
 }
 
 const MessageBubblePart: React.FC<Props> = ({
@@ -21,8 +24,31 @@ const MessageBubblePart: React.FC<Props> = ({
   onOpenEditDialog,
   isCurrentUser,
   walletName,
+  walletColor,
+  walletIcon,
 }) => {
-  const walletInfo = WALLETS_UI.find((w) => w.id === "momo") || WALLETS_UI[0];
+  const walletTemplate = WALLET_TEMPLATES.find((t) => t.code === walletIcon) || WALLET_TEMPLATES[0];
+
+  const getCategoryIcon = () => {
+    if (!msg.categoryIcon) return null;
+
+    // 1. Thử tìm icon động từ Lucide dựa trên tên BE trả về
+    // Chuyển kebab-case (utensils) sang PascalCase (Utensils)
+    const iconName = msg.categoryIcon
+      .split("-")
+      .map((part: string) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join("");
+
+    const DynamicIcon = (LucideIcons as any)[iconName];
+    if (DynamicIcon) {
+      return <DynamicIcon size={16} />;
+    }
+    
+    // 2. Nếu không thấy, tìm trong CATEGORIES_UI (fallback)
+    const allCategories = [...CATEGORIES_UI.expense, ...CATEGORIES_UI.income];
+    const found = allCategories.find(c => c.id === msg.categoryIcon);
+    return found?.icon || null;
+  };
 
   if (!isCurrentUser) {
     return (
@@ -78,14 +104,21 @@ const MessageBubblePart: React.FC<Props> = ({
       `}
     >
       <div className="flex items-center justify-between mb-2 pb-2 border-b border-dashed border-gray-100 gap-4">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1">
-          {walletInfo?.icon} {walletName || walletInfo?.name}
+        <span className="text-2xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+          <img
+            src={walletTemplate?.img}
+            alt={walletName}
+            className="w-3.5 h-3.5 object-contain"
+          />
+          <span style={{ color: walletColor || "#9ca3af" }}>
+            {walletName || "Ví nguồn"}
+          </span>
         </span>
 
         <div className="flex items-center">
           {isAnalyzing && (
             <div className="flex items-center gap-2 animate-pulse">
-              <span className="text-[10px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-pink-500">
+              <span className="text-2xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-pink-500">
                 AI Phân tích...
               </span>
               <RainbowSpinner size="w-3 h-3" />
@@ -94,18 +127,19 @@ const MessageBubblePart: React.FC<Props> = ({
 
           {isDone && (
             <span
-              className={`text-[10px] uppercase font-bold flex items-center gap-1.5 animate-in zoom-in duration-300 ${
+              className={`text-2xs uppercase font-bold flex items-center gap-1.5 animate-in zoom-in duration-300 ${
                 msg.transType === "expense"
                   ? "text-rose-500"
                   : "text-emerald-500"
               }`}
             >
+              {getCategoryIcon()}
               {msg.category}
             </span>
           )}
 
           {isError && (
-            <span className="text-[10px] font-bold text-red-500 flex items-center gap-1 animate-pulse">
+            <span className="text-2xs font-bold text-red-500 flex items-center gap-1 animate-pulse">
               <AlertCircle size={12} />{" "}
               {isNetworkError ? "Lỗi mạng" : "Capy đang bối rối..."}
             </span>
@@ -129,7 +163,7 @@ const MessageBubblePart: React.FC<Props> = ({
       </div>
 
       {isError && (
-        <div className="mt-2 pt-2 border-t border-red-200/50 text-[10px] font-bold text-red-600 flex items-center gap-1 justify-end">
+        <div className="mt-2 pt-2 border-t border-red-200/50 text-2xs font-bold text-red-600 flex items-center gap-1 justify-end">
           <RefreshCw size={10} />{" "}
           {isNetworkError ? "Bấm để thử lại" : "Sửa prompt"}
         </div>

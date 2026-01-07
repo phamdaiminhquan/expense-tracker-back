@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { Message, Category } from "@/lib/types";
+import { Message, Category } from "@/lib/types.lib";
 import { MessageChatPart } from "@/pages/message/parts/message-chat/message-chat.part";
-import { NavigationDrawer } from "@/components/element/drawer/drawer-navigation.element";
+import { DrawerNavigation } from "@/components/elements/drawer/drawer-navigation.element";
 import { FundCreatePart } from "@/pages/fund/parts/fund-create/fund-create.part";
 import React from "react";
 import { FundUpdatePart } from "../fund/parts/fund-update/fund-update.part";
@@ -9,12 +9,14 @@ import { Fund } from "@/apis/funds/fund.entities";
 import ChartContent from "../statistic/parts/statistic-chart/statistic-chart.part";
 import { StatisticPage } from "../statistic/statistic.page";
 import { useFundMembers } from "@/hooks/use-fund-members.hook";
-import { FundMemberListDialog } from "@/components/element/dialog/dialog-member-list.element";
-import { TutorialOverlay } from "@/components/element/overlay/overlay-tutorial.element";
-import InviteFundDialog from "@/components/InviteFundDialog";
+import { DialogFundMemberList } from "@/components/elements/dialog/dialog-fund-member-list.element";
+import { OverlayTutorial } from "@/components/elements/overlay/overlay-tutorial.element";
+import ShareFundDialog from "@/components/elements/dialog/dialog-share-fund.element";
+import JoinFundDialog from "@/components/elements/dialog/dialog-join-fund.element";
+import { useNavigate } from "react-router-dom";
 
 interface MessagePageProps {
-  fund: Fund | null;
+  fund: Fund | any;
   funds: Fund[];
   messages: Message[];
   categories: Category[];
@@ -30,6 +32,7 @@ interface MessagePageProps {
     type: "personal" | "shared"
   ) => Promise<void>;
   onDeleteFund: (fundId: string) => Promise<void>;
+  onJoinFund: (fundId: string) => Promise<void>
   onLogout: () => void;
   onAddMessage: (message: Omit<Message, "id" | "timestamp">) => Promise<void>;
   onResendMessage: (message: Message) => Promise<void>;
@@ -40,6 +43,8 @@ interface MessagePageProps {
   isLoadingFunds?: boolean;
   isLoadingMoreFunds?: boolean;
   hasMoreFunds?: boolean;
+  needJoinFund: boolean;
+  onCloseJoinDialog: () => void;
   onLoadMoreFunds?: () => void;
   onSearchFunds?: (query: string) => void;
   onRefreshFunds?: () => Promise<void>; // Callback để reload funds khi tạo ví
@@ -58,6 +63,7 @@ export function MessagePage({
   onCreateFund,
   onUpdateFund,
   onDeleteFund,
+  onJoinFund,
   onLogout,
   onAddMessage,
   onResendMessage,
@@ -66,17 +72,14 @@ export function MessagePage({
   isProcessing = false,
   isLoading = false,
   isLoadingFunds = false,
+  needJoinFund,
+  onCloseJoinDialog,
   isLoadingMoreFunds = false,
   hasMoreFunds = false,
   onLoadMoreFunds,
   onSearchFunds,
   onRefreshFunds,
 }: MessagePageProps) {
-  // const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
-  // const [isCategorySubscriptionOpen, setIsCategorySubscriptionOpen] =
-  //   useState(false);
-  // const [isAutoCategorySubscription, setIsAutoCategorySubscription] =
-  //   useState(false);
 
   // state
   const [isStatisticsDialogOpen, setIsStatisticsDialogOpen] = useState(false);
@@ -93,7 +96,7 @@ export function MessagePage({
     ? categories.filter((c) => c.fundId === fund.id)
     : [];
   const fundMessages = fund ? messages.filter((m) => m.fundId === fund.id) : [];
-  const [isShareFund, setIsShareFund] = useState(false)
+  const [isOpenShareFundDialog, setIsOpenShareFundDialog] = useState(false)
 
 
   // hook
@@ -177,7 +180,7 @@ export function MessagePage({
 
   return (
     <React.Fragment>
-      <TutorialOverlay />
+      <OverlayTutorial />
       {/* Container: p-0 trên mobile, p-3 trên desktop */}
       <div
         className={`flex h-dvh lg:h-screen overflow-hidden bg-[#F0F2F5] lg:p-3 lg:gap-3 p-0 gap-0 ${showLoadingScreen
@@ -187,7 +190,7 @@ export function MessagePage({
       >
         {/* CỘT 1: SIDEBAR LEFT - Chỉ hiện trên lg, giữ nguyên card style vì là desktop */}
         <aside className="hidden lg:flex w-[350px] bg-white flex-col shrink-0 rounded-2xl shadow-sm overflow-hidden border border-gray-100">
-          <NavigationDrawer
+          <DrawerNavigation
             open={true}
             onOpenChange={() => { }}
             funds={funds}
@@ -210,7 +213,7 @@ export function MessagePage({
 
         {/* DRAWER CHO MOBILE/TABLET */}
         <div className="lg:hidden">
-          <NavigationDrawer
+          <DrawerNavigation
             open={isDrawerOpen}
             onOpenChange={setIsDrawerOpen}
             funds={funds}
@@ -239,6 +242,7 @@ export function MessagePage({
             currentUserId={currentUserId}
             currentUserName={currentUserName}
             onOpenDrawer={() => setIsDrawerOpen(true)}
+            onCreateFund={handleOpenCreateFund}
             onShowStatistics={() => setIsStatisticsDialogOpen(true)}
             onAddMessage={onAddMessage}
             onResendMessage={onResendMessage}
@@ -246,27 +250,18 @@ export function MessagePage({
             onDeleteMessage={onDeleteMessage}
             isProcessing={isProcessing}
             isLoading={isLoading}
-            onShareFund={() => setIsShareFund(true)}
-          // onManageCategories={() => setIsCategoryDialogOpen(true)}
-          // onShowCategorySubscription={() => {
-          //   setIsAutoCategorySubscription(false);
-          //   setIsCategorySubscriptionOpen(true);
-          // }}
-          // resolveUserName={resolveUserName}
-          // isLoadingFunds={isLoadingFunds}
-          // onSelectFund={onSelectFund}
-          // funds={funds}
+            onOpenShareFundDialog={() => setIsOpenShareFundDialog(!isOpenShareFundDialog)}
           />
         </main>
 
         {/* CỘT 3: STATISTIC VIEW - Giữ nguyên card style trên desktop */}
-        <aside className="hidden xl:flex w-[380px] bg-white flex-col shrink-0 rounded-2xl shadow-sm overflow-hidden border border-gray-100">
-          <div className="p-8 flex flex-col h-full">
-            <h2 className="text-xl font-bold text-gray-800 mb-6 px-2">
-              Thống kê chi tiết
-            </h2>
-            <ChartContent fundId={fund?.id} />
+        <aside className="hidden xl:flex w-[400px] bg-white flex-col shrink-0 rounded-2xl shadow-sm overflow-hidden border border-gray-100">
+          <div className="p-6 pb-4 border-b border-gray-100">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold text-gray-800">Thống kê chi tiết</h2>
+            </div>
           </div>
+          <ChartContent fundId={fund?.id} />
         </aside>
 
         {/* DRAWER CHO MOBILE/TABLET (SIDEBAR RIGHT / STATISTIC) */}
@@ -295,7 +290,7 @@ export function MessagePage({
           allUsers={currentUser ? [currentUser] : []}
         />
 
-        <FundMemberListDialog
+        <DialogFundMemberList
           isOpen={isMemberDialogOpen}
           onClose={handleCloseMemberDialog}
           fund={selectedFund!}
@@ -307,9 +302,15 @@ export function MessagePage({
           currentUserId={currentUserId}
         />
 
-        <InviteFundDialog
-          open={isShareFund}
-          onClose={() => setIsShareFund(false)}
+        <ShareFundDialog
+          isOpen={isOpenShareFundDialog}
+          onClose={() => setIsOpenShareFundDialog(false)}
+          fund={fund!}
+        />
+        <JoinFundDialog
+          isOpen={needJoinFund}
+          onClose={onCloseJoinDialog}
+          onJoin={onJoinFund}
           fund={fund!}
         />
       </div>

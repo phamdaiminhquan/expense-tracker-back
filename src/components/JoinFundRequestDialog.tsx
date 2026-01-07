@@ -7,12 +7,12 @@ import {
     Typography,
 } from "@mui/material";
 import PersonAddOutlinedIcon from "@mui/icons-material/PersonAddOutlined";
-import { JoinFundResponse } from "@/apis/funds/fund.interface";
+import { JoinFundRequest } from "@/apis/funds/fund.interface";
 import { TimeAgoComponent } from "./components-mui/time-ago/time-ago.component";
 import { X } from "lucide-react";
 
 export const RequestFundItem: React.FC<{
-    request: JoinFundResponse
+    request: JoinFundRequest
     onApprove?: () => void;
     onReject?: () => void;
 }> = ({ onApprove, onReject, request }) => {
@@ -39,7 +39,7 @@ export const RequestFundItem: React.FC<{
                         color: "#fff",
                     }}
                 >
-                    {request.user.name.charAt(0)}
+                    {request.user?.name.charAt(0) ?? 'U'}
                 </Avatar>
 
                 <Box sx={{ flex: 1 }}>
@@ -51,7 +51,7 @@ export const RequestFundItem: React.FC<{
                         }}
                     >
                         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                            <Typography fontWeight={600}>{request.user.name}</Typography>
+                            <Typography fontWeight={600}>{request.user?.name ?? 'User'}</Typography>
                             <Chip
                                 label={request.tag}
                                 size="small"

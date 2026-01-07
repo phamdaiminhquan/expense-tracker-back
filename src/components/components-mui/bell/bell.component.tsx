@@ -1,145 +1,102 @@
-import React, { ReactNode, useState } from 'react';
 import {
-    Badge,
+    Box,
+    Divider,
+    Fade,
     IconButton,
-    Dialog,
-    DialogTitle,
     List,
     ListItem,
-    Box,
+    Popover,
     Typography,
-    Divider,
-    IconButton as MuiIconButton,
-    DialogContent
-} from '@mui/material';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import CloseIcon from '@mui/icons-material/Close';
+} from "@mui/material"
+import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone"
+import React, { useState } from "react"
+import { STYLE } from "@/common/constant"
+import { BadgeComponent } from "../badge/badge.component"
+import { BadgeFundItemComponent } from "../badge/badge-fund-item.component"
 
-interface BellNotificationProps {
-    unreadCount: number;
-    requests: Array<ReactNode>;
-    title?: string;
-    onOpen?: () => Promise<void>;
-    isLoading?: boolean
+
+export type BellItemType = "FUND_REQUEST" | "SYSTEM"
+
+export interface BellItem {
+    id: string
+    type: BellItemType
+    payload: any
 }
 
-export const BellNotification: React.FC<BellNotificationProps> = ({
-    unreadCount,
-    requests,
-    title = "Yêu cầu tham gia quỹ",
-    onOpen,
-    isLoading = false
+export interface BellComponentProps {
+    count: number
+    title: string
+    items: BellItem[]
+}
+
+/* ========= COMPONENT ========= */
+
+export const BellComponent: React.FC<BellComponentProps> = ({
+    count,
+    title,
+    items,
 }) => {
-    const [open, setOpen] = useState(false);
+    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+    const open = Boolean(anchorEl)
 
-    const handleClose = () => {
-        setOpen(false);
-    };
+    const renderItem = (item: BellItem) => {
+        switch (item.type) {
+            case "FUND_REQUEST":
+                return <React.Fragment key={item.id}>
+                    <BadgeFundItemComponent {...item.payload} />
+                    <Divider />
+                </React.Fragment>
 
-    const [isFetching, setIsFetching] = useState(false);
+            case "SYSTEM":
+                return (
+                    <Typography key={item.id} variant="body2">
+                        {item.payload.message}
+                    </Typography>
+                )
 
-    const handleOpen = async () => {
-        setOpen(true);
-
-        if (onOpen) {
-            try {
-                setIsFetching(true);
-                await onOpen();
-            } finally {
-                setIsFetching(false);
-            }
+            default:
+                return null
         }
-    };
+    }
 
     return (
-        <>
-            <IconButton
-                color="inherit"
-                onClick={() => setOpen(true)}
-                sx={{
-                    position: 'relative',
-                    '&:hover': {
-                        backgroundColor: 'action.hover',
-                    },
-                }}
-            >
-                <Badge
-                    badgeContent={unreadCount}
-                    color="error"
-                    sx={{
-                        '& .MuiBadge-badge': {
-                            top: 4,
-                            right: 4,
-                            border: '2px solid white',
+        <Fade in timeout={STYLE.ANIMATION_TIME}>
+            <Box>
+                <BadgeComponent badgeContent={count}>
+                    <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
+                        <NotificationsNoneIcon />
+                    </IconButton>
+                </BadgeComponent>
+
+                <Popover
+                    open={open}
+                    anchorEl={anchorEl}
+                    onClose={() => setAnchorEl(null)}
+                    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                    transformOrigin={{ vertical: "top", horizontal: "right" }}
+                    PaperProps={{
+                        sx: {
+                            width: 440,
+                            maxHeight: 420,
+                            display: "flex",
+                            flexDirection: "column",
+                            p: 2,
                         },
                     }}
                 >
-                    <NotificationsIcon />
-                </Badge>
-            </IconButton>
+                    <Typography fontWeight={600} mb={1}>
+                        {title}
+                    </Typography>
 
-            <Dialog
-                open={open}
-                onClose={handleClose}
-                maxWidth="sm"
-                fullWidth
-                PaperProps={{
-                    sx: {
-                        borderRadius: 2,
-                        maxHeight: '80vh',
-                    }
-                }}
-            >
-                <DialogTitle sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    pb: 1,
-                }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="h6" fontWeight="bold">
-                            {title}
-                        </Typography>
-                    </Box>
-                    <MuiIconButton
-                        onClick={handleClose}
-                        size="small"
-                        edge="end"
-                    >
-                        <CloseIcon />
-                    </MuiIconButton>
-                </DialogTitle>
-
-                <Divider />
-
-                <DialogContent sx={{ p: 0 }}>
-                    <List sx={{ maxHeight: '60vh', overflow: 'auto' }}>
-                        {requests.length === 0 ? (
-                            <ListItem>
-                                <Box sx={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    width: '100%',
-                                    py: 4,
-                                    color: 'text.secondary'
-                                }}>
-                                    <NotificationsIcon sx={{ fontSize: 40, mb: 2, opacity: 0.5 }} />
-                                    <Typography>Không có yêu cầu nào</Typography>
-                                </Box>
+                    <List disablePadding>
+                        {items.map((item) => (
+                            <ListItem key={item.id} disableGutters>
+                                {renderItem(item)}
                             </ListItem>
-                        ) : (
-                            requests.map((req, index) => (
-                                <React.Fragment key={index}>
-                                    {req}
-                                    {index < requests.length - 1 && <Divider />}
-                                </React.Fragment>
-                            ))
-                        )}
+                        ))}
                     </List>
-                </DialogContent>
-            </Dialog>
-        </>
-    );
-};
+                </Popover>
+            </Box>
+        </Fade>
+    )
+}
