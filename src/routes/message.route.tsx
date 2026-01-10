@@ -7,7 +7,11 @@ import { PAGE_TAKE_DEFAULT } from "@/common/constant/page-take.constant";
 import { useFund } from "@/app/providers/FundProvider";
 import { useMessage } from "@/app/providers/MessageProvider";
 import { useAppReady } from "@/contexts/app-ready.context";
-import { getFund, getFundSearchNumberId, joinFundRequest } from "@/apis/funds/fund.api";
+import {
+  getFund,
+  getFundSearchNumberId,
+  joinFundRequest,
+} from "@/apis/funds/fund.api";
 import { getListWallets } from "@/apis/wallets/wallet.api";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -61,8 +65,7 @@ export function MessageRoute() {
     return accessibleFunds[0] ?? null;
   }, [fundId, fund, accessibleFunds]);
 
-  const canLoadMessages =
-    !!selectedFund && !!selectedFund.id;
+  const canLoadMessages = !!selectedFund && !!selectedFund.id;
 
   const {
     messageList,
@@ -71,12 +74,7 @@ export function MessageRoute() {
     createMessage,
     updateMessage,
     deleteMessage,
-  } = useMessage(
-    canLoadMessages ? selectedFund.id : undefined
-  );
-
-
-
+  } = useMessage(canLoadMessages ? selectedFund.id : undefined);
 
   const { categories } = useCategories();
 
@@ -185,7 +183,6 @@ export function MessageRoute() {
     }
   };
 
-
   const handleAddMessage = async (messageData: any) => {
     if (!selectedFund) return;
 
@@ -240,14 +237,12 @@ export function MessageRoute() {
   return (
     <MessagePage
       fund={selectedFund || fund}
-      fundId={fundId}
       funds={accessibleFunds}
       messages={messageList?.data || []}
       categories={categories}
       currentUserId={currentUserId as string}
       currentUserName={currentUserName as string}
       currentUser={currentUser}
-      resolveUserName={resolveUserName}
       onSelectFund={handleSelectFund}
       onCreateFund={(name, type) =>
         handleCreateFund(name, type, [currentUserId as string])
@@ -279,10 +274,6 @@ export function MessageRoute() {
       isLoadingMoreFunds={false}
       hasMoreFunds={hasMoreFunds}
       onLoadMoreFunds={handleLoadMoreFunds}
-      onRefreshFunds={async () => {
-        // Reload funds list khi user tạo ví thành công
-        await mutateList();
-      }}
     />
   );
 }

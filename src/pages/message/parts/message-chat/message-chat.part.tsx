@@ -65,7 +65,6 @@ export function MessageChatPart({
   onOpenShareFundDialog,
 }: ChatMessageViewProps) {
   // state
-  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [editingPendingPrompt, setEditingPendingPrompt] =
     useState<Message | null>(null);
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
@@ -76,7 +75,6 @@ export function MessageChatPart({
   const [showWalletSelector, setShowWalletSelector] = useState(false);
   const [showCategorySelector, setShowCategorySelector] = useState(false);
   const [selectedWalletId, setSelectedWalletId] = useState("momo");
-  const [actionSheetOpen, setActionSheetOpen] = useState(false);
 
   // OPTIMISTIC UI STATE - Hiện tin nhắn ngay lập tức
   const [optimisticMessages, setOptimisticMessages] = useState<
@@ -240,8 +238,9 @@ export function MessageChatPart({
             {[1, 2, 3, 4, 5].map((i) => (
               <div
                 key={i}
-                className={`flex ${i % 2 === 0 ? "justify-end" : "justify-start"
-                  }`}
+                className={`flex ${
+                  i % 2 === 0 ? "justify-end" : "justify-start"
+                }`}
               >
                 <Skeleton className="h-16 w-48 rounded-2xl" />
               </div>
@@ -310,8 +309,9 @@ export function MessageChatPart({
               return (
                 <div
                   key={message.id}
-                  className={`flex w-full ${isCurrentUser ? "justify-end" : "justify-start"
-                    } animate-in fade-in slide-in-from-bottom-4 duration-500`}
+                  className={`flex w-full ${
+                    isCurrentUser ? "justify-end" : "justify-start"
+                  } animate-in fade-in slide-in-from-bottom-4 duration-500`}
                 >
                   <MessageBubblePart
                     msg={uiMsg}
@@ -389,13 +389,13 @@ export function MessageChatPart({
           }
           capyMood={
             isProcessing ||
-              optimisticMessages.some((m) => m.status === "analyzing")
+            optimisticMessages.some((m) => m.status === "analyzing")
               ? "excited"
               : "sleepy"
           }
           onSend={() => handleOptimisticSend()}
-          onFocus={() => { }}
-          onBlur={() => { }}
+          onFocus={() => {}}
+          onBlur={() => {}}
           onWalletClick={() => setShowWalletSelector(true)}
           onCategoryClick={() => setShowCategorySelector(true)}
         />
@@ -481,7 +481,6 @@ export function MessageChatPart({
           ]);
         }}
       />
-
     </div>
   );
 }

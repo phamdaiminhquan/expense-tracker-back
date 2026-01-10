@@ -12,18 +12,15 @@ import { useFundMembers } from "@/hooks/use-fund-members.hook";
 import { DialogFundMemberList } from "@/components/elements/dialog/dialog-fund-member-list.element";
 import { OverlayTutorial } from "@/components/elements/overlay/overlay-tutorial.element";
 import ShareFundDialog from "@/components/elements/dialog/dialog-share-fund.element";
-import { useNavigate } from "react-router-dom";
 
 interface MessagePageProps {
   fund: Fund | any;
-  fundId?: string;
   funds: Fund[];
   messages: Message[];
   categories: Category[];
   currentUserId: string;
   currentUserName: string;
   currentUser: any;
-  resolveUserName: (userId: string) => string;
   onSelectFund: (fundId: string) => void;
   onCreateFund: (name: string, type: "personal" | "shared") => Promise<void>;
   onUpdateFund: (
@@ -44,24 +41,20 @@ interface MessagePageProps {
   hasMoreFunds?: boolean;
   onLoadMoreFunds?: () => void;
   onSearchFunds?: (query: string) => void;
-  onRefreshFunds?: () => Promise<void>; // Callback để reload funds khi tạo ví
 }
 
 export function MessagePage({
   fund,
-  fundId,
   funds,
   messages,
   categories,
   currentUserId,
   currentUserName,
   currentUser,
-  resolveUserName,
   onSelectFund,
   onCreateFund,
   onUpdateFund,
   onDeleteFund,
-  onJoinFund,
   onLogout,
   onAddMessage,
   onResendMessage,
@@ -74,9 +67,7 @@ export function MessagePage({
   hasMoreFunds = false,
   onLoadMoreFunds,
   onSearchFunds,
-  onRefreshFunds,
 }: MessagePageProps) {
-
   // state
   const [isStatisticsDialogOpen, setIsStatisticsDialogOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -92,8 +83,7 @@ export function MessagePage({
     ? categories.filter((c) => c.fundId === fund.id)
     : [];
   const fundMessages = fund ? messages.filter((m) => m.fundId === fund.id) : [];
-  const [isOpenShareFundDialog, setIsOpenShareFundDialog] = useState(false)
-
+  const [isOpenShareFundDialog, setIsOpenShareFundDialog] = useState(false);
 
   // hook
   const hasShownInitialBanner = useRef(false);
@@ -171,7 +161,7 @@ export function MessagePage({
   const handleRemoveMember = async (memberId: string) => {
     try {
       await removeMember(memberId);
-    } catch { }
+    } catch {}
   };
 
   return (
@@ -179,16 +169,17 @@ export function MessagePage({
       <OverlayTutorial />
       {/* Container: p-0 trên mobile, p-3 trên desktop */}
       <div
-        className={`flex h-dvh lg:h-screen overflow-hidden bg-[#F0F2F5] lg:p-3 lg:gap-3 p-0 gap-0 ${showLoadingScreen
-          ? "opacity-0"
-          : "opacity-100 transition-opacity duration-500"
-          }`}
+        className={`flex h-dvh lg:h-screen overflow-hidden bg-[#F0F2F5] lg:p-3 lg:gap-3 p-0 gap-0 ${
+          showLoadingScreen
+            ? "opacity-0"
+            : "opacity-100 transition-opacity duration-500"
+        }`}
       >
         {/* CỘT 1: SIDEBAR LEFT - Chỉ hiện trên lg, giữ nguyên card style vì là desktop */}
         <aside className="hidden lg:flex w-[350px] bg-white flex-col shrink-0 rounded-2xl shadow-sm overflow-hidden border border-gray-100">
           <DrawerNavigation
             open={true}
-            onOpenChange={() => { }}
+            onOpenChange={() => {}}
             funds={funds}
             onDeleteFund={onDeleteFund}
             currentUserName={currentUserName}
@@ -199,7 +190,7 @@ export function MessagePage({
             onSelectFund={onSelectFund}
             onCreateFund={handleOpenCreateFund}
             onUpdateFund={handleOpenUpdateFund}
-            onLoadMore={onLoadMoreFunds || (() => { })}
+            onLoadMore={onLoadMoreFunds || (() => {})}
             onLogout={onLogout}
             onSearchFunds={onSearchFunds}
             isPermanent={true}
@@ -222,7 +213,7 @@ export function MessagePage({
             onSelectFund={onSelectFund}
             onCreateFund={handleOpenCreateFund}
             onUpdateFund={handleOpenUpdateFund}
-            onLoadMore={onLoadMoreFunds || (() => { })}
+            onLoadMore={onLoadMoreFunds || (() => {})}
             onLogout={onLogout}
             onSearchFunds={onSearchFunds}
             onViewFundMembers={handleViewFundMembers}
@@ -246,7 +237,9 @@ export function MessagePage({
             onDeleteMessage={onDeleteMessage}
             isProcessing={isProcessing}
             isLoading={isLoading}
-            onOpenShareFundDialog={() => setIsOpenShareFundDialog(!isOpenShareFundDialog)}
+            onOpenShareFundDialog={() =>
+              setIsOpenShareFundDialog(!isOpenShareFundDialog)
+            }
           />
         </main>
 
@@ -254,7 +247,9 @@ export function MessagePage({
         <aside className="hidden xl:flex w-[400px] bg-white flex-col shrink-0 rounded-2xl shadow-sm overflow-hidden border border-gray-100">
           <div className="p-6 pb-4 border-b border-gray-100">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-800">Thống kê chi tiết</h2>
+              <h2 className="text-xl font-bold text-gray-800">
+                Thống kê chi tiết
+              </h2>
             </div>
           </div>
           <ChartContent fundId={fund?.id} />
