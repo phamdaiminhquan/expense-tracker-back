@@ -42,8 +42,6 @@ export function DialogFundMemberList({
 }: DialogFundMemberListProps) {
   const [search, setSearch] = React.useState("");
 
-  if (!fund) return null;
-
   const filteredMembers = React.useMemo(() => {
     if (!search.trim()) return members;
     const lower = search.trim().toLowerCase();

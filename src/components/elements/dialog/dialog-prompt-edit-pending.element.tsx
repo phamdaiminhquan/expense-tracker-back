@@ -82,8 +82,7 @@ export function DialogPromptEditPending({
       setConfirmDelete(false);
     }
   }, [message, open]);
-  console.log("initialData", formData);
-  //
+
   const handleSave = useCallback(
     async (data: typeof formData, isManual = false) => {
       if (!message) return;
