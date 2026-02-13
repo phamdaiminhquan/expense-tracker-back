@@ -5,15 +5,12 @@ import { CategoryProvider } from "./providers/CategoryProvider.tsx";
 import { AIParserProvider } from "./providers/AIParserProvider.tsx";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { createAppTheme } from "@/common/utils/theme.utils.ts";
-import { GlobalReduxState } from "@/redux/store.interface.ts";
-import { useSelector } from "react-redux";
-// import "@/assets/css/App.css";
+import { useSystemStore } from "@/stores/system.store";
 
 function App() {
-  const system = useSelector((state: GlobalReduxState) => state.system);
-  const theme = createAppTheme(system.mode);
+  const mode = useSystemStore((state) => state.mode);
+  const theme = createAppTheme(mode);
 
-  // PersistGate trong main.tsx đã xử lý loading, không cần loading ở đây
   return (
     <BrowserRouter
       future={{

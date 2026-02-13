@@ -12,6 +12,7 @@ import {
   UpdateMessageDto,
 } from "@/apis/messages/message.interface";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/common/utils/error.utils";
 
 export const useMessage = (fundId?: string, messageId?: string) => {
   const [loading, setLoading] = useState(false);
@@ -54,9 +55,9 @@ export const useMessage = (fundId?: string, messageId?: string) => {
         mutateList();
         mutate("wallets");
         return newMessage;
-      } catch (error: any) {
+      } catch (error: unknown) {
         toast.error("Có lỗi xảy ra", {
-          description: error?.message || "Vui lòng thử lại",
+          description: getErrorMessage(error),
         });
         throw error;
       } finally {
@@ -77,9 +78,9 @@ export const useMessage = (fundId?: string, messageId?: string) => {
         mutateMessage();
         mutate("wallets");
         return updatedMessage;
-      } catch (error) {
+      } catch (error: unknown) {
         toast.error("Cập nhật giao dịch thất bại", {
-          description: error?.message || "Vui lòng thử lại",
+          description: getErrorMessage(error),
         });
         throw error;
       } finally {
@@ -99,9 +100,9 @@ export const useMessage = (fundId?: string, messageId?: string) => {
         mutateList();
         mutate("wallets");
         return true;
-      } catch (error: any) {
+      } catch (error: unknown) {
         toast.error("Xóa giao dịch thất bại", {
-          description: error?.message || "Vui lòng thử lại",
+          description: getErrorMessage(error),
         });
         return false;
       } finally {

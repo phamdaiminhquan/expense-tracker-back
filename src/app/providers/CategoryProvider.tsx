@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo, useState } from "react";
-import { Category } from "@/lib/types.lib";
-import { createCategory as createCategoryFactory } from "@/lib/categories.lib";
+import { Category } from "@/common/lib/types.lib";
+import { createCategory as createCategoryFactory } from "@/common/lib/categories.lib";
 
 interface CategoryContextValue {
   categories: Category[];

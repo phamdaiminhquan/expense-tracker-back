@@ -1,5 +1,5 @@
 import { useState, useEffect, RefObject } from 'react';
-import { useIsMobile } from './use-mobile.hook';
+import { useIsMobile } from './use-mobile';
 
 /**
  * Hook chuyên dụng để xử lý việc liếc mắt của Capybara theo con trỏ chuột

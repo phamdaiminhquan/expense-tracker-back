@@ -13,7 +13,7 @@ import {
   refreshToken,
   saveAuthSession,
   shouldRefreshSession,
-} from "@/lib/auth.lib";
+} from "@/common/lib/auth.lib";
 
 interface AuthContextValue {
   session: AuthSession | null;

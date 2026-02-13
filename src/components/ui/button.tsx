@@ -2,7 +2,7 @@ import { ComponentProps } from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from "@/lib/utils.lib";
+import { cn } from "@/common/lib/utils.lib";
 
 type ButtonProps = ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {

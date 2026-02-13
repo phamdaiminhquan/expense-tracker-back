@@ -18,7 +18,8 @@ import {
 } from '@/apis/funds/fund.interface'
 import { toast } from 'sonner'
 import { JoinFundStatus } from '@/apis/funds/fund.enum'
-import { useAuth } from '@/hooks/use-auth.hook'
+import { useAuth } from '@/hooks/use-auth'
+import { getErrorMessage, getErrorStatus } from '@/common/utils/error.utils'
 
 
 export const useFund = (params?: GetListFundDto, fundId?: string) => {
@@ -55,9 +56,9 @@ export const useFund = (params?: GetListFundDto, fundId?: string) => {
           setNeedJoinFund(false)
         }
         return res
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Trường hợp BE trả về 403 thay vì public site
-        if (error?.response?.status === 403) {
+        if (getErrorStatus(error) === 403) {
           setNeedJoinFund(true)
         }
         throw error
@@ -132,9 +133,9 @@ export const useFund = (params?: GetListFundDto, fundId?: string) => {
         })
         mutateList()
         return newFund
-      } catch (error: any) {
+      } catch (error: unknown) {
         toast.error('Tạo quỹ thất bại', {
-          description: error?.message || 'Vui lòng thử lại',
+          description: getErrorMessage(error),
         })
         throw error
       } finally {
@@ -155,9 +156,9 @@ export const useFund = (params?: GetListFundDto, fundId?: string) => {
         mutateList()
         mutateFund()
         return updatedFund
-      } catch (error: any) {
+      } catch (error: unknown) {
         toast.error('Cập nhật quỹ thất bại', {
-          description: error?.message || 'Vui lòng thử lại',
+          description: getErrorMessage(error),
         })
         throw error
       } finally {
@@ -175,9 +176,9 @@ export const useFund = (params?: GetListFundDto, fundId?: string) => {
         toast.success('Đã xóa quỹ thành công!')
         mutateList()
         return true
-      } catch (error: any) {
+      } catch (error: unknown) {
         toast.error('Xóa quỹ thất bại', {
-          description: error?.message || 'Vui lòng thử lại',
+          description: getErrorMessage(error),
         })
         return false
       } finally {
@@ -199,8 +200,8 @@ export const useFund = (params?: GetListFundDto, fundId?: string) => {
 
         mutateList()
         return true
-      } catch (error: any) {
-        const status = error?.response?.status
+      } catch (error: unknown) {
+        const status = getErrorStatus(error)
 
         if (status === 409) {
           toast.info('Bạn đã gửi yêu cầu tham gia quỹ trước đó')

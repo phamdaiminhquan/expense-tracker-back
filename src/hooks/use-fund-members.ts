@@ -7,6 +7,7 @@ import {
 } from '@/apis/funds/fund.api';
 import { GetListFundMemberDto, AddMemberPayload, FundMemberDto } from '@/apis/funds/fund.interface';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 export const useFundMembers = (
     fundId: string,
@@ -27,8 +28,8 @@ export const useFundMembers = (
                 await addFundMember(fundId, payload);
                 toast.success('Đã mời thành viên thành công!');
                 mutate();
-            } catch (error: any) {
-                toast.error('Mời thành viên thất bại', { description: error?.message || 'Vui lòng thử lại' });
+            } catch (error: unknown) {
+                toast.error('Mời thành viên thất bại', { description: getErrorMessage(error) });
                 throw error;
             } finally {
                 setLoading(false);
@@ -44,8 +45,8 @@ export const useFundMembers = (
                 await removeFundMember(fundId, userId);
                 toast.success('Đã xóa thành viên!');
                 mutate();
-            } catch (error: any) {
-                toast.error('Xóa thành viên thất bại', { description: error?.message || 'Vui lòng thử lại' });
+            } catch (error: unknown) {
+                toast.error('Xóa thành viên thất bại', { description: getErrorMessage(error) });
                 throw error;
             } finally {
                 setLoading(false);

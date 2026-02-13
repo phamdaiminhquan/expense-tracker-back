@@ -8,7 +8,7 @@ import {
   Edit3,
   Trash,
 } from "lucide-react";
-import { formatCurrency } from "@/lib/currency.lib";
+import { formatCurrency } from "@/common/lib/currency.lib";
 import { WALLET_TEMPLATES } from "@/pages/message/message.constant";
 
 interface WalletListProps {

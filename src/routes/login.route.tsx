@@ -1,6 +1,6 @@
 import { Navigate, useNavigate } from "react-router-dom";
 import { FormLogin } from "@/components/elements/form/form-login.element";
-import { useAuth } from "@/hooks/use-auth.hook";
+import { useAuth } from "@/hooks/use-auth";
 
 export function LoginRoute() {
   const navigate = useNavigate();

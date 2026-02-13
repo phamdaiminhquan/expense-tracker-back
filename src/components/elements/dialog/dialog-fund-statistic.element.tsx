@@ -1,11 +1,11 @@
-import { Fund, Category } from "@/lib/types.lib";
+import { Fund, Category } from "@/common/lib/types.lib";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { formatCurrency } from "@/lib/currency.lib";
+import { formatCurrency } from "@/common/lib/currency.lib";
 import { Card } from "@/components/ui/card";
 import { TrendUp, TrendDown, Wallet, User, Tag } from "@phosphor-icons/react";
 import { getStatisticsByFundId } from "@/apis/statistics/statistic.api";

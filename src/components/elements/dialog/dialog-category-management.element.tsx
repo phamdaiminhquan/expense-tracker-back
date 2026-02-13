@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Category, Message } from "@/lib/types.lib";
+import { Category, Message } from "@/common/lib/types.lib";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Plus, Trash, PencilSimple, X, Check } from "@phosphor-icons/react";
-import { canDeleteCategory } from "@/lib/categories.lib";
+import { canDeleteCategory } from "@/common/lib/categories.lib";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import React from "react";

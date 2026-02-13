@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { AuthSession, login, register, saveAuthSession } from "@/lib/auth.lib";
+import { AuthSession, login, register, saveAuthSession } from "@/common/lib/auth.lib";
 import { toast } from "sonner";
 import { Eye, EyeOff, ArrowRight, Loader2, Check } from "lucide-react";
 import { Capybara, type CapyMood } from "../capybara/CapyFace";
 import { LoadingScreen } from "../capybara/LoadingScreen";
-import { useIsMobile } from "@/hooks/use-mobile.hook";
-import { useCapyEyeTracking } from "@/hooks/use-capy-eyes-tracking.hook";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useCapyEyeTracking } from "@/hooks/use-capy-eyes-tracking";
 import { getListFunds } from "@/apis/funds/fund.api";
 import { getListWallets } from "@/apis/wallets/wallet.api";
 import { preload } from "swr";

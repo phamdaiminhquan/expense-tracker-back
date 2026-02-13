@@ -24,7 +24,7 @@ export const createFund = async (body: CreateFundDto): Promise<Fund> => {
   return res.data;
 };
 
-export const getFund = async (id: string): Promise<Fund | any> => {
+export const getFund = async (id: string): Promise<Fund> => {
   const res = await axiosRequest.get(`funds/${id}`);
   return res.data;
 };
@@ -84,8 +84,9 @@ export async function dialogCateOpened(fundId: string): Promise<boolean> {
   return true;
 }
 
-export async function joinFundRequest(fundId: string): Promise<any> {
-  return await axiosRequest.post(`/funds/${fundId}/join-requests`);
+export async function joinFundRequest(fundId: string): Promise<JoinFundRequest> {
+  const res = await axiosRequest.post(`/funds/${fundId}/join-requests`);
+  return res.data;
 }
 
 export async function getJoinRequests(

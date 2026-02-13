@@ -4,7 +4,7 @@ import { ComponentProps } from "react";
 import { Command as CommandPrimitive } from "cmdk";
 import SearchIcon from "lucide-react/dist/esm/icons/search";
 
-import { cn } from "@/lib/utils.lib";
+import { cn } from "@/common/lib/utils.lib";
 import {
   Dialog,
   DialogContent,

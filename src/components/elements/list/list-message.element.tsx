@@ -15,8 +15,8 @@ import {
   ArrowClockwise,
   NotePencil,
 } from "@phosphor-icons/react";
-import { Message, Category } from "@/lib/types.lib";
-import { formatCurrency } from "@/lib/currency.lib";
+import { Message, Category } from "@/common/lib/types.lib";
+import { formatCurrency } from "@/common/lib/currency.lib";
 import { DialogPromptEditPending } from "../dialog/dialog-prompt-edit-pending.element";
 import React from "react";
 

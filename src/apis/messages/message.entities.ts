@@ -1,4 +1,4 @@
-import { FundType, FundLastMessage, MessageStatus } from "@/lib/types.lib";
+import { FundType, FundLastMessage, MessageStatus } from "@/common/lib/types.lib";
 import { BaseEntity } from "../../common/interfaces/api.interface";
 import { TransactionDto } from "./message.interface";
 import { Fund } from "../funds/fund.entities";

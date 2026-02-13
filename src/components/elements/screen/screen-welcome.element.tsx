@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { User } from "@/lib/auth.lib";
-import { FundType } from "@/lib/types.lib";
+import { User } from "@/common/lib/auth.lib";
+import { FundType } from "@/common/lib/types.lib";
 import { Fund } from "@/apis/funds/fund.entities";
 import { WelcomeFundCreateFirst } from "../welcome/welcome-fund-create-first.element";
 import { WelcomeWalletCreateFirst } from "../welcome/welcome-wallet-create-fist.element";

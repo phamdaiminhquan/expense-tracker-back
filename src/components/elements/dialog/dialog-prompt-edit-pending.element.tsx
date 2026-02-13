@@ -6,11 +6,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Message, Category } from "@/lib/types.lib";
+import { Message, Category } from "@/common/lib/types.lib";
 import { Check, Trash2, AlertCircle, Loader2 } from "lucide-react";
 import { Wallet } from "@/apis/wallets/wallet.entities";
 import { WALLET_TEMPLATES } from "@/pages/message/message.constant";
-import { formatCurrency } from "@/lib/currency.lib";
+import { formatCurrency } from "@/common/lib/currency.lib";
 import { Button } from "@/components/ui/button";
 import useSWR from "swr";
 import { getListCategoriesDefault } from "@/apis/categories/category.api";

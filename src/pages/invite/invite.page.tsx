@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import useSWR from "swr";
 import { getFund, joinFundRequest } from "@/apis/funds/fund.api";
-import { useAuth } from "@/hooks/use-auth.hook";
+import { useAuth } from "@/hooks/use-auth";
 import { Users, Crown, UserPlus, Bell } from "lucide-react";
-import { formatCurrency } from "@/lib/currency.lib";
+import { formatCurrency } from "@/common/lib/currency.lib";
 import { toast } from "sonner";
 import LoadingScreenZen from "@/components/elements/screen/screen-loading-zen.element";
 import { Button } from "@/components/ui/button";
+import { getErrorStatus } from "@/common/utils/error.utils";
 
 export function InvitePage() {
     const { fundId } = useParams();
@@ -39,14 +40,14 @@ export function InvitePage() {
             });
             // Navigate to main chat (dashboard), not the fund (since not approved yet)
             navigate(`/chat`);
-        } catch (error: any) {
-            const status = error?.response?.status;
+        } catch (error: unknown) {
+            const status = getErrorStatus(error);
             if (status === 409) {
                 toast.info("Bạn đã gửi yêu cầu tham gia rồi.");
                 navigate(`/chat`);
             } else if (status === 403) {
-                 toast.info("Bạn đã là thành viên của quỹ này.");
-                 navigate(`/chat/${fundId}`);
+                toast.info("Bạn đã là thành viên của quỹ này.");
+                navigate(`/chat/${fundId}`);
             } else {
                 toast.error("Có lỗi xảy ra, vui lòng thử lại.");
             }
@@ -63,7 +64,7 @@ export function InvitePage() {
     if (isLoading) return <LoadingScreenZen isLoading={true} />;
 
     if (error || !fund) {
-         return (
+        return (
             <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
                 <div className="bg-white p-8 rounded-2xl shadow-lg text-center max-w-md w-full">
                     <h2 className="text-xl font-bold text-gray-800 mb-2">Không tìm thấy quỹ</h2>
@@ -87,7 +88,7 @@ export function InvitePage() {
                 {/* Header */}
                 <div className="p-8 border-b border-gray-100 bg-linear-to-b from-blue-50/50">
                     <div className="flex gap-4 items-start">
-                         <div className="w-16 h-16 bg-linear-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg flex items-center justify-center shrink-0">
+                        <div className="w-16 h-16 bg-linear-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg flex items-center justify-center shrink-0">
                             <Users className="text-white w-8 h-8" />
                         </div>
                         <div>
@@ -108,9 +109,9 @@ export function InvitePage() {
                                 {fund.memberCount || 0}
                             </p>
                         </div>
-                         <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100/50">
+                        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100/50">
                             <p className="text-xs font-medium text-gray-400 mb-1 uppercase tracking-wider">Tổng quỹ</p>
-                             <p className="text-xl font-bold text-emerald-600">
+                            <p className="text-xl font-bold text-emerald-600">
                                 {formatCurrency(fund.totalBalance || 0)}
                             </p>
                         </div>
@@ -120,16 +121,16 @@ export function InvitePage() {
                 {/* Content */}
                 <div className="p-8">
                     <div className="bg-gray-50 rounded-2xl p-5 mb-8">
-                         <p className="text-gray-600 italic leading-relaxed text-center">
+                        <p className="text-gray-600 italic leading-relaxed text-center">
                             “{fund.description || "Quỹ này chưa có mô tả."}”
                         </p>
                     </div>
 
                     <div className="space-y-4">
                         <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
-                             <div className="bg-blue-100 rounded-full p-1 mt-0.5">
+                            <div className="bg-blue-100 rounded-full p-1 mt-0.5">
                                 <Bell className="w-3.5 h-3.5 text-blue-600" />
-                             </div>
+                            </div>
                             <p className="text-sm text-blue-900">
                                 Khi tham gia, bạn sẽ có quyền xem lịch sử giao dịch và đóng góp vào quỹ.
                             </p>
@@ -147,8 +148,8 @@ export function InvitePage() {
                         ) : (
                             <div className="space-y-3">
                                 <button
-                                     onClick={handleLogin}
-                                     className="w-full py-4 rounded-xl bg-blue-600 text-white font-bold text-lg hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-200 flex items-center justify-center gap-2"
+                                    onClick={handleLogin}
+                                    className="w-full py-4 rounded-xl bg-blue-600 text-white font-bold text-lg hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-200 flex items-center justify-center gap-2"
                                 >
                                     Đăng nhập để tham gia
                                 </button>
@@ -157,8 +158,8 @@ export function InvitePage() {
                                 </p>
                             </div>
                         )}
-                        
-                        <button 
+
+                        <button
                             onClick={() => navigate('/')}
                             className="w-full py-4 rounded-xl text-gray-500 font-semibold hover:bg-gray-50 transition-colors"
                         >

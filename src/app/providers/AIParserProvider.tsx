@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react";
-import { Category, ParsedExpense } from "@/lib/types.lib";
+import { Category, ParsedExpense } from "@/common/lib/types.lib";
 
 interface AIParserContextValue {
   isParsing: boolean;

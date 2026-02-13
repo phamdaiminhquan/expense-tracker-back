@@ -17,8 +17,7 @@ import { IconElement } from '../icon/icon.element';
 import { STYLE } from '@/common/constant';
 import { Mode } from '@/common/enums/mode.enum';
 import { Form, FormikContext } from 'formik';
-import { GlobalReduxState } from '@/redux/store.interface';
-import { useSelector } from 'react-redux';
+import { useSystemStore } from '@/stores/system.store';
 
 export interface DialogElementProps extends DialogProps {
   iconLabel?: string;
@@ -66,7 +65,7 @@ export const DialogElement: React.FC<DialogElementProps> = ({
 }) => {
   const { palette } = useTheme();
 
-  const mode = useSelector((state: GlobalReduxState) => state.system.mode);
+  const mode = useSystemStore((state) => state.mode);
 
   const [openHelp, setOpenHelp] = useState(false);
 

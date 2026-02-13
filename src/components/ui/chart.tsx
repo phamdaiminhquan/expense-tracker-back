@@ -10,7 +10,7 @@ import {
 } from "react";
 import * as RechartsPrimitive from "recharts";
 
-import { cn } from "@/lib/utils.lib";
+import { cn } from "@/common/lib/utils.lib";
 import React from "react";
 
 // Format: { THEME_NAME: CSS_SELECTOR }

@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { Capybara } from "../capybara/CapyFace";
-import { useCapyEyeTracking } from "@/hooks/use-capy-eyes-tracking.hook";
+import { useCapyEyeTracking } from "@/hooks/use-capy-eyes-tracking";
 import DialogWalletSelector from "../dialog/dialog-wallet-selector.element";
 
 interface WelcomeWalletCreateFirstProps {

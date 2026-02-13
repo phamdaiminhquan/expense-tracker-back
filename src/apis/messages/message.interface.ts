@@ -1,5 +1,5 @@
 import { PageOptionsDto } from "@/common/interfaces/api.interface";
-import { MessageStatus, FundType } from "@/lib/types.lib";
+import { MessageStatus, FundType } from "@/common/lib/types.lib";
 import { Message } from "./message.entities";
 import { Wallet } from "../wallets/wallet.entities";
 

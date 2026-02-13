@@ -1,9 +1,9 @@
 import React, { useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { Capybara } from "../capybara/CapyFace";
-import { useCapyEyeTracking } from "@/hooks/use-capy-eyes-tracking.hook";
-import { User } from "@/lib/auth.lib";
-import { FundType } from "@/lib/types.lib";
+import { useCapyEyeTracking } from "@/hooks/use-capy-eyes-tracking";
+import { User } from "@/common/lib/auth.lib";
+import { FundType } from "@/common/lib/types.lib";
 import { FundCreatePart } from "@/pages/fund/parts/fund-create/fund-create.part";
 
 interface WelcomeFundCreateFirstProps {

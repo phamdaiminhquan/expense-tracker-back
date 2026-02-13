@@ -1,4 +1,4 @@
-import { FundType, FundLastMessage } from "@/lib/types.lib";
+import { FundType, FundLastMessage } from "@/common/lib/types.lib";
 import { BaseEntity } from "../../common/interfaces/api.interface";
 
 export interface Fund extends BaseEntity {

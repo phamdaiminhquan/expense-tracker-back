@@ -1,6 +1,6 @@
 import { ComponentProps } from "react";
 
-import { cn } from "@/lib/utils.lib";
+import { cn } from "@/common/lib/utils.lib";
 
 function Table({ className, ...props }: ComponentProps<"table">) {
   return (

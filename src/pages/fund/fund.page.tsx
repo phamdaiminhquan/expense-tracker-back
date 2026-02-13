@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { FundListPart } from "@/pages/fund/parts/fund-list/fund-list.part";
 import { FundCreatePart } from "@/pages/fund/parts/fund-create/fund-create.part";
-import { User } from "@/lib/auth.lib";
+import { User } from "@/common/lib/auth.lib";
 import { toast } from "sonner";
 import { Fund } from "@/apis/funds/fund.entities";
 

@@ -9,7 +9,7 @@ import { CollapseProps, Column, OnClickRow, OnDisabled } from '../table.interfac
 import { ButtonIconElement } from '../../elements/button/button-icon.element';
 import { getErrorMessage } from '@/common/utils/string.utils';
 import { STYLE } from '@/common/constant';
-import { useSnackbar, SnackbarType } from '@/hooks/use-snackbar.hook';
+import { useSnackbar, SnackbarType } from '@/hooks/use-snackbar';
 
 export interface RowCollapsePartProps<R, RC> {
   columns: Column<R>[];

@@ -1,4 +1,4 @@
-import { Fund } from "@/lib/types.lib";
+import { Fund } from "@/common/lib/types.lib";
 import { Button } from "@/components/ui/button";
 import {
   Select,

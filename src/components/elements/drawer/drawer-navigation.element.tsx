@@ -4,22 +4,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import {
   Plus,
-  Wallet,
-  Users,
   Search,
   LogOut,
   X,
-  Trash,
-  Pencil,
-  LayoutList,
   ChevronLeft,
 } from "lucide-react";
 import { Fund } from "@/apis/funds/fund.entities";
+import { FundItem } from "../fund/fund-item.element";
 import { Mode } from "@/common/enums/mode.enum";
-import { ACTION_SYSTEM } from "@/redux";
-import { useAppDispatch } from "@/redux/store.redux";
-import { useSelector } from "react-redux";
-import { GlobalReduxState } from "@/redux/store.interface";
+import { useSystemStore } from "@/stores/system.store";
 import { debounce } from "@mui/material";
 import { Button } from "../../ui/button";
 
@@ -61,8 +54,7 @@ export function DrawerNavigation({
   onViewFundMembers,
   isPermanent = false,
 }: DrawerNavigationProps & { isPermanent?: boolean }) {
-  const dispatch = useAppDispatch();
-  const system = useSelector((state: GlobalReduxState) => state.system);
+  const { mode: systemMode, toggleMode } = useSystemStore();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -184,97 +176,17 @@ export function DrawerNavigation({
             ))}
           </div>
         ) : (
-          funds.map((fund) => {
-            const isActive = fund.id === currentFundId;
-            return (
-              <div
-                key={fund.id}
-                onClick={() => handleSelectFund(fund.id)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    handleSelectFund(fund.id);
-                  }
-                }}
-                role="button"
-                tabIndex={0}
-                className={`w-full group flex items-center gap-3 p-3 rounded-2xl transition-all text-left border cursor-pointer ${isActive
-                  ? "bg-indigo-50 border-indigo-100"
-                  : "hover:bg-gray-50 border-transparent"
-                  }`}
-              >
-                <div
-                  className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${isActive
-                    ? "bg-indigo-200 text-indigo-700"
-                    : "bg-gray-100 text-gray-500"
-                    }`}
-                >
-                  {fund.type === "shared" ? (
-                    <Users size={20} />
-                  ) : (
-                    <Wallet size={20} />
-                  )}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <h4
-                    className={`font-bold text-sm truncate ${isActive ? "text-indigo-900" : "text-gray-700"
-                      }`}
-                  >
-                    {fund.name}
-                  </h4>
-                  <p className="text-2xs text-gray-400 font-semibold uppercase tracking-wider">
-                    {fund.type === "shared" ? "Quỹ chung" : "Quỹ cá nhân"}
-                  </p>
-                </div>
-
-                <div
-                  className={`flex gap-1 transition-opacity ${isActive
-                    ? "opacity-100"
-                    : "opacity-0 group-hover:opacity-100"
-                    }`}
-                >
-                  {fund.membershipRole === "owner" && (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation(); // Ngăn event bubble lên button cha
-                          handleUpdateFund(e, fund.id);
-                        }}
-                        className="cursor-pointer h-7 w-7 p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-indigo-600 transition-colors"
-                      >
-                        <Pencil size={14} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation(); // Ngăn event bubble lên button cha
-                          handleDeleteFund(e, fund.id);
-                        }}
-                        className="cursor-pointer h-7 w-7 p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-rose-500 transition-colors"
-                      >
-                        <Trash size={14} />
-                      </Button>
-                    </>
-                  )}
-
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      handleViewFundMembers(e, fund.id);
-                    }}
-                    className="cursor-pointer h-7 w-7 p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-purple-500 transition-colors"
-                  >
-                    <LayoutList size={14} />
-                  </Button>
-                </div>
-              </div>
-            );
-          })
+          funds.map((fund) => (
+            <FundItem
+              key={fund.id}
+              fund={fund}
+              isActive={fund.id === currentFundId}
+              onSelect={() => handleSelectFund(fund.id)}
+              onEdit={(e) => handleUpdateFund(e, fund.id)}
+              onDelete={(e) => handleDeleteFund(e, fund.id)}
+              onViewMembers={(e) => handleViewFundMembers(e, fund.id)}
+            />
+          ))
         )}
 
         {isLoadingMore && (
@@ -305,13 +217,13 @@ export function DrawerNavigation({
           </div>
 
           {/* <button
-            onClick={() => dispatch(ACTION_SYSTEM.changeMode(system.mode))}
+            onClick={() => toggleMode()}
             className="p-2 bg-white rounded-xl shadow-sm hover:bg-gray-100 transition-colors"
           >
             <X
               size={18}
               className={
-                system.mode === Mode.DARK ? "text-indigo-500" : "text-amber-500"
+                systemMode === Mode.DARK ? "text-indigo-500" : "text-amber-500"
               }
             />
           </button> */}

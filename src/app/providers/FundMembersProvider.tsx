@@ -3,6 +3,7 @@ import useSWR from 'swr';
 import { getFundMembers, removeFundMember } from '@/apis/funds/fund.api';
 import { toast } from 'sonner';
 import { GetListFundMemberDto } from '@/apis/funds/fund.interface';
+import { getErrorMessage } from '@/common/utils/error.utils';
 
 export const useFundMembers = (fundId: string, params?: GetListFundMemberDto) => {
     const [loading, setLoading] = useState(false);
@@ -20,8 +21,8 @@ export const useFundMembers = (fundId: string, params?: GetListFundMemberDto) =>
                 await removeFundMember(fundId, memberId);
                 toast.success('Đã xóa thành viên!');
                 mutate();
-            } catch (error: any) {
-                toast.error('Xóa thành viên thất bại', { description: error?.message || 'Vui lòng thử lại' });
+            } catch (error: unknown) {
+                toast.error('Xóa thành viên thất bại', { description: getErrorMessage(error) });
                 throw error;
             } finally {
                 setLoading(false);

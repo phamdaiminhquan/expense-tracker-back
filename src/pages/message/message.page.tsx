@@ -1,26 +1,27 @@
-import { useState, useEffect, useRef } from "react";
-import { Message, Category } from "@/lib/types.lib";
+import React from "react";
 import { MessageChatPart } from "@/pages/message/parts/message-chat/message-chat.part";
 import { DrawerNavigation } from "@/components/elements/drawer/drawer-navigation.element";
 import { FundCreatePart } from "@/pages/fund/parts/fund-create/fund-create.part";
-import React from "react";
 import { FundUpdatePart } from "../fund/parts/fund-update/fund-update.part";
 import { Fund } from "@/apis/funds/fund.entities";
 import ChartContent from "../statistic/parts/statistic-chart/statistic-chart.part";
 import { StatisticPage } from "../statistic/statistic.page";
-import { useFundMembers } from "@/hooks/use-fund-members.hook";
+import { useFundMembers } from "@/hooks/use-fund-members";
 import { DialogFundMemberList } from "@/components/elements/dialog/dialog-fund-member-list.element";
 import { OverlayTutorial } from "@/components/elements/overlay/overlay-tutorial.element";
 import ShareFundDialog from "@/components/elements/dialog/dialog-share-fund.element";
+import { useMessagePageState } from "./hooks/use-message-page-state";
+import { SidebarPart } from "./parts/sidebar/sidebar.part";
+import { useMessage } from "@/app/providers/MessageProvider";
+import { useCategories } from "@/hooks/use-categories";
+import { useAuth } from "@/hooks/use-auth";
+import { mutate } from "swr";
+import { getErrorMessage } from "@/common/utils/error.utils";
 
 interface MessagePageProps {
   fund: Fund | any;
   funds: Fund[];
-  messages: Message[];
-  categories: Category[];
-  currentUserId: string;
-  currentUserName: string;
-  currentUser: any;
+  currentFundId?: string;
   onSelectFund: (fundId: string) => void;
   onCreateFund: (name: string, type: "personal" | "shared") => Promise<void>;
   onUpdateFund: (
@@ -30,12 +31,6 @@ interface MessagePageProps {
   ) => Promise<void>;
   onDeleteFund: (fundId: string) => Promise<void>;
   onLogout: () => void;
-  onAddMessage: (message: Omit<Message, "id" | "timestamp">) => Promise<void>;
-  onResendMessage: (message: Message) => Promise<void>;
-  onUpdateMessage: (message: Message) => Promise<void>;
-  onDeleteMessage: (id: string) => Promise<void>;
-  isProcessing?: boolean;
-  isLoading?: boolean;
   isLoadingFunds?: boolean;
   isLoadingMoreFunds?: boolean;
   hasMoreFunds?: boolean;
@@ -46,204 +41,174 @@ interface MessagePageProps {
 export function MessagePage({
   fund,
   funds,
-  messages,
-  categories,
-  currentUserId,
-  currentUserName,
-  currentUser,
   onSelectFund,
   onCreateFund,
   onUpdateFund,
   onDeleteFund,
   onLogout,
-  onAddMessage,
-  onResendMessage,
-  onUpdateMessage,
-  onDeleteMessage,
-  isProcessing = false,
-  isLoading = false,
   isLoadingFunds = false,
   isLoadingMoreFunds = false,
   hasMoreFunds = false,
   onLoadMoreFunds,
   onSearchFunds,
 }: MessagePageProps) {
-  // state
-  const [isStatisticsDialogOpen, setIsStatisticsDialogOpen] = useState(false);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isCreateFundDialogOpen, setIsCreateFundDialogOpen] = useState(false);
-  const [isUpdateFundDialogOpen, setIsUpdateFundDialogOpen] = useState(false);
-  const [showLoadingScreen, setShowLoadingScreen] = useState(false);
-  const [selectedFundId, setSelectedFundId] = useState<string | null>(null);
-  const [isMemberDialogOpen, setIsMemberDialogOpen] = useState(false);
-  const [memberPage, setMemberPage] = useState(1);
-  const pageSize = 20;
-  const selectedFund = funds.find((f) => f.id === selectedFundId);
+  // --- AUTH ---
+  const { currentUserId, currentUserName, currentUser } = useAuth();
+
+  // --- MESSAGE DATA (self-fetched) ---
+  const canLoadMessages = !!fund?.id;
+  const {
+    messageList,
+    isLoadingList: isLoadingMessages,
+    loading: isProcessingMessage,
+    createMessage,
+    updateMessage,
+    deleteMessage,
+  } = useMessage(canLoadMessages ? fund.id : undefined);
+
+  // --- CATEGORIES ---
+  const { categories } = useCategories();
+
+  // --- STATE HOOK ---
+  const { dialogs, ui } = useMessagePageState(isLoadingFunds);
+
+  // --- DATA TRANSFORMS ---
+  const messages = messageList?.data || [];
+  const selectedFund = funds.find((f) => f.id === dialogs.member.selectedFundId);
   const fundCategories = fund
     ? categories.filter((c) => c.fundId === fund.id)
     : [];
   const fundMessages = fund ? messages.filter((m) => m.fundId === fund.id) : [];
-  const [isOpenShareFundDialog, setIsOpenShareFundDialog] = useState(false);
 
-  // hook
-  const hasShownInitialBanner = useRef(false);
+  // --- MEMBERS LOGIC ---
   const {
     members,
     isLoading: isLoadingMembers,
     loading: isProcessingMember,
     removeMember,
     mutate: mutateMembers,
-  } = useFundMembers(selectedFundId || "", {
-    page: memberPage,
-    take: pageSize,
+  } = useFundMembers(dialogs.member.selectedFundId || "", {
+    page: 1,
+    take: 20,
   });
 
-  // function
-
-  // Hiển thị banner khi đang load funds (lần đầu vào app)
-  useEffect(() => {
-    if (hasShownInitialBanner.current) return;
-
-    // Chỉ hiển thị lần đầu khi vào app và đang load funds
-    const hasSeenBanner = sessionStorage.getItem("hasSeenChatBanner");
-    if (!hasSeenBanner && isLoadingFunds) {
-      hasShownInitialBanner.current = true;
-      setShowLoadingScreen(true);
-      sessionStorage.setItem("hasSeenChatBanner", "true");
-    }
-  }, [isLoadingFunds]);
-
-  // Tự động ẩn banner khi load xong (không cần user action)
-  useEffect(() => {
-    if (showLoadingScreen && !isLoadingFunds) {
-      // Set showLoadingScreen = false để hiển thị nội dung
-      setShowLoadingScreen(false);
-    }
-  }, [showLoadingScreen, isLoadingFunds]);
-
-  const handleOpenCreateFund = () => {
-    setIsCreateFundDialogOpen(true);
-    setIsDrawerOpen(false);
+  // --- MESSAGE HANDLERS (now internal) ---
+  const handleAddMessage = async (messageData: any) => {
+    if (!fund) return;
+    const payload = {
+      message: messageData.message || null,
+      walletId: messageData.walletId ?? null,
+    };
+    await createMessage(fund.id, payload);
   };
 
-  const handleOpenUpdateFund = () => {
-    setIsUpdateFundDialogOpen(true);
-    setIsDrawerOpen(false);
+  const handleResendMessage = async (failedMessage: any, walletId?: string) => {
+    if (!fund) return;
+    const messageText = failedMessage.originalPrompt || failedMessage.message;
+    const payload = {
+      message: messageText,
+      walletId: walletId ?? failedMessage.walletId ?? null,
+    };
+    await createMessage(fund.id, payload);
   };
 
-  const handleCreateFundComplete = async (
-    name: string,
-    type: "personal" | "shared"
-  ) => {
+  const handleUpdateMessage = async (updatedMessage: any) => {
+    const payload: any = {
+      message: updatedMessage.message,
+      walletId: updatedMessage.walletId ?? null,
+      spendValue: updatedMessage.spend,
+      earnValue: updatedMessage.earn,
+      categoryId: updatedMessage.categoryId,
+    };
+    await updateMessage(updatedMessage.id, payload);
+  };
+
+  const handleDeleteMessage = async (id: string) => {
+    await deleteMessage(id);
+  };
+
+  // --- FUND HANDLERS ---
+  const handleCreateFundComplete = async (name: string, type: "personal" | "shared") => {
     await onCreateFund(name, type);
-    setIsCreateFundDialogOpen(false);
+    dialogs.createFund.close();
   };
-  const handleUpdateFundComplete = async (
-    id: string,
-    name: string,
-    type: "personal" | "shared"
-  ) => {
+
+  const handleUpdateFundComplete = async (id: string, name: string, type: "personal" | "shared") => {
     await onUpdateFund(id, name, type);
-    setIsUpdateFundDialogOpen(false);
-  };
-
-  // Hàm mở dialog member khi chọn icon xem thành viên
-  const handleViewFundMembers = (fundId: string) => {
-    setSelectedFundId(fundId);
-    setIsMemberDialogOpen(true);
-  };
-
-  const handleCloseMemberDialog = () => {
-    setIsMemberDialogOpen(false);
-    setSelectedFundId(null);
+    dialogs.updateFund.close();
   };
 
   const handleRemoveMember = async (memberId: string) => {
     try {
       await removeMember(memberId);
-    } catch {}
+    } catch { }
+  };
+
+  const navProps = {
+    funds,
+    onDeleteFund,
+    currentUserName: currentUserName || "",
+    currentFundId: fund?.id || null,
+    isLoadingFunds,
+    isLoadingMore: isLoadingMoreFunds,
+    hasMore: hasMoreFunds,
+    onSelectFund,
+    onCreateFund: dialogs.createFund.open,
+    onUpdateFund: dialogs.updateFund.open,
+    onLoadMore: onLoadMoreFunds || (() => { }),
+    onLogout,
+    onSearchFunds,
+    onViewFundMembers: dialogs.member.open
   };
 
   return (
     <React.Fragment>
       <OverlayTutorial />
-      {/* Container: p-0 trên mobile, p-3 trên desktop */}
+      {/* Container */}
       <div
-        className={`flex h-dvh lg:h-screen overflow-hidden bg-[#F0F2F5] lg:p-3 lg:gap-3 p-0 gap-0 ${
-          showLoadingScreen
-            ? "opacity-0"
-            : "opacity-100 transition-opacity duration-500"
-        }`}
+        className={`flex h-dvh lg:h-screen overflow-hidden bg-[#F0F2F5] lg:p-3 lg:gap-3 p-0 gap-0 ${ui.showLoadingScreen
+          ? "opacity-0"
+          : "opacity-100 transition-opacity duration-500"
+          }`}
       >
-        {/* CỘT 1: SIDEBAR LEFT - Chỉ hiện trên lg, giữ nguyên card style vì là desktop */}
-        <aside className="hidden lg:flex w-[350px] bg-white flex-col shrink-0 rounded-2xl shadow-sm overflow-hidden border border-gray-100">
-          <DrawerNavigation
-            open={true}
-            onOpenChange={() => {}}
-            funds={funds}
-            onDeleteFund={onDeleteFund}
-            currentUserName={currentUserName}
-            currentFundId={fund?.id || null}
-            isLoadingFunds={isLoadingFunds}
-            isLoadingMore={isLoadingMoreFunds}
-            hasMore={hasMoreFunds}
-            onSelectFund={onSelectFund}
-            onCreateFund={handleOpenCreateFund}
-            onUpdateFund={handleOpenUpdateFund}
-            onLoadMore={onLoadMoreFunds || (() => {})}
-            onLogout={onLogout}
-            onSearchFunds={onSearchFunds}
-            isPermanent={true}
-            onViewFundMembers={handleViewFundMembers}
-          />
-        </aside>
+        {/* CỘT 1: SIDEBAR LEFT (Desktop) */}
+        <SidebarPart
+          {...navProps}
+          open={true}
+          onOpenChange={() => { }}
+        />
 
         {/* DRAWER CHO MOBILE/TABLET */}
         <div className="lg:hidden">
           <DrawerNavigation
-            open={isDrawerOpen}
-            onOpenChange={setIsDrawerOpen}
-            funds={funds}
-            onDeleteFund={onDeleteFund}
-            currentUserName={currentUserName}
-            currentFundId={fund?.id || null}
-            isLoadingFunds={isLoadingFunds}
-            isLoadingMore={isLoadingMoreFunds}
-            hasMore={hasMoreFunds}
-            onSelectFund={onSelectFund}
-            onCreateFund={handleOpenCreateFund}
-            onUpdateFund={handleOpenUpdateFund}
-            onLoadMore={onLoadMoreFunds || (() => {})}
-            onLogout={onLogout}
-            onSearchFunds={onSearchFunds}
-            onViewFundMembers={handleViewFundMembers}
+            {...navProps}
+            open={dialogs.drawer.isOpen}
+            onOpenChange={dialogs.drawer.setOpen}
           />
         </div>
 
-        {/* CỘT 2: CHAT MAIN VIEW - Bo góc trên desktop, tràn viền trên mobile */}
+        {/* CỘT 2: CHAT MAIN VIEW */}
         <main className="flex-1 flex flex-col min-w-0 min-h-0 bg-white lg:rounded-2xl lg:shadow-sm lg:border lg:border-gray-100 shadow-none border-none overflow-hidden relative">
           <MessageChatPart
             fund={fund}
             messages={fundMessages}
             categories={fundCategories}
-            currentUserId={currentUserId}
-            currentUserName={currentUserName}
-            onOpenDrawer={() => setIsDrawerOpen(true)}
-            onCreateFund={handleOpenCreateFund}
-            onShowStatistics={() => setIsStatisticsDialogOpen(true)}
-            onAddMessage={onAddMessage}
-            onResendMessage={onResendMessage}
-            onUpdateMessage={onUpdateMessage}
-            onDeleteMessage={onDeleteMessage}
-            isProcessing={isProcessing}
-            isLoading={isLoading}
-            onOpenShareFundDialog={() =>
-              setIsOpenShareFundDialog(!isOpenShareFundDialog)
-            }
+            currentUserId={currentUserId || ""}
+            currentUserName={currentUserName || ""}
+            onOpenDrawer={dialogs.drawer.open}
+            onCreateFund={dialogs.createFund.open}
+            onShowStatistics={dialogs.statistics.open}
+            onAddMessage={handleAddMessage}
+            onResendMessage={handleResendMessage}
+            onUpdateMessage={handleUpdateMessage}
+            onDeleteMessage={handleDeleteMessage}
+            isProcessing={isProcessingMessage}
+            isLoading={isLoadingMessages}
+            onOpenShareFundDialog={dialogs.share.toggle}
           />
         </main>
 
-        {/* CỘT 3: STATISTIC VIEW - Giữ nguyên card style trên desktop */}
+        {/* CỘT 3: STATISTIC VIEW (Desktop Right) */}
         <aside className="hidden xl:flex w-[400px] bg-white flex-col shrink-0 rounded-2xl shadow-sm overflow-hidden border border-gray-100">
           <div className="p-6 pb-4 border-b border-gray-100">
             <div className="flex justify-between items-center">
@@ -255,47 +220,48 @@ export function MessagePage({
           <ChartContent fundId={fund?.id} />
         </aside>
 
-        {/* DRAWER CHO MOBILE/TABLET (SIDEBAR RIGHT / STATISTIC) */}
+        {/* --- DIALOGS --- */}
+
+        {/* STATISTIC DRAWER (Mobile) */}
         <StatisticPage
-          isOpen={isStatisticsDialogOpen}
-          onClose={() => setIsStatisticsDialogOpen(false)}
+          isOpen={dialogs.statistics.isOpen}
+          onClose={dialogs.statistics.close}
           fundId={fund?.id}
           totalExpense={0}
           totalIncome={0}
         />
 
         <FundCreatePart
-          open={isCreateFundDialogOpen}
-          onOpenChange={setIsCreateFundDialogOpen}
+          open={dialogs.createFund.isOpen}
+          onOpenChange={dialogs.createFund.setOpen}
           onCreateFund={handleCreateFundComplete}
-          currentUserId={currentUserId}
+          currentUserId={currentUserId || ""}
           allUsers={currentUser ? [currentUser] : []}
         />
 
         <FundUpdatePart
           fund={fund}
-          open={isUpdateFundDialogOpen}
-          onOpenChange={setIsUpdateFundDialogOpen}
+          open={dialogs.updateFund.isOpen}
+          onOpenChange={dialogs.updateFund.setOpen}
           onUpdateFund={handleUpdateFundComplete}
-          currentUserId={currentUserId}
+          currentUserId={currentUserId || ""}
           allUsers={currentUser ? [currentUser] : []}
         />
 
         <DialogFundMemberList
-          isOpen={isMemberDialogOpen}
-          onClose={handleCloseMemberDialog}
+          isOpen={dialogs.member.isOpen}
+          onClose={dialogs.member.close}
           fund={selectedFund}
           members={members}
           isLoading={isLoadingMembers || isProcessingMember}
           onRefresh={() => mutateMembers()}
-          // onInviteMember={handleInviteMember}
           onRemoveMember={handleRemoveMember}
-          currentUserId={currentUserId}
+          currentUserId={currentUserId || ""}
         />
 
         <ShareFundDialog
-          isOpen={isOpenShareFundDialog}
-          onClose={() => setIsOpenShareFundDialog(false)}
+          isOpen={dialogs.share.isOpen}
+          onClose={dialogs.share.close}
           fund={fund}
         />
       </div>

@@ -12,8 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { FundType } from "@/lib/types.lib";
-import { User } from "@/lib/auth.lib";
+import { FundType } from "@/common/lib/types.lib";
+import { User } from "@/common/lib/auth.lib";
 import { Users, User as UserIcon } from "@phosphor-icons/react";
 import { Fund } from "@/apis/funds/fund.entities";
 

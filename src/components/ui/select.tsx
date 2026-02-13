@@ -4,7 +4,7 @@ import CheckIcon from "lucide-react/dist/esm/icons/check";
 import ChevronDownIcon from "lucide-react/dist/esm/icons/chevron-down";
 import ChevronUpIcon from "lucide-react/dist/esm/icons/chevron-up";
 
-import { cn } from "@/lib/utils.lib";
+import { cn } from "@/common/lib/utils.lib";
 
 function Select({ ...props }: ComponentProps<typeof SelectPrimitive.Root>) {
   return <SelectPrimitive.Root data-slot="select" {...props} />;

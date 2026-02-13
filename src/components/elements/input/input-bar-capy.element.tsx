@@ -4,7 +4,7 @@ import {
   CATEGORIES_UI,
   WALLET_TEMPLATES,
 } from "@/pages/message/message.constant";
-import { formatCurrency } from "@/lib/currency.lib";
+import { formatCurrency } from "@/common/lib/currency.lib";
 
 export default function InputBarCapy({
   // Data Props

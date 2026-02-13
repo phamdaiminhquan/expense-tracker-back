@@ -3,7 +3,7 @@ import { Slot } from "@radix-ui/react-slot";
 import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
 import MoreHorizontal from "lucide-react/dist/esm/icons/more-horizontal";
 
-import { cn } from "@/lib/utils.lib";
+import { cn } from "@/common/lib/utils.lib";
 
 function Breadcrumb({ ...props }: ComponentProps<"nav">) {
   return <nav aria-label="breadcrumb" data-slot="breadcrumb" {...props} />;

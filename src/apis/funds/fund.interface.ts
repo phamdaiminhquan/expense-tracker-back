@@ -1,5 +1,5 @@
 import { BaseEntity, PageOptionsDto } from "@/common/interfaces/api.interface";
-import { FundType } from "@/lib/types.lib";
+import { FundType } from "@/common/lib/types.lib";
 import { Fund } from "./fund.entities";
 import { JoinFundStatus } from "./fund.enum";
 
