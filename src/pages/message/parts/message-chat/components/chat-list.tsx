@@ -133,7 +133,7 @@ function OptimisticMessageBubble({
         uiMsg.transType = spendVal > 0 ? "expense" : "income";
         uiMsg.category =
             optMsg.resolvedMessage.transaction?.category?.name || "Chưa phân loại";
-        uiMsg.categoryIcon = optMsg.resolvedMessage.transaction?.category?.icon;
+        uiMsg.categoryIcon = optMsg.resolvedMessage.transaction?.category?.icon ?? "loader";
     }
 
     const resolvedWalletId = optMsg.resolvedMessage?.transaction?.wallet?.id;
@@ -148,7 +148,6 @@ function OptimisticMessageBubble({
 
     return (
         <motion.div
-            layout
             custom={true}
             variants={messageVariants}
             initial="hidden"
@@ -251,7 +250,7 @@ export function ChatList({
     );
 
     return (
-        <AnimatePresence mode="popLayout" initial={false}>
+        <AnimatePresence initial={false}>
             {/* REAL MESSAGES từ Server */}
             {[...filteredMessages].reverse().map((message) => {
                 const isCurrentUser = message.createdById === currentUserId;
@@ -292,13 +291,13 @@ export function ChatList({
                 return (
                     <motion.div
                         key={message.id}
-                        layout
                         custom={isCurrentUser}
                         variants={messageVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className={`flex w-full ${isCurrentUser ? "justify-end" : "justify-start"}`}
+                        style={{ pointerEvents: 'auto' }}
+                        className={`flex w-full cursor-pointer ${isCurrentUser ? "justify-end" : "justify-start"}`}
                     >
                         <MessageBubblePart
                             msg={uiMsg as any}
@@ -315,6 +314,7 @@ export function ChatList({
                                 setEditingPendingPrompt(message);
                             }}
                             onOpenEditDialog={() => {
+                                console.log('[DEBUG] onOpenEditDialog clicked for message:', message.id);
                                 setEditingPendingPrompt(message);
                             }}
                         />

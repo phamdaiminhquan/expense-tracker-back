@@ -25,39 +25,49 @@ export default function InputBarCapy({
   const [eyePosition, setEyePosition] = useState({ x: 0, y: 0 });
   const [isBlinking, setIsBlinking] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState("food");
+  const blinkTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const gazeTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // --- 1. LOGIC: Tự động chớp mắt ---
   useEffect(() => {
+    let cancelled = false;
     const blinkLoop = () => {
+      if (cancelled) return;
       setIsBlinking(true);
-      setTimeout(() => {
+      blinkTimeoutRef.current = setTimeout(() => {
+        if (cancelled) return;
         setIsBlinking(false);
         const nextBlink = Math.random() * 3000 + 3000;
-        setTimeout(blinkLoop, nextBlink);
+        blinkTimeoutRef.current = setTimeout(blinkLoop, nextBlink);
       }, 150);
     };
-    const initialTimeout = setTimeout(blinkLoop, 2000);
-    return () => clearTimeout(initialTimeout);
+    blinkTimeoutRef.current = setTimeout(blinkLoop, 2000);
+    return () => {
+      cancelled = true;
+      clearTimeout(blinkTimeoutRef.current);
+    };
   }, []);
 
   // --- 2. LOGIC: Liếc mắt khi rảnh (Idle) ---
   useEffect(() => {
-    let idleInterval;
+    let cancelled = false;
     if (capyMood === "sleepy") {
       const gazeLoop = () => {
+        if (cancelled) return;
         const randomX = (Math.random() - 0.5) * 6;
         const randomY = (Math.random() - 0.5) * 4;
         setEyePosition({ x: randomX, y: randomY });
         const nextGaze = Math.random() * 2000 + 1500;
-        idleInterval = setTimeout(gazeLoop, nextGaze);
+        gazeTimeoutRef.current = setTimeout(gazeLoop, nextGaze);
       };
       gazeLoop();
     } else if (isAnalyzing) {
       setEyePosition({ x: 0, y: -4 }); // Nhìn lên khi đang suy nghĩ
-    } else {
-      if (idleInterval) clearTimeout(idleInterval);
     }
-    return () => clearTimeout(idleInterval);
+    return () => {
+      cancelled = true;
+      clearTimeout(gazeTimeoutRef.current);
+    };
   }, [capyMood, isAnalyzing]);
 
   // --- 3. LOGIC: Mắt nhìn theo chuột (Mouse Tracking) ---
@@ -127,10 +137,9 @@ export default function InputBarCapy({
                 key={cat.id}
                 onClick={() => setSelectedCategoryId(cat.id)}
                 className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all shadow-sm border
-                  ${
-                    selectedCategoryId === cat.id
-                      ? "bg-indigo-500 text-white border-indigo-500"
-                      : "bg-white/90 backdrop-blur text-gray-600 border-gray-100 hover:bg-gray-50"
+                  ${selectedCategoryId === cat.id
+                    ? "bg-indigo-500 text-white border-indigo-500"
+                    : "bg-white/90 backdrop-blur text-gray-600 border-gray-100 hover:bg-gray-50"
                   }`}
               >
                 {cat.icon} {cat.label}
@@ -147,9 +156,8 @@ export default function InputBarCapy({
 
         {/* Wallet Selector & Indicator */}
         <div
-          className={`flex justify-between items-center mb-2 lg:mb-3 px-1 transition-all ${
-            isAnalyzing ? "opacity-50 pointer-events-none" : ""
-          }`}
+          className={`flex justify-between items-center mb-2 lg:mb-3 px-1 transition-all ${isAnalyzing ? "opacity-50 pointer-events-none" : ""
+            }`}
         >
           <button
             onClick={onWalletClick}
@@ -194,11 +202,10 @@ export default function InputBarCapy({
         {/* Input & Button Area */}
         <div className="relative flex items-center gap-2 lg:gap-3">
           <div
-            className={`flex-1 bg-gray-50 rounded-xl lg:rounded-2xl flex items-center px-3 lg:px-4 transition-all duration-300 focus-within:bg-white focus-within:ring-2 focus-within:ring-offset-0 ${
-              isSmartMode
-                ? "focus-within:ring-purple-100"
-                : "focus-within:ring-emerald-100"
-            }`}
+            className={`flex-1 bg-gray-50 rounded-xl lg:rounded-2xl flex items-center px-3 lg:px-4 transition-all duration-300 focus-within:bg-white focus-within:ring-2 focus-within:ring-offset-0 ${isSmartMode
+              ? "focus-within:ring-purple-100"
+              : "focus-within:ring-emerald-100"
+              }`}
           >
             <input
               value={inputValue}

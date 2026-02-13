@@ -166,21 +166,19 @@ export function DialogPromptEditPending({
           <div className="flex bg-gray-100 p-1 rounded-2xl mb-6">
             <button
               onClick={() => setFormData({ ...formData, type: "expense" })}
-              className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
-                formData.type === "expense"
+              className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${formData.type === "expense"
                   ? "bg-white text-rose-600 shadow-sm scale-[1.02]"
                   : "text-gray-500 hover:text-gray-700"
-              }`}
+                }`}
             >
               Chi tiêu
             </button>
             <button
               onClick={() => setFormData({ ...formData, type: "income" })}
-              className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
-                formData.type === "income"
+              className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${formData.type === "income"
                   ? "bg-white text-emerald-600 shadow-sm scale-[1.02]"
                   : "text-gray-500 hover:text-gray-700"
-              }`}
+                }`}
             >
               Thu nhập
             </button>
@@ -188,11 +186,10 @@ export function DialogPromptEditPending({
 
           <div className="relative mb-4">
             <div
-              className={`absolute top-1/2 left-4 -translate-y-1/2 font-bold text-lg ${
-                formData.type === "expense"
+              className={`absolute top-1/2 left-4 -translate-y-1/2 font-bold text-lg ${formData.type === "expense"
                   ? "text-rose-400"
                   : "text-emerald-400"
-              }`}
+                }`}
             >
               ₫
             </div>
@@ -202,11 +199,10 @@ export function DialogPromptEditPending({
               onChange={(e) =>
                 setFormData({ ...formData, amount: Number(e.target.value) })
               }
-              className={`w-full p-4 pl-10 text-3xl font-bold text-center bg-transparent border-b-2 outline-none transition-all placeholder-gray-200 ${
-                formData.type === "expense"
+              className={`w-full p-4 pl-10 text-3xl font-bold text-center bg-transparent border-b-2 outline-none transition-all placeholder-gray-200 ${formData.type === "expense"
                   ? "text-rose-600 border-rose-100 focus:border-rose-500"
                   : "text-emerald-600 border-emerald-100 focus:border-emerald-500"
-              }`}
+                }`}
               placeholder="0"
               autoFocus
             />
@@ -265,9 +261,8 @@ export function DialogPromptEditPending({
                         </span>
                       </div>
                       <div
-                        className={`text-[10px] font-medium ${
-                          isSelected ? "" : "text-gray-400"
-                        }`}
+                        className={`text-[10px] font-medium ${isSelected ? "" : "text-gray-400"
+                          }`}
                       >
                         {formatCurrency(w.balance)} ₫
                       </div>
@@ -282,12 +277,24 @@ export function DialogPromptEditPending({
                 Danh mục
               </div>
               <div className="flex flex-wrap gap-2">
-                {!categoriesDefault || categoriesDefault.length === 0 ? (
-                  <div className="text-xs text-amber-500 italic px-1 py-2">
-                    Nhu liệu: Không tìm thấy danh mục từ Backend.
-                  </div>
-                ) : (
-                  categoriesDefault.map((c) => {
+                {(() => {
+                  // Filter categories theo type hiện tại (expense/income)
+                  const filtered = (categoriesDefault || []).filter((c: any) => {
+                    // Thử nhiều field phổ biến từ BE
+                    const catType = c.type || c.transactionType || c.parent?.name?.toLowerCase();
+                    if (!catType) return true; // Không có field type → hiện hết
+                    return catType.toLowerCase() === formData.type;
+                  });
+
+                  if (filtered.length === 0) {
+                    return (
+                      <div className="text-xs text-amber-500 italic px-1 py-2">
+                        Không tìm thấy danh mục cho {formData.type === "expense" ? "chi tiêu" : "thu nhập"}.
+                      </div>
+                    );
+                  }
+
+                  return filtered.map((c) => {
                     const isSelected = formData.categoryId === c.id;
                     return (
                       <button
@@ -295,19 +302,18 @@ export function DialogPromptEditPending({
                         onClick={() =>
                           setFormData({ ...formData, categoryId: c.id })
                         }
-                        className={`px-3 py-2 rounded-lg text-xs font-bold border transition-all flex items-center gap-1.5 ${
-                          isSelected
+                        className={`px-3 py-2 rounded-lg text-xs font-bold border transition-all flex items-center gap-1.5 ${isSelected
                             ? formData.type === "expense"
                               ? "bg-rose-500 text-white border-rose-500 shadow-rose-200 shadow-md transform scale-105"
                               : "bg-emerald-500 text-white border-emerald-500 shadow-emerald-200 shadow-md transform scale-105"
                             : "bg-white text-gray-600 border-gray-100 hover:border-gray-300"
-                        }`}
+                          }`}
                       >
                         {c.name}
                       </button>
                     );
-                  })
-                )}
+                  });
+                })()}
               </div>
             </div>
             <DialogFooter className="gap-3">
@@ -323,11 +329,10 @@ export function DialogPromptEditPending({
                 type="button"
                 onClick={() => handleSave(formData, true)}
                 disabled={saveStatus === "saving"}
-                className={`bg-linear-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold flex items-center justify-center gap-2 ${
-                  saveStatus === "saving"
+                className={`bg-linear-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold flex items-center justify-center gap-2 ${saveStatus === "saving"
                     ? "opacity-80 pointer-events-none"
                     : ""
-                }`}
+                  }`}
                 loading={saveStatus === "saving"}
               >
                 Lưu

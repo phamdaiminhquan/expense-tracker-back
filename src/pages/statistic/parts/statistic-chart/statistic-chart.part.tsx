@@ -62,8 +62,8 @@ const StatisticChartPart: React.FC<Props> = ({
   const currentTotal = statistic
     ? statistic.totalAmount || 0
     : activeTab === "expense"
-    ? totalExpense || 0
-    : totalIncome || 0;
+      ? totalExpense || 0
+      : totalIncome || 0;
 
   return (
     <div className="flex-1 overflow-y-auto px-6 py-6 hide-scrollbar">
@@ -75,9 +75,8 @@ const StatisticChartPart: React.FC<Props> = ({
         />
         <button
           onClick={() => setActiveTab("expense")}
-          className={`flex-1 relative z-10 py-2 text-xs font-bold uppercase transition-colors flex items-center justify-center gap-2 ${
-            activeTab === "expense" ? "text-gray-900" : "text-gray-400"
-          }`}
+          className={`flex-1 relative z-10 py-2 text-xs font-bold uppercase transition-colors flex items-center justify-center gap-2 ${activeTab === "expense" ? "text-gray-900" : "text-gray-400"
+            }`}
         >
           <TrendingDown
             size={16}
@@ -87,9 +86,8 @@ const StatisticChartPart: React.FC<Props> = ({
         </button>
         <button
           onClick={() => setActiveTab("income")}
-          className={`flex-1 relative z-10 py-2 text-xs font-bold uppercase transition-colors flex items-center justify-center gap-2 ${
-            activeTab === "income" ? "text-gray-900" : "text-gray-400"
-          }`}
+          className={`flex-1 relative z-10 py-2 text-xs font-bold uppercase transition-colors flex items-center justify-center gap-2 ${activeTab === "income" ? "text-gray-900" : "text-gray-400"
+            }`}
         >
           <TrendingUp
             size={16}
@@ -105,9 +103,8 @@ const StatisticChartPart: React.FC<Props> = ({
           Tổng {activeTab === "expense" ? "Chi" : "Thu"} Tháng này
         </span>
         <h1
-          className={`text-3xl font-black mt-2 tracking-tight ${
-            activeTab === "expense" ? "text-gray-900" : "text-emerald-600"
-          }`}
+          className={`text-3xl font-black mt-2 tracking-tight ${activeTab === "expense" ? "text-gray-900" : "text-emerald-600"
+            }`}
         >
           {formatVND(currentTotal).replace("₫", "")}
           <span className="text-lg text-gray-400 ml-1 font-bold">đ</span>
@@ -120,50 +117,47 @@ const StatisticChartPart: React.FC<Props> = ({
         <div className="absolute top-4 right-4 bg-gray-50 p-1 rounded-lg flex gap-1 z-10">
           <button
             onClick={() => setChartType("pie")}
-            className={`p-1.5 rounded transition-all ${
-              chartType === "pie"
+            className={`p-1.5 rounded transition-all ${chartType === "pie"
                 ? "bg-white shadow-sm text-indigo-600"
                 : "text-gray-400"
-            }`}
+              }`}
           >
             <PieIcon size={14} />
           </button>
           <button
             onClick={() => setChartType("bar")}
-            className={`p-1.5 rounded transition-all ${
-              chartType === "bar"
+            className={`p-1.5 rounded transition-all ${chartType === "bar"
                 ? "bg-white shadow-sm text-indigo-600"
                 : "text-gray-400"
-            }`}
+              }`}
           >
             <BarChart3 size={14} />
           </button>
         </div>
 
-        <div className="h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            {chartType === "pie" ? (
-              <PieChartComponent
-                data={chartData}
-                formatVND={(v) => formatVND(v)}
-              />
-            ) : (
+        <div className="h-64 w-full flex items-center justify-center">
+          {chartType === "pie" ? (
+            <PieChartComponent
+              data={chartData}
+              formatVND={(v) => formatVND(v)}
+            />
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
               <BarChartComponent
                 data={chartData}
                 formatVND={(v) => formatVND(v)}
               />
-            )}
-          </ResponsiveContainer>
+            </ResponsiveContainer>
+          )}
 
           {/* Center Icon for Pie */}
           {chartType === "pie" && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div
-                className={`p-3 rounded-full ${
-                  activeTab === "expense"
+                className={`p-3 rounded-full ${activeTab === "expense"
                     ? "bg-rose-50 text-rose-500"
                     : "bg-emerald-50 text-emerald-500"
-                }`}
+                  }`}
               >
                 {activeTab === "expense" ? (
                   <TrendingDown size={24} />
@@ -208,11 +202,10 @@ const StatisticChartPart: React.FC<Props> = ({
               </div>
               <div className="text-right">
                 <div
-                  className={`font-bold text-sm ${
-                    activeTab === "expense"
+                  className={`font-bold text-sm ${activeTab === "expense"
                       ? "text-gray-900"
                       : "text-emerald-600"
-                  }`}
+                    }`}
                 >
                   {activeTab === "expense" ? "-" : "+"}
                   {formatVND(item.value).replace("₫", "")}

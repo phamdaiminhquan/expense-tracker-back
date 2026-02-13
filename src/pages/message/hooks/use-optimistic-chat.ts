@@ -45,13 +45,16 @@ export function useOptimisticChat({
 
         // Lọc bỏ optimistic messages đã được server xác nhận
         setOptimisticMessages((prev) => {
-            return prev.map((opt) => {
+            const next = prev.map((opt) => {
                 if (opt.status === "network_error") return opt;
 
                 const matched = messages.find(
                     (m) => normalizeText(m.message) === normalizeText(opt.text)
                 );
                 if (!matched) return opt;
+
+                // Already resolved - skip to avoid creating new object
+                if (opt.serverMessageId === matched.id) return opt;
 
                 const resolvedStatus: OptimisticMessageStatus =
                     matched.status === "failed" ? "ai_error" : "done";
@@ -63,6 +66,10 @@ export function useOptimisticChat({
                     resolvedMessage: matched,
                 };
             });
+
+            // Only update if something actually changed
+            const changed = next.some((item, i) => item !== prev[i]);
+            return changed ? next : prev;
         });
     }, [messages]);
 
