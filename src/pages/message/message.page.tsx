@@ -17,10 +17,14 @@ import { useCategories } from "@/hooks/use-categories";
 import { useAuth } from "@/hooks/use-auth";
 import { mutate } from "swr";
 import { getErrorMessage } from "@/common/utils/error.utils";
+import { Wallet } from "@/apis/wallets/wallet.entities";
+import { toast } from "sonner";
+import { useEffect, useState } from "react";
 
 interface MessagePageProps {
   fund: Fund | any;
   funds: Fund[];
+  wallets?: Wallet[];
   currentFundId?: string;
   onSelectFund: (fundId: string) => void;
   onCreateFund: (name: string, type: "personal" | "shared") => Promise<void>;
@@ -41,6 +45,7 @@ interface MessagePageProps {
 export function MessagePage({
   fund,
   funds,
+  wallets = [],
   onSelectFund,
   onCreateFund,
   onUpdateFund,
@@ -71,6 +76,13 @@ export function MessagePage({
 
   // --- STATE HOOK ---
   const { dialogs, ui } = useMessagePageState(isLoadingFunds);
+  const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!selectedWalletId && wallets.length > 0) {
+      setSelectedWalletId(wallets[0].id);
+    }
+  }, [wallets, selectedWalletId]);
 
   // --- DATA TRANSFORMS ---
   const messages = messageList?.data || [];
@@ -146,19 +158,26 @@ export function MessagePage({
 
   const navProps = {
     funds,
+    wallets,
     onDeleteFund,
     currentUserName: currentUserName || "",
     currentFundId: fund?.id || null,
+    currentWalletId: selectedWalletId,
     isLoadingFunds,
+    isLoadingWallets: false,
     isLoadingMore: isLoadingMoreFunds,
     hasMore: hasMoreFunds,
     onSelectFund,
+    onSelectWallet: (walletId: string) => setSelectedWalletId(walletId),
     onCreateFund: dialogs.createFund.open,
     onUpdateFund: dialogs.updateFund.open,
     onLoadMore: onLoadMoreFunds || (() => { }),
     onLogout,
     onSearchFunds,
-    onViewFundMembers: dialogs.member.open
+    onSearchWallets: () => { },
+    onOpenAgent: () => toast.info("Agent đang được phát triển"),
+    onOpenProfile: () => toast.info("Trang profile đang được phát triển"),
+    onViewFundMembers: dialogs.member.open,
   };
 
   return (

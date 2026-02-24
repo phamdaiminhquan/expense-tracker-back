@@ -153,7 +153,7 @@ function OptimisticMessageBubble({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="flex w-full justify-end"
+            className="flex w-full min-w-0 justify-end"
         >
             <MessageBubblePart
                 msg={uiMsg as any}
@@ -297,7 +297,7 @@ export function ChatList({
                         animate="visible"
                         exit="exit"
                         style={{ pointerEvents: 'auto' }}
-                        className={`flex w-full cursor-pointer ${isCurrentUser ? "justify-end" : "justify-start"}`}
+                        className={`flex w-full min-w-0 cursor-pointer ${isCurrentUser ? "justify-end" : "justify-start"}`}
                     >
                         <MessageBubblePart
                             msg={uiMsg as any}

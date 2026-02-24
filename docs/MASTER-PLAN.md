@@ -1,8 +1,9 @@
-# MASTER PLAN: Expense Tracker Frontend
+# MASTER PLAN: FinCap Product Evolution (Frontend + AI Agent)
 
-> **Status**: ✅ Completed
-> **Last Updated**: 2026-02-13
+> **Status**: 🟡 In Progress (2026 Pivot Active)
+> **Last Updated**: 2026-02-24
 > **Workflow**: Idea (User) → Master Plan (Agent) → Phase Detail Plan (Discuss) → Implementation.
+> **Reference Plans**: [PLAN-2026](./PLAN-2026.md)
 
 ## 📜 CORE PROTOCOL (Strict)
 1.  **Reference Driven**: Luôn tham chiếu và tuân thủ thứ tự trong Master Plan. Không nhảy cóc.
@@ -18,6 +19,56 @@
 
 ---
 
+## 🧭 2026 Strategic Pivot (Active)
+- Định vị FinCap từ app ghi chép thành **AI Financial Agent**.
+- Tập trung tạo trải nghiệm người dùng mở app mỗi ngày vì insight/chủ động từ AI.
+- Giai đoạn ngắn hạn ưu tiên **validate UX nhanh bằng mock data** trước khi có API đầy đủ.
+
+### Kiến trúc Agent đã chốt
+- **Một Agent Tổng Quản** (orchestrator) là não trung tâm.
+- **Fund/Wallet là switch chính**, còn **Agent là entry riêng bằng CTA lớn** trong nav; tất cả vẫn là ngữ cảnh của cùng một agent.
+- Agent sử dụng các skill nội bộ: chọn fund, chọn ví, ghi giao dịch, giải thích quyết định.
+
+---
+
+## 🚀 Active Roadmap 2026 (Execution)
+
+### 🔵 Phase 2026-A: MVP Mock (Now)
+> **Goal**: Ra nhanh trải nghiệm mới với switch Fund/Wallet + Agent CTA riêng, không chờ API.
+
+- [ ] **A1. Nav Switch (Fund / Wallet) + Agent CTA**
+  - Nâng cấp sidebar: switch chỉ gồm **Fund/Wallet** và thêm **nút Agent lớn riêng** như một entry độc lập.
+  - Giữ context đã chọn khi đổi qua lại Fund/Wallet và khi vào Agent từ CTA.
+- [ ] **A2. Wallet History Mock**
+  - Cho phép mở lịch sử chi tiêu theo ví trong context fund.
+  - Cập nhật số dư ví bằng mock store sau mỗi giao dịch.
+- [ ] **A3. Direct Wallet Transaction Mock**
+  - Ghi chi tiêu thủ công trực tiếp vào ví.
+  - Tự trừ tiền ở ví tương ứng.
+- [ ] **A4. Agent Auto-Route Mock**
+  - Agent tự tìm đúng fund + ví để tạo giao dịch tự động.
+  - Có fallback mặc định khi câu lệnh thiếu dữ kiện.
+
+### 🟣 Phase 2026-B: API Integration & Hardening (Next)
+- [ ] Thay mock bằng API thật cho wallet history, create transaction, balance sync.
+- [ ] Bổ sung optimistic/rollback cho luồng ghi nhanh nhiều giao dịch.
+- [ ] Chuẩn hóa query key/cache key theo fundId-walletId.
+
+### 🟢 Phase 2026-C: Product Scale (Later)
+- [ ] Persona system + proactive insight.
+- [ ] Analytics nâng cao (heartbeat, subscription hunter, doomsday warning).
+- [ ] Shared space/social finance + monetization rollout.
+
+---
+
+## ✅ Exit Criteria cho Phase 2026-A
+1. Chuyển switch Fund/Wallet mượt; vào Agent qua nút riêng không làm mất context đã chọn.
+2. Tạo giao dịch thủ công tại ví làm giảm số dư đúng ví đó.
+3. Mở lịch sử ví thấy đúng giao dịch vừa tạo.
+4. Agent nhập liệu tự nhiên có thể tự chọn fund/ví đúng trên bộ câu test mẫu.
+
+---
+
 ## 🎯 Strategic Goals
 1.  **Code Quality**: Clean Architecture, Type Safety, standard hooks/components.
 2.  **Performance**: Optimize re-renders, bundle size, and data fetching (Infinite Scroll).
@@ -25,7 +76,8 @@
 
 ---
 
-## 📅 Roadmap & Phases
+## 📚 Baseline History (Completed Phases - Legacy)
+> Giữ nguyên để tham chiếu tiến trình kỹ thuật đã hoàn thành trước pivot 2026.
 
 ### ✅ Phase 0: Foundation Clean-up (Completed)
 - [x] Basic restructure (lib, contexts, components folders).

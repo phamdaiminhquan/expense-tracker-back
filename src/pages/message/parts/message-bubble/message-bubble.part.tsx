@@ -96,7 +96,7 @@ const MessageBubblePart: React.FC<Props> = ({
     <div
       onClick={handleClick}
       className={`
-        relative max-w-[85%] min-w-[200px] px-4 py-3 rounded-2xl text-sm shadow-sm transition-all duration-500 border group
+        relative max-w-[85%] min-w-[200px] min-w-0 overflow-x-hidden px-4 py-3 rounded-2xl text-sm shadow-sm transition-all duration-500 border group
         rounded-tr-sm
         ${isAnalyzing
           ? "bg-white border-indigo-100 ring-2 ring-indigo-50/50"
@@ -115,7 +115,7 @@ const MessageBubblePart: React.FC<Props> = ({
       `}
     >
       <div className="flex items-start justify-between gap-4">
-        <span className="text-gray-700 leading-relaxed animate-in fade-in slide-in-from-left-2 duration-300">
+        <span className="min-w-0 break-words text-gray-700 leading-relaxed animate-in fade-in slide-in-from-left-2 duration-300">
           {msg.text}
         </span>
 

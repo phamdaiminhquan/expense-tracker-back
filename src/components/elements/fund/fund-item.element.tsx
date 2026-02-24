@@ -1,6 +1,6 @@
 import React from "react";
 import { Fund } from "@/apis/funds/fund.entities";
-import { Users, Wallet, Pencil, Trash, LayoutList } from "lucide-react";
+import { BriefcaseBusiness, Pencil, Trash, LayoutList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface FundItemProps {
@@ -44,7 +44,7 @@ export const FundItem: React.FC<FundItemProps> = ({
                         : "bg-gray-100 text-gray-500"
                     }`}
             >
-                {fund.type === "shared" ? <Users size={20} /> : <Wallet size={20} />}
+                <BriefcaseBusiness size={20} />
             </div>
 
             {/* INFO */}

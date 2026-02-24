@@ -1,64 +1,88 @@
-import { useEffect, useCallback, useRef, useMemo } from "react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useEffect, useCallback, useRef, useMemo, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Plus,
   Search,
   LogOut,
-  X,
+  Wallet,
   ChevronLeft,
 } from "lucide-react";
 import { Fund } from "@/apis/funds/fund.entities";
+import { Wallet as WalletEntity } from "@/apis/wallets/wallet.entities";
 import { FundItem } from "../fund/fund-item.element";
-import { Mode } from "@/common/enums/mode.enum";
-import { useSystemStore } from "@/stores/system.store";
 import { debounce } from "@mui/material";
 import { Button } from "../../ui/button";
+import { DrawerNavRail } from "./drawer-nav-rail.element";
 
 interface DrawerNavigationProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   funds: Fund[];
+  wallets?: WalletEntity[];
   currentUserName: string;
   currentFundId: string | null;
+  currentWalletId?: string | null;
   isLoadingFunds?: boolean;
+  isLoadingWallets?: boolean;
   isLoadingMore?: boolean;
   hasMore?: boolean;
   onDeleteFund: (fundId: string) => Promise<void>;
   onSelectFund: (fundId: string) => void;
+  onSelectWallet?: (walletId: string) => void;
   onCreateFund: () => void;
   onUpdateFund: (fundId: string) => void;
   onLoadMore: () => void;
   onLogout: () => void;
   onSearchFunds?: (query: string) => void;
+  onSearchWallets?: (query: string) => void;
   onViewFundMembers: (fundId: string) => void;
+  onOpenAgent?: () => void;
+  onOpenProfile?: () => void;
 }
 
 export function DrawerNavigation({
   open,
   onOpenChange,
   funds,
+  wallets = [],
   currentUserName,
   currentFundId,
+  currentWalletId,
   isLoadingFunds = false,
+  isLoadingWallets = false,
   isLoadingMore = false,
   hasMore = false,
   onDeleteFund,
   onSelectFund,
+  onSelectWallet,
   onCreateFund,
   onUpdateFund,
   onLoadMore,
   onLogout,
   onSearchFunds,
+  onSearchWallets,
   onViewFundMembers,
+  onOpenAgent,
+  onOpenProfile,
   isPermanent = false,
 }: DrawerNavigationProps & { isPermanent?: boolean }) {
-  const { mode: systemMode, toggleMode } = useSystemStore();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState<"funds" | "wallets">("funds");
+  const [searchValue, setSearchValue] = useState("");
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  const isFundsTab = activeTab === "funds";
 
   useEffect(() => {
-    if (!open || !hasMore || isLoadingMore) return;
+    if (!open || !hasMore || isLoadingMore || !isFundsTab) return;
 
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -74,7 +98,7 @@ export function DrawerNavigation({
 
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
-  }, [open, hasMore, isLoadingMore, onLoadMore]);
+  }, [open, hasMore, isLoadingMore, onLoadMore, isFundsTab]);
 
   const handleSelectFund = useCallback(
     (fundId: string) => {
@@ -100,17 +124,48 @@ export function DrawerNavigation({
     onDeleteFund(fundId);
   };
 
-  const getInitials = (name: string) => {
-    return name.charAt(0).toUpperCase();
-  };
-
   const debounceSearch = useMemo(
     () =>
       debounce((value: string) => {
-        onSearchFunds?.(value);
+        if (isFundsTab) {
+          onSearchFunds?.(value);
+          return;
+        }
+        onSearchWallets?.(value);
       }, 500),
-    [onSearchFunds]
+    [onSearchFunds, onSearchWallets, isFundsTab]
   );
+
+  const filteredFunds = useMemo(() => {
+    const query = searchValue.trim().toLowerCase();
+    if (!query) return funds;
+    return funds.filter((fund) => fund.name.toLowerCase().includes(query));
+  }, [funds, searchValue]);
+
+  const filteredWallets = useMemo(() => {
+    const query = searchValue.trim().toLowerCase();
+    if (!query) return wallets;
+    return wallets.filter((wallet) =>
+      wallet.name.toLowerCase().includes(query)
+    );
+  }, [wallets, searchValue]);
+
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+      maximumFractionDigits: 0,
+    }).format(value || 0);
+
+  const handleSwitchTab = (tab: "funds" | "wallets") => {
+    setActiveTab(tab);
+    setSearchValue("");
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchValue(value);
+    debounceSearch?.(value);
+  };
 
   const handleViewFundMembers = (e: React.MouseEvent, fundId: string) => {
     e.stopPropagation();
@@ -119,116 +174,158 @@ export function DrawerNavigation({
   };
 
   const SidebarContent = (
-    <div className="w-full h-full p-0 flex flex-col overflow-hidden bg-white">
-      {/* Sidebar Header (Menu Title & Search) */}
-      <div className="p-6 pb-4 border-b border-gray-100">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-gray-800">Menu</h2>
-          {!isPermanent && (
-            <button
-              onClick={() => onOpenChange(false)}
-              className="p-2 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors"
-            >
-              <ChevronLeft size={20} className="text-gray-500" />
-            </button>
+    <div className="w-full h-full p-0 flex overflow-hidden bg-background">
+      <DrawerNavRail
+        currentUserName={currentUserName}
+        activeTab={activeTab}
+        onChangeTab={handleSwitchTab}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenAgent={onOpenAgent}
+        onOpenProfile={onOpenProfile}
+      />
+
+      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+        <div className="p-4 pb-3 border-b border-border">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h2 className="text-lg font-bold text-foreground">
+                {isFundsTab ? "Danh sách quỹ" : "Danh sách ví"}
+              </h2>
+              <p className="text-2xs text-muted-foreground uppercase tracking-wider">
+                {isFundsTab ? "Message" : "Wallet"}
+              </p>
+            </div>
+            {!isPermanent && (
+              <button
+                onClick={() => onOpenChange(false)}
+                className="p-2 bg-muted rounded-full hover:bg-muted/80 transition-colors"
+              >
+                <ChevronLeft size={18} className="text-muted-foreground" />
+              </button>
+            )}
+          </div>
+
+          <div className="relative">
+            <Search
+              size={16}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            />
+            <input
+              value={searchValue}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              placeholder={isFundsTab ? "Tìm kiếm quỹ..." : "Tìm kiếm ví..."}
+              className="text-foreground w-full pl-9 pr-3 py-2.5 bg-muted rounded-lg text-sm border border-border"
+            />
+          </div>
+        </div>
+
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-3 space-y-2">
+          {isFundsTab && (
+            <div className="flex items-center justify-between px-1 mb-2">
+              <h3 className="text-2xs font-bold text-muted-foreground uppercase tracking-widest">
+                Quỹ
+              </h3>
+              <button
+                onClick={handleCreateFund}
+                className="cursor-pointer p-1.5 bg-primary/15 text-primary rounded-lg hover:bg-primary/20 transition-colors"
+              >
+                <Plus size={16} strokeWidth={3} />
+              </button>
+            </div>
+          )}
+
+          {isFundsTab ? (
+            isLoadingFunds ? (
+              <div className="space-y-3 p-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <Skeleton className="w-12 h-12 rounded-xl shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              filteredFunds.map((fund) => (
+                <FundItem
+                  key={fund.id}
+                  fund={fund}
+                  isActive={fund.id === currentFundId}
+                  onSelect={() => handleSelectFund(fund.id)}
+                  onEdit={(e) => handleUpdateFund(e, fund.id)}
+                  onDelete={(e) => handleDeleteFund(e, fund.id)}
+                  onViewMembers={(e) => handleViewFundMembers(e, fund.id)}
+                />
+              ))
+            )
+          ) : isLoadingWallets ? (
+            <div className="space-y-3 p-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center gap-3 p-2">
+                  <Skeleton className="w-10 h-10 rounded-lg shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredWallets.length === 0 ? (
+            <div className="text-sm text-muted-foreground p-3">Chưa có ví phù hợp.</div>
+          ) : (
+            filteredWallets.map((wallet) => (
+              <button
+                key={wallet.id}
+                onClick={() => {
+                  onSelectWallet?.(wallet.id);
+                  if (!isPermanent) onOpenChange(false);
+                }}
+                className={`cursor-pointer w-full text-left p-3 rounded-xl border transition-colors ${
+                  wallet.id === currentWalletId
+                    ? "border-primary/40 bg-primary/10"
+                    : "border-border hover:bg-muted/60"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
+                    <Wallet size={16} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-foreground truncate">{wallet.name}</p>
+                    <p className="text-2xs text-muted-foreground">{formatCurrency(wallet.balance)}</p>
+                  </div>
+                </div>
+              </button>
+            ))
+          )}
+
+          {isFundsTab && isLoadingMore && (
+            <div className="flex justify-center p-2">
+              <Skeleton className="w-6 h-6 rounded-full" />
+            </div>
           )}
         </div>
-        <div className="relative mt-2">
-          <Search
-            size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-          />
-          <input
-            onChange={(e) => debounceSearch?.(e.target.value)}
-            placeholder="Tìm kiếm quỹ..."
-            className="text-black w-full pl-10 pr-4 py-3 bg-gray-50 rounded-2xl text-sm transition-all border-none"
-          />
-        </div>
       </div>
 
-      {/* Sidebar Body (Funds List) */}
-      <div
-        ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-2"
-      >
-        <div className="flex items-center justify-between px-2 mb-2">
-          <h3 className="text-2xs font-bold text-gray-400 uppercase tracking-widest">
-            Danh sách quỹ
-          </h3>
-          <button
-            onClick={handleCreateFund}
-            className="cursor-pointer p-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors"
+      <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Cài đặt</DialogTitle>
+            <DialogDescription>Tạm thời chỉ hỗ trợ đăng xuất.</DialogDescription>
+          </DialogHeader>
+
+          <Button
+            onClick={onLogout}
+            className="w-full mt-2"
+            variant="destructive"
           >
-            <Plus size={16} strokeWidth={3} />
-          </button>
-        </div>
-
-        {isLoadingFunds ? (
-          <div className="space-y-3 p-2">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex items-center gap-3">
-                <Skeleton className="w-12 h-12 rounded-xl shrink-0" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-3 w-24" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          funds.map((fund) => (
-            <FundItem
-              key={fund.id}
-              fund={fund}
-              isActive={fund.id === currentFundId}
-              onSelect={() => handleSelectFund(fund.id)}
-              onEdit={(e) => handleUpdateFund(e, fund.id)}
-              onDelete={(e) => handleDeleteFund(e, fund.id)}
-              onViewMembers={(e) => handleViewFundMembers(e, fund.id)}
-            />
-          ))
-        )}
-
-        {isLoadingMore && (
-          <div className="flex justify-center p-2">
-            <Skeleton className="w-6 h-6 rounded-full" />
-          </div>
-        )}
-      </div>
-
-      {/* Sidebar Footer (User Account & Logout) */}
-      <div className="p-4 border-t border-gray-100 bg-gray-50/50">
-        <div className="flex items-center gap-3 p-2">
-          <Avatar className="h-10 w-10 ring-2 ring-white shadow-sm">
-            <AvatarFallback className="bg-indigo-500 text-white font-bold">
-              {getInitials(currentUserName)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="font-bold text-sm text-gray-800 truncate">
-              {currentUserName}
-            </p>
-            <button
-              onClick={onLogout}
-              className="cursor-pointer flex items-center gap-1.5 text-rose-500 font-bold text-2xs uppercase tracking-wider hover:opacity-80 transition-opacity"
-            >
-              <LogOut size={12} /> Đăng xuất
-            </button>
-          </div>
-
-          {/* <button
-            onClick={() => toggleMode()}
-            className="p-2 bg-white rounded-xl shadow-sm hover:bg-gray-100 transition-colors"
-          >
-            <X
-              size={18}
-              className={
-                systemMode === Mode.DARK ? "text-indigo-500" : "text-amber-500"
-              }
-            />
-          </button> */}
-        </div>
-      </div>
+            <LogOut size={16} className="mr-2" />
+            Đăng xuất
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 

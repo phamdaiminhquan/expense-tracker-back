@@ -173,6 +173,7 @@ export function MessageRoute() {
     <MessagePage
       fund={selectedFund || fund}
       funds={accessibleFunds}
+      wallets={walletsData?.data || []}
       onSelectFund={handleSelectFund}
       onCreateFund={(name, type) => handleCreateFund(name, type)}
       onUpdateFund={handleUpdateFund}
