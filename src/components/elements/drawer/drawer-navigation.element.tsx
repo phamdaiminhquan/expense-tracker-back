@@ -46,6 +46,11 @@ interface DrawerNavigationProps {
   onViewFundMembers: (fundId: string) => void;
   onOpenAgent?: () => void;
   onOpenProfile?: () => void;
+  isAgentMode?: boolean;
+  onExitAgentToTab?: (tab: "funds" | "wallets") => void;
+  /** Controlled active tab (used when rail is rendered outside, e.g. desktop SidebarPart) */
+  activeTabControlled?: "funds" | "wallets";
+  onChangeTabControlled?: (tab: "funds" | "wallets") => void;
 }
 
 export function DrawerNavigation({
@@ -72,10 +77,19 @@ export function DrawerNavigation({
   onViewFundMembers,
   onOpenAgent,
   onOpenProfile,
+  isAgentMode = false,
+  onExitAgentToTab,
+  activeTabControlled,
+  onChangeTabControlled,
   isPermanent = false,
 }: DrawerNavigationProps & { isPermanent?: boolean }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [activeTab, setActiveTab] = useState<"funds" | "wallets">("funds");
+  const [activeTabInternal, setActiveTabInternal] = useState<"funds" | "wallets">("funds");
+  const activeTab = activeTabControlled ?? activeTabInternal;
+  const setActiveTab = (tab: "funds" | "wallets") => {
+    setActiveTabInternal(tab);
+    onChangeTabControlled?.(tab);
+  };
   const [searchValue, setSearchValue] = useState("");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -158,6 +172,9 @@ export function DrawerNavigation({
     }).format(value || 0);
 
   const handleSwitchTab = (tab: "funds" | "wallets") => {
+    if (isAgentMode) {
+      onExitAgentToTab?.(tab);
+    }
     setActiveTab(tab);
     setSearchValue("");
   };
@@ -175,16 +192,40 @@ export function DrawerNavigation({
 
   const SidebarContent = (
     <div className="w-full h-full p-0 flex overflow-hidden bg-background">
-      <DrawerNavRail
-        currentUserName={currentUserName}
-        activeTab={activeTab}
-        onChangeTab={handleSwitchTab}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-        onOpenAgent={onOpenAgent}
-        onOpenProfile={onOpenProfile}
-      />
+      {!isPermanent && (
+        <div className="relative z-20 h-full w-16 shrink-0">
+          <div
+            className={`h-full overflow-hidden border ${
+              isAgentMode
+                ? "rounded-full border-border bg-background shadow-sm"
+                : "rounded-l-[1.75rem] rounded-r-none border-transparent bg-muted/20 shadow-none"
+            }`}
+          >
+            <DrawerNavRail
+              currentUserName={currentUserName}
+              activeTab={activeTab}
+              onChangeTab={handleSwitchTab}
+              onOpenSettings={() => setIsSettingsOpen(true)}
+              onOpenAgent={onOpenAgent}
+              onOpenProfile={onOpenProfile}
+              isPillMode={isAgentMode}
+              isAgentMode={isAgentMode}
+            />
+          </div>
+        </div>
+      )}
 
-      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+      <div
+        className={`relative z-0 min-w-0 flex-1 flex flex-col overflow-hidden bg-background ${
+          !isPermanent
+            ? `origin-left transform-gpu transition-[transform,opacity] duration-300 ease-in-out ${
+                isAgentMode
+                  ? "scale-x-0 opacity-0 pointer-events-none"
+                  : "scale-x-100 opacity-100"
+              }`
+            : ""
+        }`}
+      >
         <div className="p-4 pb-3 border-b border-border">
           <div className="flex justify-between items-center mb-4">
             <div>
@@ -308,39 +349,49 @@ export function DrawerNavigation({
           )}
         </div>
       </div>
-
-      <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Cài đặt</DialogTitle>
-            <DialogDescription>Tạm thời chỉ hỗ trợ đăng xuất.</DialogDescription>
-          </DialogHeader>
-
-          <Button
-            onClick={onLogout}
-            className="w-full mt-2"
-            variant="destructive"
-          >
-            <LogOut size={16} className="mr-2" />
-            Đăng xuất
-          </Button>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 
+  const SettingsDialog = (
+    <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Cài đặt</DialogTitle>
+          <DialogDescription>Tạm thời chỉ hỗ trợ đăng xuất.</DialogDescription>
+        </DialogHeader>
+
+        <Button
+          onClick={onLogout}
+          className="w-full mt-2"
+          variant="destructive"
+        >
+          <LogOut size={16} className="mr-2" />
+          Đăng xuất
+        </Button>
+      </DialogContent>
+    </Dialog>
+  );
+
   if (isPermanent) {
-    return SidebarContent;
+    // Rail and SettingsDialog are owned by SidebarPart when in permanent (desktop) mode
+    return <>{SidebarContent}</>;
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="left"
-        className="w-[85%] sm:w-[400px] p-0 flex flex-col overflow-hidden border-none shadow-2xl bg-white  [&>button]:hidden"
-      >
-        {SidebarContent}
-      </SheetContent>
-    </Sheet>
+    <>
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent
+          side="left"
+          className={`${
+            isAgentMode
+              ? "w-16 sm:w-16 p-0 flex flex-col overflow-hidden border-none shadow-none bg-transparent [&>button]:hidden"
+              : "w-[85%] sm:w-[400px] p-0 flex flex-col overflow-hidden border-none shadow-2xl bg-white [&>button]:hidden"
+          }`}
+        >
+          {SidebarContent}
+        </SheetContent>
+      </Sheet>
+      {SettingsDialog}
+    </>
   );
 }

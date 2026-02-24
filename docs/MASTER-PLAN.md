@@ -36,9 +36,12 @@
 ### 🔵 Phase 2026-A: MVP Mock (Now)
 > **Goal**: Ra nhanh trải nghiệm mới với switch Fund/Wallet + Agent CTA riêng, không chờ API.
 
-- [ ] **A1. Nav Switch (Fund / Wallet) + Agent CTA**
+- [x] **A1. Nav Switch (Fund / Wallet) + Agent CTA**
   - Nâng cấp sidebar: switch chỉ gồm **Fund/Wallet** và thêm **nút Agent lớn riêng** như một entry độc lập.
   - Giữ context đã chọn khi đổi qua lại Fund/Wallet và khi vào Agent từ CTA.
+- [ ] **A1.1 Agent UI Shell (Bước 1 khởi tạo Agent)**
+  - Tạo màn hình Agent UI riêng để người dùng tương tác thay vì toast placeholder.
+  - Màn hình gồm header Agent, vùng hội thoại rỗng (state initial), ô nhập lệnh tự nhiên.
 - [ ] **A2. Wallet History Mock**
   - Cho phép mở lịch sử chi tiêu theo ví trong context fund.
   - Cập nhật số dư ví bằng mock store sau mỗi giao dịch.

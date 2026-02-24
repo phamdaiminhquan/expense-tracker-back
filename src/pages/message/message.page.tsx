@@ -20,6 +20,7 @@ import { getErrorMessage } from "@/common/utils/error.utils";
 import { Wallet } from "@/apis/wallets/wallet.entities";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
+import { AgentPanel } from "./parts/agent/agent-panel.part";
 
 interface MessagePageProps {
   fund: Fund | any;
@@ -77,6 +78,7 @@ export function MessagePage({
   // --- STATE HOOK ---
   const { dialogs, ui } = useMessagePageState(isLoadingFunds);
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
+  const [activeMainView, setActiveMainView] = useState<"chat" | "agent">("chat");
 
   useEffect(() => {
     if (!selectedWalletId && wallets.length > 0) {
@@ -87,6 +89,7 @@ export function MessagePage({
   // --- DATA TRANSFORMS ---
   const messages = messageList?.data || [];
   const selectedFund = funds.find((f) => f.id === dialogs.member.selectedFundId);
+  const selectedWallet = wallets.find((wallet) => wallet.id === selectedWalletId) || null;
   const fundCategories = fund
     ? categories.filter((c) => c.fundId === fund.id)
     : [];
@@ -175,7 +178,9 @@ export function MessagePage({
     onLogout,
     onSearchFunds,
     onSearchWallets: () => { },
-    onOpenAgent: () => toast.info("Agent đang được phát triển"),
+    onOpenAgent: () => setActiveMainView("agent"),
+    isAgentMode: activeMainView === "agent",
+    onExitAgentToTab: () => setActiveMainView("chat"),
     onOpenProfile: () => toast.info("Trang profile đang được phát triển"),
     onViewFundMembers: dialogs.member.open,
   };
@@ -208,42 +213,54 @@ export function MessagePage({
 
         {/* CỘT 2: CHAT MAIN VIEW */}
         <main className="flex-1 flex flex-col min-w-0 min-h-0 bg-white lg:rounded-2xl lg:shadow-sm lg:border lg:border-gray-100 shadow-none border-none overflow-hidden relative">
-          <MessageChatPart
-            fund={fund}
-            messages={fundMessages}
-            categories={fundCategories}
-            currentUserId={currentUserId || ""}
-            currentUserName={currentUserName || ""}
-            onOpenDrawer={dialogs.drawer.open}
-            onCreateFund={dialogs.createFund.open}
-            onShowStatistics={dialogs.statistics.open}
-            onAddMessage={handleAddMessage}
-            onResendMessage={handleResendMessage}
-            onUpdateMessage={handleUpdateMessage}
-            onDeleteMessage={handleDeleteMessage}
-            isProcessing={isProcessingMessage}
-            isLoading={isLoadingMessages}
-            onOpenShareFundDialog={dialogs.share.toggle}
-          />
+          {activeMainView === "chat" ? (
+            <MessageChatPart
+              fund={fund}
+              messages={fundMessages}
+              categories={fundCategories}
+              currentUserId={currentUserId || ""}
+              currentUserName={currentUserName || ""}
+              onOpenDrawer={dialogs.drawer.open}
+              onCreateFund={dialogs.createFund.open}
+              onShowStatistics={dialogs.statistics.open}
+              onAddMessage={handleAddMessage}
+              onResendMessage={handleResendMessage}
+              onUpdateMessage={handleUpdateMessage}
+              onDeleteMessage={handleDeleteMessage}
+              isProcessing={isProcessingMessage}
+              isLoading={isLoadingMessages}
+              onOpenShareFundDialog={dialogs.share.toggle}
+            />
+          ) : (
+            <AgentPanel
+              fund={fund || null}
+              wallets={wallets}
+              selectedWallet={selectedWallet}
+              onSelectWallet={(walletId) => setSelectedWalletId(walletId)}
+              onBackToChat={() => setActiveMainView("chat")}
+            />
+          )}
         </main>
 
         {/* CỘT 3: STATISTIC VIEW (Desktop Right) */}
-        <aside className="hidden xl:flex w-[400px] bg-white flex-col shrink-0 rounded-2xl shadow-sm overflow-hidden border border-gray-100">
-          <div className="p-6 pb-4 border-b border-gray-100">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-800">
-                Thống kê chi tiết
-              </h2>
+        {activeMainView === "chat" && (
+          <aside className="hidden xl:flex w-[400px] bg-white flex-col shrink-0 rounded-2xl shadow-sm overflow-hidden border border-gray-100">
+            <div className="p-6 pb-4 border-b border-gray-100">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-gray-800">
+                  Thống kê chi tiết
+                </h2>
+              </div>
             </div>
-          </div>
-          <ChartContent fundId={fund?.id} />
-        </aside>
+            <ChartContent fundId={fund?.id} />
+          </aside>
+        )}
 
         {/* --- DIALOGS --- */}
 
         {/* STATISTIC DRAWER (Mobile) */}
         <StatisticPage
-          isOpen={dialogs.statistics.isOpen}
+          isOpen={activeMainView === "chat" && dialogs.statistics.isOpen}
           onClose={dialogs.statistics.close}
           fundId={fund?.id}
           totalExpense={0}
