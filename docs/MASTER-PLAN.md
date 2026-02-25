@@ -1,7 +1,7 @@
 # MASTER PLAN: FinCap Product Evolution (Frontend + AI Agent)
 
 > **Status**: 🟡 In Progress (2026 Pivot Active)
-> **Last Updated**: 2026-02-24
+> **Last Updated**: 2026-02-25
 > **Workflow**: Idea (User) → Master Plan (Agent) → Phase Detail Plan (Discuss) → Implementation.
 > **Reference Plans**: [PLAN-2026](./PLAN-2026.md)
 
@@ -42,12 +42,22 @@
 - [ ] **A1.1 Agent UI Shell (Bước 1 khởi tạo Agent)**
   - Tạo màn hình Agent UI riêng để người dùng tương tác thay vì toast placeholder.
   - Màn hình gồm header Agent, vùng hội thoại rỗng (state initial), ô nhập lệnh tự nhiên.
-- [ ] **A2. Wallet History Mock**
-  - Cho phép mở lịch sử chi tiêu theo ví trong context fund.
-  - Cập nhật số dư ví bằng mock store sau mỗi giao dịch.
+- [x] **A2. Wallet Transaction View (Main View)**
+  - API: `GET /wallets/:walletId/transactions` → `WalletTransactionsResponse`.
+  - Click ví trong drawer → main view chuyển sang hiển thị giao dịch của ví (thay thế chat).
+  - 5 loại transaction card theo `TransactionType`: EXPENSE (rose), INCOME (emerald), INTERNAL (blue), DEBT (amber), REVERSAL (gray).
+  - Summary bar: tổng chi tiêu / thu nhập / số giao dịch.
+  - **TODO (chờ BE)**: INTERNAL cần `fromWallet`/`toWallet`; DEBT cần `debtorName`/`dueDate`; REVERSAL cần `originalTransactionId`.
 - [ ] **A3. Direct Wallet Transaction Mock**
   - Ghi chi tiêu thủ công trực tiếp vào ví.
   - Tự trừ tiền ở ví tương ứng.
+- [x] **A3.1. Người dùng không thể xoá giao dịch**
+  - Giao dịch chỉ có thể bị **đảo ngược (REVERSAL)**, không xoá khỏi hệ thống.
+  - Đảm bảo tính toàn vẹn dữ liệu tài chính (audit trail).
+- [ ] **A3.2. Chuyển khoản nội bộ (Internal Transfer)**
+  - Cho phép chuyển tiền giữa các ví của cùng một người dùng.
+  - Tạo giao dịch type `INTERNAL` với `fromWallet` → `toWallet`, trừ ví nguồn + cộng ví đích.
+  - UI: chọn ví nguồn, ví đích, nhập số tiền, xác nhận.
 - [ ] **A4. Agent Auto-Route Mock**
   - Agent tự tìm đúng fund + ví để tạo giao dịch tự động.
   - Có fallback mặc định khi câu lệnh thiếu dữ kiện.

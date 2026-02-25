@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { WALLET_TEMPLATES } from "@/pages/message/message.constant";
-import { createWallet, deleteWallet } from "@/apis/wallets/wallet.api";
+import { createWallet, deleteWallet, updateWallet } from "@/apis/wallets/wallet.api";
 import { WalletType } from "@/apis/wallets/wallet.enum";
 import { CreateWalletDto } from "@/apis/wallets/wallet.interface";
 import { toast } from "sonner";
@@ -53,6 +53,7 @@ const DialogWalletSelector: React.FC<Props> = ({
     WALLET_TEMPLATES[0]
   );
   const [formName, setFormName] = useState("");
+  const [editingWallet, setEditingWallet] = useState<any>(null);
 
   // Reset view when opening/closing or changing mode
   useEffect(() => {
@@ -67,7 +68,39 @@ const DialogWalletSelector: React.FC<Props> = ({
     }
   }, [open, createOnly]);
 
+  const handleEdit = (wallet: any) => {
+    const tpl =
+      WALLET_TEMPLATES.find((t) => t.code === wallet.icon) ||
+      WALLET_TEMPLATES.find((t) => t.code === "custom")!;
+    setEditingWallet(wallet);
+    setChosenTemplate(tpl);
+    setFormName(wallet.name);
+    setFormBalance(wallet.balance ?? 0);
+    setModalView("form");
+  };
+
   const handleCreate = async () => {
+    if (editingWallet) {
+      // UPDATE flow
+      setLoading(true);
+      try {
+        await updateWallet(editingWallet.id, {
+          name: formName || editingWallet.name,
+          balance: Number(formBalance) || 0,
+        });
+        toast.success("Cập nhật ví thành công!");
+        if (mutate) await mutate();
+        setEditingWallet(null);
+        setModalView("list");
+      } catch {
+        toast.error("Cập nhật ví thất bại");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // CREATE flow
     const tpl = chosenTemplate || WALLET_TEMPLATES[0];
     const mapped = mapTemplateToCreate(tpl);
     const body: CreateWalletDto = {
@@ -108,6 +141,7 @@ const DialogWalletSelector: React.FC<Props> = ({
     setModalView("list");
     setFormName("");
     setFormBalance(0);
+    setEditingWallet(null);
     onClose();
   };
 
@@ -128,6 +162,7 @@ const DialogWalletSelector: React.FC<Props> = ({
               onSelect(id);
               handleClose();
             }}
+            onEdit={handleEdit}
             onDelete={handleDelete}
             onAddNew={() => setModalView("templates")}
             onClose={handleClose}
@@ -148,7 +183,15 @@ const DialogWalletSelector: React.FC<Props> = ({
 
         {modalView === "form" && (
           <WalletForm
-            onBack={() => setModalView("templates")}
+            onBack={() => {
+              if (editingWallet) {
+                setEditingWallet(null);
+                setModalView("list");
+              } else {
+                setModalView("templates");
+              }
+            }}
+            isEdit={!!editingWallet}
             onSubmit={handleCreate}
             formName={formName}
             setFormName={setFormName}

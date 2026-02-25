@@ -14,6 +14,15 @@ import {
   Briefcase,
 } from "lucide-react";
 
+import cashSvg from "/assets/image/logo/cash.svg?url";
+import momoSvg from "/assets/image/logo/momo.svg?url";
+import techcombankSvg from "/assets/image/logo/techcombank.svg?url";
+import vietcombankSvg from "/assets/image/logo/vietcombank.svg?url";
+import tpbankSvg from "/assets/image/logo/tpbank.svg?url";
+import mbbankSvg from "/assets/image/logo/mbbank.svg?url";
+import zalopaySvg from "/assets/image/logo/zalo-pay.svg?url";
+import walletSvg from "/assets/image/logo/wallet.svg?url";
+
 export const THEME_COLORS = {
   bg: "bg-[#FAFAFA]", // Màu nền tổng thể
   text: "text-gray-800",
@@ -103,7 +112,7 @@ export const WALLET_TEMPLATES = [
     text: "#10B981",
     bgLight: "#ECFDF5", // emerald-50
     icon: "cash",
-    img: "/assets/image/logo/cash.svg",
+    img: cashSvg,
   },
   {
     code: "momo",
@@ -112,7 +121,7 @@ export const WALLET_TEMPLATES = [
     text: "#A50064",
     bgLight: "#FDF2F8", // pink-50
     icon: "momo",
-    img: "/assets/image/logo/momo.svg",
+    img: momoSvg,
   },
   {
     code: "tcb",
@@ -121,7 +130,7 @@ export const WALLET_TEMPLATES = [
     text: "#74B156",
     bgLight: "#F0FDF4", // green-50
     icon: "tcb",
-    img: "/assets/image/logo/techcombank.svg",
+    img: techcombankSvg,
   },
   {
     code: "vcb",
@@ -130,7 +139,7 @@ export const WALLET_TEMPLATES = [
     text: "#74B156",
     bgLight: "#F0FDF4", // green-50
     icon: "vcb",
-    img: "/assets/image/logo/vietcombank.svg",
+    img: vietcombankSvg,
   },
   {
     code: "tpb",
@@ -139,7 +148,7 @@ export const WALLET_TEMPLATES = [
     text: "#8B5CF6",
     bgLight: "#F5F3FF", // purple-50
     icon: "tpb",
-    img: "/assets/image/logo/tpbank.svg",
+    img: tpbankSvg,
   },
   {
     code: "mb",
@@ -148,7 +157,7 @@ export const WALLET_TEMPLATES = [
     text: "#1D4ED8",
     bgLight: "#EFF6FF", // blue-50
     icon: "mb",
-    img: "/assets/image/logo/mbbank.svg",
+    img: mbbankSvg,
   },
   {
     code: "zalopay",
@@ -157,7 +166,7 @@ export const WALLET_TEMPLATES = [
     text: "#0068FF",
     bgLight: "#ECFEFF", // cyan-50
     icon: "zalopay",
-    img: "/assets/image/logo/zalo-pay.svg",
+    img: zalopaySvg,
   },
   {
     code: "custom",
@@ -166,7 +175,7 @@ export const WALLET_TEMPLATES = [
     text: "#4B5563",
     bgLight: "#F3F4F6", // gray-100
     icon: "custom",
-    img: "/assets/image/logo/wallet.svg",
+    img: walletSvg,
   },
 ];
 

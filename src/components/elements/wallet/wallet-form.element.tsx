@@ -11,6 +11,7 @@ interface WalletFormProps {
   setFormBalance: (balance: number | string) => void;
   chosenTemplate: any;
   loading: boolean;
+  isEdit?: boolean;
 }
 
 export const WalletForm: React.FC<WalletFormProps> = ({
@@ -22,6 +23,7 @@ export const WalletForm: React.FC<WalletFormProps> = ({
   setFormBalance,
   chosenTemplate,
   loading,
+  isEdit = false,
 }) => {
   return (
     <React.Fragment>
@@ -33,7 +35,7 @@ export const WalletForm: React.FC<WalletFormProps> = ({
           >
             <ChevronLeft size={24} />
           </button>
-          <h3 className="text-lg font-bold text-gray-800">Thiết lập ví</h3>
+          <h3 className="text-lg font-bold text-gray-800">{isEdit ? "Chỉnh sửa ví" : "Thiết lập ví"}</h3>
         </div>
       </div>
 
@@ -71,6 +73,13 @@ export const WalletForm: React.FC<WalletFormProps> = ({
               type="number"
               value={formBalance}
               onChange={(e) => setFormBalance(e.target.value)}
+              onFocus={() => {
+                if (formBalance === 0 || formBalance === "0") setFormBalance("");
+              }}
+              onBlur={() => {
+                if (formBalance === "" || formBalance === null || formBalance === undefined)
+                  setFormBalance(0);
+              }}
               className="w-full p-4 pl-4 pr-12 bg-gray-50 rounded-2xl text-gray-800 font-bold text-lg focus:ring-2 focus:ring-emerald-100 outline-none border border-transparent focus:border-emerald-200 transition-all"
             />
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">
@@ -87,10 +96,10 @@ export const WalletForm: React.FC<WalletFormProps> = ({
           className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-200 active:scale-95 transition-all flex items-center justify-center gap-2"
         >
           {loading ? (
-            "Đang tạo..."
+            isEdit ? "Đang lưu..." : "Đang tạo..."
           ) : (
             <>
-              <Check size={20} /> Tạo ví ngay
+              <Check size={20} /> {isEdit ? "Lưu thay đổi" : "Tạo ví ngay"}
             </>
           )}
         </Button>

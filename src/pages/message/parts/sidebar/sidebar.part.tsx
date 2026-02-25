@@ -26,7 +26,7 @@ export function SidebarPart(props: DrawerNavigationProps) {
   };
 
   return (
-    <aside className="hidden lg:flex items-stretch shrink-0 py-3 pl-3 gap-3">
+    <aside className="hidden lg:flex items-stretch shrink-0 gap-3">
       {/* Layer 1: NavRail — always visible, always pill, "home" of the app */}
       <div className="w-16 rounded-full border border-border bg-background shadow-sm overflow-hidden flex-shrink-0">
         <DrawerNavRail

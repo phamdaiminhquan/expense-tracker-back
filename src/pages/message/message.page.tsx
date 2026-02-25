@@ -21,6 +21,7 @@ import { Wallet } from "@/apis/wallets/wallet.entities";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { AgentPanel } from "./parts/agent/agent-panel.part";
+import { WalletTransactionsPanel } from "@/components/elements/wallet/wallet-transactions.element";
 
 interface MessagePageProps {
   fund: Fund | any;
@@ -78,7 +79,7 @@ export function MessagePage({
   // --- STATE HOOK ---
   const { dialogs, ui } = useMessagePageState(isLoadingFunds);
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
-  const [activeMainView, setActiveMainView] = useState<"chat" | "agent">("chat");
+  const [activeMainView, setActiveMainView] = useState<"chat" | "agent" | "wallet">("chat");
 
   useEffect(() => {
     if (!selectedWalletId && wallets.length > 0) {
@@ -171,7 +172,10 @@ export function MessagePage({
     isLoadingMore: isLoadingMoreFunds,
     hasMore: hasMoreFunds,
     onSelectFund,
-    onSelectWallet: (walletId: string) => setSelectedWalletId(walletId),
+    onSelectWallet: (walletId: string) => {
+      setSelectedWalletId(walletId);
+      setActiveMainView("wallet");
+    },
     onCreateFund: dialogs.createFund.open,
     onUpdateFund: dialogs.updateFund.open,
     onLoadMore: onLoadMoreFunds || (() => { }),
@@ -231,13 +235,37 @@ export function MessagePage({
               isLoading={isLoadingMessages}
               onOpenShareFundDialog={dialogs.share.toggle}
             />
-          ) : (
+          ) : activeMainView === "agent" ? (
             <AgentPanel
               fund={fund || null}
               wallets={wallets}
               selectedWallet={selectedWallet}
               onSelectWallet={(walletId) => setSelectedWalletId(walletId)}
               onBackToChat={() => setActiveMainView("chat")}
+            />
+          ) : activeMainView === "wallet" && selectedWalletId ? (
+            <WalletTransactionsPanel
+              walletId={selectedWalletId}
+              onBack={() => setActiveMainView("chat")}
+              onOpenDrawer={dialogs.drawer.open}
+            />
+          ) : (
+            <MessageChatPart
+              fund={fund}
+              messages={fundMessages}
+              categories={fundCategories}
+              currentUserId={currentUserId || ""}
+              currentUserName={currentUserName || ""}
+              onOpenDrawer={dialogs.drawer.open}
+              onCreateFund={dialogs.createFund.open}
+              onShowStatistics={dialogs.statistics.open}
+              onAddMessage={handleAddMessage}
+              onResendMessage={handleResendMessage}
+              onUpdateMessage={handleUpdateMessage}
+              onDeleteMessage={handleDeleteMessage}
+              isProcessing={isProcessingMessage}
+              isLoading={isLoadingMessages}
+              onOpenShareFundDialog={dialogs.share.toggle}
             />
           )}
         </main>

@@ -5,6 +5,7 @@ import {
   CreateWalletDto,
   GetListWalletDto,
   UpdateWalletDto,
+  WalletTransactionsResponse,
 } from "./wallet.interface";
 
 export const getListWallets = async (
@@ -33,3 +34,10 @@ export const updateWallet = async (
 
 export const deleteWallet = async (id: string): Promise<void> =>
   await axiosRequest.delete(`wallets/${id}`);
+
+export const getWalletTransactions = async (
+  walletId: string
+): Promise<WalletTransactionsResponse> => {
+  const res = await axiosRequest.get(`wallets/${walletId}/transactions`);
+  return res.data;
+};

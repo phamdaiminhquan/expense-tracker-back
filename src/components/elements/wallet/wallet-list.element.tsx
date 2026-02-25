@@ -15,6 +15,7 @@ interface WalletListProps {
   data: any;
   selectedWalletId: string;
   onSelect: (id: string) => void;
+  onEdit: (wallet: any) => void;
   onDelete: (id: string) => void;
   onAddNew: () => void;
   onClose: () => void;
@@ -24,6 +25,7 @@ export const WalletList: React.FC<WalletListProps> = ({
   data,
   selectedWalletId,
   onSelect,
+  onEdit,
   onDelete,
   onAddNew,
   onClose,
@@ -110,9 +112,9 @@ export const WalletList: React.FC<WalletListProps> = ({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Handle edit
+                      onEdit(w);
                     }}
-                    className=" text-gray-300 hover:text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors"
+                    className="p-1.5 text-gray-300 hover:text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors"
                   >
                     <Edit3 size={16} />
                   </button>

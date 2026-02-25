@@ -12,11 +12,11 @@ import {
   Plus,
   Search,
   LogOut,
-  Wallet,
   ChevronLeft,
 } from "lucide-react";
 import { Fund } from "@/apis/funds/fund.entities";
 import { Wallet as WalletEntity } from "@/apis/wallets/wallet.entities";
+import { WALLET_TEMPLATES } from "@/pages/message/message.constant";
 import { FundItem } from "../fund/fund-item.element";
 import { debounce } from "@mui/material";
 import { Button } from "../../ui/button";
@@ -226,6 +226,7 @@ export function DrawerNavigation({
             : ""
         }`}
       >
+        <>
         <div className="p-4 pb-3 border-b border-border">
           <div className="flex justify-between items-center mb-4">
             <div>
@@ -316,30 +317,48 @@ export function DrawerNavigation({
           ) : filteredWallets.length === 0 ? (
             <div className="text-sm text-muted-foreground p-3">Chưa có ví phù hợp.</div>
           ) : (
-            filteredWallets.map((wallet) => (
-              <button
-                key={wallet.id}
-                onClick={() => {
-                  onSelectWallet?.(wallet.id);
-                  if (!isPermanent) onOpenChange(false);
-                }}
-                className={`cursor-pointer w-full text-left p-3 rounded-xl border transition-colors ${
-                  wallet.id === currentWalletId
-                    ? "border-primary/40 bg-primary/10"
-                    : "border-border hover:bg-muted/60"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
-                    <Wallet size={16} />
+            filteredWallets.map((wallet) => {
+              const style =
+                WALLET_TEMPLATES.find((t) => t.code === wallet.icon) ||
+                WALLET_TEMPLATES.find((t) => t.code === "custom");
+
+              return (
+                <button
+                  key={wallet.id}
+                  onClick={() => {
+                    onSelectWallet?.(wallet.id);
+                    if (!isPermanent) onOpenChange(false);
+                  }}
+                  className={`cursor-pointer w-full text-left p-3 rounded-xl border transition-colors ${
+                    wallet.id === currentWalletId
+                      ? "border-primary/40 bg-primary/10"
+                      : "border-border hover:bg-muted/60"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="h-9 w-9 rounded-lg flex items-center justify-center shrink-0"
+                      style={{ backgroundColor: style?.bgLight || "#F3F4F6" }}
+                    >
+                      <img
+                        src={style?.img}
+                        alt={wallet.name}
+                        className="w-6 h-6 object-contain"
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className="text-sm font-semibold truncate"
+                        style={{ color: wallet.color || style?.text }}
+                      >
+                        {wallet.name}
+                      </p>
+                      <p className="text-2xs text-muted-foreground">{formatCurrency(wallet.balance)}</p>
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-foreground truncate">{wallet.name}</p>
-                    <p className="text-2xs text-muted-foreground">{formatCurrency(wallet.balance)}</p>
-                  </div>
-                </div>
-              </button>
-            ))
+                </button>
+              );
+            })
           )}
 
           {isFundsTab && isLoadingMore && (
@@ -348,6 +367,7 @@ export function DrawerNavigation({
             </div>
           )}
         </div>
+        </>
       </div>
     </div>
   );
