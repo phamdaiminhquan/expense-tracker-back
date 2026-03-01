@@ -5,6 +5,7 @@ import { MessagePage } from "@/pages/message/message.page";
 import { PAGE_TAKE_DEFAULT } from "@/common/constant/page-take.constant";
 import { useFund } from "@/app/providers/FundProvider";
 import { useAppReady } from "@/app/providers/app-ready.context";
+import { useSocketFundEvents } from "@/hooks/use-socket-fund-events";
 import { getFundSearchNumberId } from "@/apis/funds/fund.api";
 import { getListWallets } from "@/apis/wallets/wallet.api";
 import { toast } from "sonner";
@@ -44,6 +45,9 @@ export function MessageRoute() {
     mutateList,
     needJoinFund,
   } = useFund(fundParams, fundId);
+
+  // Real-time fund/member events via WebSocket
+  useSocketFundEvents({ currentUserId, mutateFundList: mutateList });
 
   // Get accessible funds
   const accessibleFunds = useMemo(() => {

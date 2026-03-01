@@ -16,6 +16,9 @@ import { CreateMessageDto } from "@/apis/messages/message.interface";
 import { useInfiniteChat } from "../../hooks/use-infinite-chat"; // NEW IMPORT
 import { useOptimisticChat } from "../../hooks/use-optimistic-chat";
 import { useScrollToBottom } from "../../hooks/use-scroll-to-bottom";
+import { useSocketMessages } from "../../hooks/use-socket-messages";
+import { useSocket } from "@/hooks/use-socket";
+import { TypingIndicator } from "./components/typing-indicator";
 import { ChatList } from "./components/chat-list";
 import { ChatInputArea } from "./components/chat-input-area";
 
@@ -105,6 +108,29 @@ export function MessageChatPart({
     refresh: refreshMessages
   } = useInfiniteChat(fund?.id);
 
+  // --- SOCKET REAL-TIME HOOK ---
+  const { typingUsers } = useSocketMessages({
+    fundId: fund?.id,
+    refresh: refreshMessages,
+    currentUserId,
+  });
+
+  const { emitTyping, stopTyping } = useSocket();
+
+  // Wrapper để emit typing event khi user gõ
+  const handleInputChange = (value: string) => {
+    setInput(value);
+    if (fund?.id && value.length > 0) {
+      emitTyping(fund.id);
+    }
+  };
+
+  // Wrapper send — stop typing trước khi gửi
+  const handleSend = () => {
+    if (fund?.id) stopTyping(fund.id);
+    handleOptimisticSend(input, setInput, selectedWalletId);
+  };
+
   // --- OPTIMISTIC UI HOOK ---
   const {
     optimisticMessages,
@@ -187,18 +213,21 @@ export function MessageChatPart({
         <div ref={bottomRef} className="h-1" />
       </div>
 
+      {/* TYPING INDICATOR */}
+      {typingUsers.length > 0 && (
+        <TypingIndicator typingUsers={typingUsers} />
+      )}
+
       {/* INPUT AREA */}
       <ChatInputArea
         input={input}
-        setInput={setInput}
+        setInput={handleInputChange}
         selectedWallet={selectedWallet}
         isSmartMode={isSmartMode}
         isAnalyzing={
           isProcessing || optimisticMessages.some((m) => m.status === "analyzing")
         }
-        onSend={() =>
-          handleOptimisticSend(input, setInput, selectedWalletId)
-        }
+        onSend={handleSend}
         onWalletClick={() => setShowWalletSelector(true)}
         onCategoryClick={() => setShowCategorySelector(true)}
       />

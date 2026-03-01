@@ -1,6 +1,7 @@
 import { BrowserRouter } from "react-router-dom";
 import { AppRouter } from "./AppRouter.tsx";
 import { AuthProvider } from "./providers/AuthProvider.tsx";
+import { SocketProvider } from "./providers/SocketProvider.tsx";
 import { CategoryProvider } from "./providers/CategoryProvider.tsx";
 import { AIParserProvider } from "./providers/AIParserProvider.tsx";
 import { CssBaseline, ThemeProvider } from "@mui/material";
@@ -21,11 +22,13 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <AuthProvider>
-          <CategoryProvider>
-            <AIParserProvider>
-              <AppRouter />
-            </AIParserProvider>
-          </CategoryProvider>
+          <SocketProvider>
+            <CategoryProvider>
+              <AIParserProvider>
+                <AppRouter />
+              </AIParserProvider>
+            </CategoryProvider>
+          </SocketProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
