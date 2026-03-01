@@ -302,6 +302,7 @@ export function ChatList({
                         <MessageBubblePart
                             msg={uiMsg as any}
                             isCurrentUser={isCurrentUser}
+                            senderName={!isCurrentUser ? message.createdByName : undefined}
                             walletName={uiMsg.walletName}
                             walletColor={uiMsg.walletColor}
                             walletIcon={uiMsg.walletIcon}
